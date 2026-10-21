@@ -2,6 +2,7 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
 
 import chatRoutes from './routes/chat.js';
@@ -39,13 +40,20 @@ app.get('/api/health', (req, res) => {
 
 // Phục vụ Client build tĩnh nếu tồn tại
 const clientDist = path.join(__dirname, '../../client/dist');
-app.use(express.static(clientDist));
-app.get('*', (req, res, next) => {
-  if (req.path.startsWith('/api/')) return next();
-  res.sendFile(path.join(clientDist, 'index.html'), (err) => {
-    if (err) res.status(404).send('VLU Assistant Server is running. Frontend dev server is at http://localhost:5173');
+const clientDistExists = fs.existsSync(path.join(clientDist, 'index.html'));
+
+if (clientDistExists) {
+  app.use(express.static(clientDist));
+  // Catch-all: trả về index.html cho React Router (mọi route không phải /api)
+  app.get('/{*splat}', (req, res, next) => {
+    if (req.path.startsWith('/api/')) return next();
+    res.sendFile(path.join(clientDist, 'index.html'));
   });
-});
+} else {
+  app.get('/', (req, res) => {
+    res.status(200).json({ status: 'ok', message: 'VLU Assistant Backend is running. Frontend not built yet.' });
+  });
+}
 
 app.listen(PORT, () => {
   console.log(`🚀 [VLU Assistant Backend] Server đang chạy tại http://localhost:${PORT}`);
