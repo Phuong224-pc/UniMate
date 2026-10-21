@@ -49,14 +49,14 @@ function AppContent() {
 
   const activeChat = chatSessions.find(s => s.id === activeChatId) || chatSessions[0];
 
-  const handleUpdateChat = (newMessages, firstPrompt) => {
+  const handleUpdateChat = (newMessages, firstPrompt, mode) => {
     setChatSessions(prev => {
       const updated = prev.map(session => {
         if (session.id === activeChatId) {
-          const title = session.title === 'Cuộc trò chuyện mới' && firstPrompt 
+          const title = (session.title === 'Cuộc trò chuyện mới' || session.title?.startsWith('Cu')) && firstPrompt 
             ? firstPrompt.slice(0, 30) 
             : session.title;
-          return { ...session, messages: newMessages, title };
+          return { ...session, messages: newMessages, title, mode: mode || session.mode || 'default' };
         }
         return session;
       });

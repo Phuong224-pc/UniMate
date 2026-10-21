@@ -18,9 +18,96 @@ import {
   Copy,
   Check
 } from 'lucide-react';
+import { 
+  GraduationCap, 
+  Compass, 
+  Route, 
+  Bot, 
+  Zap, 
+  ChevronRight 
+} from 'lucide-react';
 import { marked } from 'marked';
 import prism from 'prismjs';
 import { api } from '../services/api';
+
+
+const BOTS = [
+  {
+    id: 'default',
+    name: 'VLU Toàn Diện',
+    icon: Bot,
+    badge: 'Đa năng',
+    desc: 'Tư vấn thông tin trường, quy chế, học phí & tuyển sinh',
+    color: 'var(--vlu-red)',
+    placeholder: 'Hỏi VLU Chatbot bất cứ điều gì về trường Văn Lang... (Enter để gửi)',
+    suggestions: [
+      { title: 'Các cơ sở đào tạo', desc: 'CS3 Đặng Thùy Trâm, CS1 Q.1, CS2 Q.6', query: 'Trường Đại học Văn Lang có những cơ sở nào tại TP.HCM?' },
+      { title: 'Học phí & Học bổng', desc: 'Chính sách miễn giảm và thời hạn', query: 'Lịch đóng học phí trường Văn Lang năm học 2025-2026' },
+      { title: 'Khung đào tạo K30', desc: 'Chương trình 126 tín chỉ', query: 'Khung chương trình đào tạo Khoa CNTT K30 Văn Lang' },
+      { title: 'Cẩm nang sinh viên', desc: 'Quy định thi và điểm rèn luyện', query: 'Cẩm nang sinh viên Đại học Văn Lang mới nhất' }
+    ]
+  },
+  {
+    id: 'graduation',
+    name: 'Dự Báo Tốt Nghiệp',
+    icon: GraduationCap,
+    badge: 'Xét tốt nghiệp',
+    desc: 'Kiểm tra 126 tín chỉ K30, chuẩn ngoại ngữ & tin học ra trường',
+    color: '#10b981',
+    placeholder: 'Nhập MSSV hoặc hỏi điều kiện tốt nghiệp... (Enter để gửi)',
+    suggestions: [
+      { title: 'Tiến độ SV 2474802010458', desc: 'Kiểm tra tín chỉ và môn còn nợ', query: 'Xem tiến độ và điều kiện tốt nghiệp của sinh viên MSSV 2474802010458' },
+      { title: 'Điều kiện tốt nghiệp K30', desc: '126 tín chỉ, MOS, TOEIC, GDQP', query: 'Điều kiện tốt nghiệp ngành CNTT K30 Đại học Văn Lang gồm những gì?' },
+      { title: 'Chuẩn đầu ra ngoại ngữ', desc: 'TOEIC / IELTS quy định', query: 'Chuẩn đầu ra ngoại ngữ và tin học để xét tốt nghiệp tại VLU là gì?' },
+      { title: 'Khóa luận & Môn thay thế', desc: 'Điều kiện làm khóa luận tốt nghiệp', query: 'Điều kiện để được làm Khóa luận tốt nghiệp hoặc học môn thay thế?' }
+    ]
+  },
+  {
+    id: 'results',
+    name: 'Kết Quả & GPA',
+    icon: Calculator,
+    badge: 'Học vụ & Điểm',
+    desc: 'Phân tích bảng điểm, cảnh báo môn nợ, tính GPA mục tiêu',
+    color: '#3b82f6',
+    placeholder: 'Hỏi về điểm môn học, cách tính GPA, cảnh báo học vụ... (Enter để gửi)',
+    suggestions: [
+      { title: 'Bảng điểm SV 2474802010458', desc: 'Xem GPA và xếp loại học tập', query: 'Phân tích bảng điểm và xếp loại học tập của sinh viên MSSV 2474802010458' },
+      { title: 'Kế hoạch nâng GPA', desc: 'Cách kéo GPA lên 3.2 Giỏi', query: 'Hiện tại GPA của tôi là 2.8, kỳ tới học 15 tín chỉ thì cần bao nhiêu điểm để đạt 3.2?' },
+      { title: 'Quy chế điểm & Cảnh báo', desc: 'Điểm F, điểm D, học lại môn', query: 'Quy chế tính điểm hệ 4 và quy định cảnh báo học vụ tại Văn Lang như thế nào?' },
+      { title: 'Học cải thiện môn nào', desc: 'Tối ưu thời gian và chi phí', query: 'Gợi ý các môn nên đăng ký học cải thiện để tăng GPA nhanh nhất' }
+    ]
+  },
+  {
+    id: 'advisor',
+    name: 'Cố Vấn Lộ Trình',
+    icon: Route,
+    badge: 'Lộ trình K30',
+    desc: 'Tư vấn đăng ký môn học, kiểm tra điều kiện tiên quyết',
+    color: '#8b5cf6',
+    placeholder: 'Hỏi môn tiên quyết, thứ tự đăng ký môn học... (Enter để gửi)',
+    suggestions: [
+      { title: 'Môn nên học kỳ tới', desc: 'Theo tiến độ chuẩn K30 CNTT', query: 'Tôi là sinh viên K30 CNTT năm 2, kỳ tới nên đăng ký những môn nào?' },
+      { title: 'Điều kiện môn tiên quyết', desc: 'CSDL, Cấu trúc dữ liệu', query: 'Môn Cấu trúc dữ liệu và giải thuật cần học trước môn nào?' },
+      { title: 'Lộ trình ra trường 3.5 năm', desc: 'Chiến lược học vượt kỳ phụ', query: 'Làm thế nào để sinh viên CNTT Văn Lang có thể tốt nghiệp sớm trong 3.5 năm?' },
+      { title: 'Chuyên ngành Kỹ thuật phần mềm', desc: 'Danh sách môn chuyên ngành', query: 'Các môn học thuộc chuyên ngành Kỹ thuật phần mềm trong khung K30 gồm những gì?' }
+    ]
+  },
+  {
+    id: 'future',
+    name: 'Định Hướng Nghề Nghiệp',
+    icon: Compass,
+    badge: 'Career & Tech',
+    desc: 'Tư vấn hướng đi nghề nghiệp, tech stack, roadmap 90 ngày',
+    color: '#f59e0b',
+    placeholder: 'Hỏi về định hướng việc làm, công nghệ cần học... (Enter để gửi)',
+    suggestions: [
+      { title: 'Lộ trình Fullstack Web', desc: 'React, Node.js, SQL, Cloud', query: 'Lộ trình 90 ngày tự học để trở thành Fullstack Web Developer cho sinh viên VLU' },
+      { title: 'Kỹ sư AI / Data Science', desc: 'Xu hướng thị trường việc làm', query: 'Sinh viên năm 2 muốn theo hướng Trí tuệ nhân tạo (AI) thì cần chuẩn bị kiến thức gì?' },
+      { title: 'Chuẩn bị thực tập', desc: 'CV, GitHub portfolio, phỏng vấn', query: 'Cần chuẩn bị những gì để ứng tuyển thực tập thực tế (Internship) tại doanh nghiệp?' },
+      { title: 'So sánh Web vs Mobile vs AI', desc: 'Nên chọn hướng nào phù hợp', query: 'So sánh cơ hội việc làm giữa Lập trình Web, Mobile App và AI tại TP.HCM' }
+    ]
+  }
+];
 
 export default function ChatPage({ activeChat, onUpdateChat }) {
   const [messages, setMessages] = useState(activeChat?.messages || []);
@@ -30,6 +117,9 @@ export default function ChatPage({ activeChat, onUpdateChat }) {
   const [isRecording, setIsRecording] = useState(false);
   const [attachMenuOpen, setAttachMenuOpen] = useState(false);
   const [showScrollBottom, setShowScrollBottom] = useState(false);
+  const [selectedBotId, setSelectedBotId] = useState(activeChat?.mode || 'default');
+  const [copiedIndex, setCopiedIndex] = useState(null);
+  const currentBot = BOTS.find(b => b.id === selectedBotId) || BOTS[0];
 
   const messagesEndRef = useRef(null);
   const chatContainerRef = useRef(null);
@@ -39,6 +129,9 @@ export default function ChatPage({ activeChat, onUpdateChat }) {
   // Đồng bộ với activeChat khi chuyển session
   useEffect(() => {
     setMessages(activeChat?.messages || []);
+    if (activeChat?.mode) {
+      setSelectedBotId(activeChat.mode);
+    }
   }, [activeChat?.id]);
 
   useEffect(() => {
@@ -123,15 +216,20 @@ export default function ChatPage({ activeChat, onUpdateChat }) {
     setLoading(true);
 
     try {
+      const validHistory = newMessages
+        .filter(m => !m.isError && m.content && !m.content.startsWith('⚠️ Lỗi kết nối AI'))
+        .map(m => ({ role: m.role, content: m.content }));
+
       const response = await api.chat({
-        messages: newMessages.map(m => ({ role: m.role, content: m.content })),
-        mode: 'default',
+        messages: validHistory,
+        mode: currentBot.id,
         image: currentImg
       });
 
       const assistantMsg = {
         role: 'assistant',
         content: response.reply,
+        model: response.model,
         timestamp: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
       };
 
@@ -139,12 +237,12 @@ export default function ChatPage({ activeChat, onUpdateChat }) {
       setMessages(finalMessages);
 
       if (onUpdateChat) {
-        onUpdateChat(finalMessages, userMsg.content);
+        onUpdateChat(finalMessages, userMsg.content, currentBot.id);
       }
     } catch (err) {
       const errorMsg = {
         role: 'assistant',
-        content: `⚠️ Lỗi kết nối AI: ${err.message}. Vui lòng thử lại sau!`,
+        content: `⚠️ Lỗi kết nối AI: ${err.message || 'Hệ thống đang quá tải'}. Vui lòng thử lại sau vài giây!`,
         isError: true,
         timestamp: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
       };
@@ -161,12 +259,74 @@ export default function ChatPage({ activeChat, onUpdateChat }) {
     }
   };
 
-  const copyToClipboard = (text) => {
+  const copyToClipboard = (text, index) => {
     navigator.clipboard.writeText(text);
+    setCopiedIndex(index);
+    setTimeout(() => setCopiedIndex(null), 2000);
   };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', position: 'relative' }}>
+      {/* Bot Selector Header Bar */}
+      <div style={{
+        background: 'var(--bg-secondary)',
+        borderBottom: '1px solid var(--border-color)',
+        padding: '10px 16px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px',
+        overflowX: 'auto',
+        scrollbarWidth: 'none',
+        flexShrink: 0,
+        zIndex: 10
+      }}>
+        <div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)', letterSpacing: '0.5px', whiteSpace: 'nowrap', marginRight: '4px' }}>
+          Chọn Bot:
+        </div>
+        {BOTS.map((bot) => {
+          const Icon = bot.icon;
+          const isSelected = bot.id === selectedBotId;
+          return (
+            <button
+              key={bot.id}
+              onClick={() => setSelectedBotId(bot.id)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '7px 12px',
+                borderRadius: '20px',
+                border: isSelected ? `1.5px solid ${bot.color}` : '1px solid var(--border-color)',
+                background: isSelected ? 'rgba(196, 18, 48, 0.08)' : 'var(--bg-primary)',
+                color: isSelected ? (bot.id === 'default' ? 'var(--vlu-red)' : bot.color) : 'var(--text-secondary)',
+                fontSize: '12px',
+                fontWeight: isSelected ? 700 : 500,
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+                transition: 'all 0.15s ease',
+                boxShadow: isSelected ? 'var(--shadow-sm)' : 'none'
+              }}
+              title={bot.desc}
+            >
+              <Icon size={14} color={isSelected ? (bot.id === 'default' ? 'var(--vlu-red)' : bot.color) : 'var(--text-muted)'} />
+              <span>{bot.name}</span>
+              {isSelected && (
+                <span style={{
+                  fontSize: '10px',
+                  padding: '1px 6px',
+                  borderRadius: '10px',
+                  background: bot.id === 'default' ? 'var(--vlu-red)' : bot.color,
+                  color: 'white',
+                  fontWeight: 600
+                }}>
+                  {bot.badge}
+                </span>
+              )}
+            </button>
+          );
+        })}
+      </div>
+
       {/* Messages Scroll Area */}
       <div 
         ref={chatContainerRef}
@@ -182,75 +342,70 @@ export default function ChatPage({ activeChat, onUpdateChat }) {
       >
         <div style={{ width: '100%', maxWidth: '840px' }}>
           {messages.length === 0 ? (
-            /* Welcome screen */
-            <div style={{ textAlign: 'center', marginTop: '40px', animation: 'fadeIn 0.4s ease-out' }}>
+            /* Dynamic Welcome Screen theo Bot được chọn */
+            <div style={{ textAlign: 'center', marginTop: '30px', animation: 'fadeIn 0.35s ease-out' }}>
               <div style={{
-                width: '72px',
-                height: '72px',
-                borderRadius: '24px',
+                width: '68px',
+                height: '68px',
+                borderRadius: '22px',
                 background: 'var(--vlu-red-light)',
                 display: 'inline-flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                marginBottom: '16px'
+                marginBottom: '14px',
+                border: '1px solid rgba(196, 18, 48, 0.2)'
               }}>
-                <img src="/img/logovanlang.png" alt="VLU" style={{ width: '48px', height: '48px', objectFit: 'contain' }} />
+                <img src="/img/logovanlang.png" alt="VLU" style={{ width: '44px', height: '44px', objectFit: 'contain' }} />
               </div>
-              <h1 style={{ fontSize: '28px', fontWeight: 800, marginBottom: '8px' }}>
-                <span className="gradient-text">Xin chào, sinh viên VLU!</span>
+              
+              <h1 style={{ fontSize: '26px', fontWeight: 800, marginBottom: '6px' }}>
+                <span className="gradient-text">{currentBot.name}</span>
               </h1>
-              <p style={{ color: 'var(--text-secondary)', fontSize: '15px', maxWidth: '500px', margin: '0 auto 28px' }}>
-                Mình là Trợ lý AI trường Đại học Văn Lang. Bạn cần giải đáp quy chế, tra cứu học phí hay kiểm tra lộ trình đào tạo hôm nay?
+              
+              <p style={{ color: 'var(--text-secondary)', fontSize: '14px', maxWidth: '540px', margin: '0 auto 24px', lineHeight: 1.6 }}>
+                {currentBot.desc}. Hãy đặt câu hỏi hoặc bấm vào gợi ý bên dưới để bắt đầu ngay!
               </p>
 
               {/* Suggestion Cards */}
               <div style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
                 gap: '12px',
                 textAlign: 'left'
               }}>
-                <div 
-                  className="vlu-card"
-                  onClick={() => handleSend("Lịch đóng học phí trường Văn Lang năm 2025-2026")}
-                  style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px', padding: '16px' }}
-                >
-                  <div style={{ padding: '10px', borderRadius: '10px', background: 'rgba(239, 68, 68, 0.1)', color: 'var(--vlu-red)' }}>
-                    <Calculator size={20} />
+                {currentBot.suggestions.map((sug, idx) => (
+                  <div 
+                    key={idx}
+                    className="vlu-card"
+                    onClick={() => handleSend(sug.query)}
+                    style={{ 
+                      cursor: 'pointer', 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: '12px', 
+                      padding: '14px',
+                      transition: 'transform 0.15s, border-color 0.15s'
+                    }}
+                  >
+                    <div style={{ 
+                      padding: '8px', 
+                      borderRadius: '8px', 
+                      background: 'rgba(196, 18, 48, 0.08)', 
+                      color: currentBot.id === 'default' ? 'var(--vlu-red)' : currentBot.color 
+                    }}>
+                      <Zap size={18} />
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontWeight: 600, fontSize: '13px', color: 'var(--text-main)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {sug.title}
+                      </div>
+                      <div style={{ fontSize: '11px', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {sug.desc}
+                      </div>
+                    </div>
+                    <ChevronRight size={14} color="var(--text-muted)" />
                   </div>
-                  <div>
-                    <div style={{ fontWeight: 600, fontSize: '14px' }}>Học phí & Quy chế</div>
-                    <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Thời hạn đóng, miễn giảm</div>
-                  </div>
-                </div>
-
-                <div 
-                  className="vlu-card"
-                  onClick={() => handleSend("Khung chương trình đào tạo Khoa CNTT K30 Văn Lang")}
-                  style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px', padding: '16px' }}
-                >
-                  <div style={{ padding: '10px', borderRadius: '10px', background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6' }}>
-                    <BookMarked size={20} />
-                  </div>
-                  <div>
-                    <div style={{ fontWeight: 600, fontSize: '14px' }}>Chương trình đào tạo</div>
-                    <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>126 tín chỉ K30 CNTT</div>
-                  </div>
-                </div>
-
-                <div 
-                  className="vlu-card"
-                  onClick={() => handleSend("Cẩm nang sinh viên Đại học Văn Lang mới nhất")}
-                  style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px', padding: '16px' }}
-                >
-                  <div style={{ padding: '10px', borderRadius: '10px', background: 'rgba(16, 185, 129, 0.1)', color: '#10b981' }}>
-                    <HelpCircle size={20} />
-                  </div>
-                  <div>
-                    <div style={{ fontWeight: 600, fontSize: '14px' }}>Cẩm nang sinh viên</div>
-                    <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Quy định thi, điểm rèn luyện</div>
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
           ) : (
@@ -431,6 +586,40 @@ export default function ChatPage({ activeChat, onUpdateChat }) {
             </div>
           )}
 
+                    {/* Quick chips above input */}
+          {messages.length > 0 && (
+            <div style={{
+              display: 'flex',
+              gap: '6px',
+              overflowX: 'auto',
+              scrollbarWidth: 'none',
+              paddingBottom: '8px',
+              whiteSpace: 'nowrap'
+            }}>
+              {currentBot.suggestions.slice(0, 3).map((sug, i) => (
+                <button
+                  key={i}
+                  onClick={() => handleSend(sug.query)}
+                  style={{
+                    fontSize: '11px',
+                    padding: '4px 10px',
+                    borderRadius: '16px',
+                    border: '1px solid var(--border-color)',
+                    background: 'var(--bg-primary)',
+                    color: 'var(--text-secondary)',
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}
+                >
+                  <Zap size={11} color="var(--vlu-red)" />
+                  <span>{sug.title}</span>
+                </button>
+              ))}
+            </div>
+          )}
+
           <div style={{
             display: 'flex',
             alignItems: 'flex-end',
@@ -530,7 +719,7 @@ export default function ChatPage({ activeChat, onUpdateChat }) {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Hỏi VLU Chatbot bất cứ điều gì về trường Văn Lang... (Enter để gửi)"
+              placeholder={currentBot.placeholder}
               rows={1}
               style={{
                 flex: 1,

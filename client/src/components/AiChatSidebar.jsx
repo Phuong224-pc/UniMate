@@ -22,7 +22,7 @@ export default function AiChatSidebar({ mode, title, subtitle, placeholder, quic
     const newMsgs = [...messages, userMsg];
     setMessages(newMsgs); setInput(''); setLoading(true);
     try {
-      const apiMessages = newMsgs.filter((m, i) => !(m.role === 'assistant' && i === 0)).map(m => ({ role: m.role, content: m.content }));
+      const apiMessages = newMsgs.filter(m => !m.isError).filter((m, i) => !(m.role === 'assistant' && i === 0)).map(m => ({ role: m.role, content: m.content }));
       const res = await api.chat({ messages: apiMessages, mode, systemPromptOverride: systemContext || undefined });
       setMessages(prev => [...prev, { role: 'assistant', content: res.reply, ts: Date.now() }]);
     } catch (err) {
@@ -30,7 +30,7 @@ export default function AiChatSidebar({ mode, title, subtitle, placeholder, quic
     } finally { setLoading(false); }
   };
 
-  const md = (t) => t.replace(/\*\*(.*?)\*\*/g, '<strong>\</strong>').replace(/\n/g, '<br/>');
+  const md = (t) => (t || '').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br/>');
 
   const qrs = quickReplies || [];
   return (
