@@ -295,3 +295,16 @@ body {
   background: transparent;
   padding: 0;
 }
+
+/* AI Chat Sidebar bounce animation */
+@keyframes bounce {
+  0%, 80%, 100% { transform: translateY(0); opacity: 0.7; }
+  40% { transform: translateY(-6px); opacity: 1; }
+}
+
+/* Responsive: stack on small screens */
+@media (max-width: 900px) {
+  .page-container > div[style*="grid-template-columns"] {
+    grid-template-columns: 1fr !important;
+  }
+}

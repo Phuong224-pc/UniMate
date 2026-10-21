@@ -33,7 +33,7 @@ app.get('/api/health', (req, res) => {
     status: 'ok',
     app: 'VLU Smart Assistant Backend',
     timestamp: new Date().toISOString(),
-    groqConfigured: Boolean(process.env.GROQ_API_KEY)
+    geminiConfigured: Boolean(process.env.GEMINI_API_KEY) && process.env.GEMINI_API_KEY !== 'your_gemini_api_key_here'
   });
 });
 
@@ -49,5 +49,5 @@ app.get('*', (req, res, next) => {
 
 app.listen(PORT, () => {
   console.log(`🚀 [VLU Assistant Backend] Server đang chạy tại http://localhost:${PORT}`);
-  console.log(`🔑 Groq API Key: ${process.env.GROQ_API_KEY ? 'Đã cấu hình' : 'CHƯA CẤU HÌNH'}`);
+  console.log(`🔑 Gemini API Key: ${(process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== 'your_gemini_api_key_here') ? 'Đã cấu hình' : 'CHƯA CẤU HÌNH - Cập nhật GEMINI_API_KEY trong server/.env'}`);
 });

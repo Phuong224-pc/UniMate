@@ -1,5 +1,5 @@
-import express from 'express';
-import Groq from 'groq-sdk';
+﻿import express from 'express';
+import { GoogleGenAI } from '@google/genai';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -30,79 +30,85 @@ try {
   console.error("Lỗi nạp prompts:", err.message);
 }
 
-function getGroqClient() {
-  const apiKey = process.env.GROQ_API_KEY;
-  if (!apiKey) throw new Error("GROQ_API_KEY chưa được cấu hình trong .env");
-  return new Groq({ apiKey });
+function getGeminiClient() {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey || apiKey === 'your_gemini_api_key_here') {
+    throw new Error("GEMINI_API_KEY chưa được cấu hình trong .env");
+  }
+  return new GoogleGenAI({ apiKey });
 }
 
 router.post('/', async (req, res) => {
   try {
     const { messages = [], mode = 'default', image = null, systemPromptOverride } = req.body;
 
-    let baseSystemPrompt = systemPromptOverride || systemPrompts[mode] || systemPrompts['default'];
+    let baseSystemPrompt = systemPromptOverride || systemPrompts[mode] || systemPrompts['default'] || 'Bạn là VLU Smart Assistant, trợ lý AI thông minh của Trường Đại học Văn Lang.';
 
     // Nếu ở chế độ advisor hoặc roadmap, bổ sung thông tin khung K30
-    if (mode === 'advisor' || mode === 'roadmap') {
+    if ((mode === 'advisor' || mode === 'roadmap') && curriculumKnowledge) {
       baseSystemPrompt += `\n\n[DỮ LIỆU THAM CHIẾU KHUNG CTĐT K30 CNTT VĂN LANG 126 TÍN CHỈ]:\n${curriculumKnowledge.slice(0, 8000)}`;
     }
 
-    const groqMessages = [
-      { role: "system", content: baseSystemPrompt }
-    ];
+    const genai = getGeminiClient();
+    const model = 'gemini-3.8-flash';
 
-    // Xử lý tin nhắn người dùng và hình ảnh (nếu có)
-    for (let i = 0; i < messages.length; i++) {
+    // Xây dựng lịch sử hội thoại theo định dạng Gemini
+    const history = [];
+    for (let i = 0; i < messages.length - 1; i++) {
       const msg = messages[i];
-      const isLast = i === messages.length - 1;
-
-      if (isLast && image && image.data) {
-        // Hỗ trợ Groq Vision
-        groqMessages.push({
-          role: "user",
-          content: [
-            { type: "text", text: msg.content || "Hãy phân tích hình ảnh này giúp tôi:" },
-            {
-              type: "image_url",
-              image_url: {
-                url: image.data.startsWith('data:') ? image.data : `data:${image.mimeType || 'image/jpeg'};base64,${image.data}`
-              }
-            }
-          ]
-        });
-      } else {
-        groqMessages.push({
-          role: msg.role === 'user' ? 'user' : 'assistant',
-          content: msg.content
-        });
-      }
+      history.push({
+        role: msg.role === 'user' ? 'user' : 'model',
+        parts: [{ text: msg.content || '' }]
+      });
     }
 
-    // Chọn model phù hợp - đồng bộ với code gốc js/chat.js
-    const model = (image && image.data)
-      ? "openai/gpt-oss-120b"
-      : "openai/gpt-oss-120b";
+    // Tin nhắn cuối cùng của user (có thể kèm ảnh)
+    const lastMsg = messages[messages.length - 1];
+    const lastParts = [];
 
-    const groq = getGroqClient();
-    const completion = await groq.chat.completions.create({
+    if (image && image.data) {
+      // Hỗ trợ Vision: gửi ảnh base64
+      const base64Data = image.data.startsWith('data:')
+        ? image.data.split(',')[1]
+        : image.data;
+      lastParts.push({
+        inlineData: {
+          mimeType: image.mimeType || 'image/jpeg',
+          data: base64Data
+        }
+      });
+    }
+
+    lastParts.push({ text: lastMsg?.content || 'Hãy phân tích hình ảnh này giúp tôi:' });
+
+    // Khởi tạo chat session với lịch sử và system instruction
+    const chat = genai.chats.create({
       model,
-      messages: groqMessages,
-      temperature: 0.5,
-      max_tokens: 2048,
-      top_p: 0.95
+      config: {
+        systemInstruction: baseSystemPrompt,
+        temperature: 0.5,
+        maxOutputTokens: 2048,
+        topP: 0.95
+      },
+      history
     });
 
-    const reply = completion.choices[0]?.message?.content || "Xin lỗi, không nhận được phản hồi từ mô hình AI.";
+    const response = await chat.sendMessage({ message: lastParts });
+    const reply = response.text || "Xin lỗi, không nhận được phản hồi từ mô hình AI.";
 
     res.json({
       success: true,
       reply,
       model,
-      usage: completion.usage
+      usage: {
+        prompt_tokens: response.usageMetadata?.promptTokenCount,
+        completion_tokens: response.usageMetadata?.candidatesTokenCount,
+        total_tokens: response.usageMetadata?.totalTokenCount
+      }
     });
 
   } catch (error) {
-    console.error("Lỗi Groq API:", error);
+    console.error("Lỗi Gemini API:", error);
     res.status(500).json({
       success: false,
       error: error.message || "Lỗi xử lý AI Core"

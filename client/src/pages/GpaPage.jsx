@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
+import AiChatSidebar from '../components/AiChatSidebar';
 import { 
   Calculator, 
   Search, 
@@ -97,8 +98,36 @@ export default function GpaPage() {
     }
   };
 
+  // AI Sidebar computed props
+  const gpaQuickReplies = [
+    { label: 'GPA hien tai', text: student ? ('GPA tich luy cua toi la ' + student.officialCumulativeGpa4 + ', phan tich giup toi') : 'Phan tich GPA cua toi' },
+    { label: 'Mon can cai thien', text: 'Mon nao toi can cai thien diem nhat?' },
+    { label: 'Tin chi con thieu', text: student ? ('Toi da tich luy ' + student.officialCumulativeCredits + ' tin chi, can bao nhieu nua de tot nghiep?') : 'Con thieu bao nhieu tin chi?' }
+  ];
+  const gpaSystemContext = student ? (() => {
+    const rank = student.officialCumulativeGpa4 >= 3.6 ? 'Xuat sac' : student.officialCumulativeGpa4 >= 3.2 ? 'Gioi' : student.officialCumulativeGpa4 >= 2.5 ? 'Kha' : student.officialCumulativeGpa4 >= 2.0 ? 'Trung binh' : 'Yeu';
+    const courses = student.courses || [];
+    const passed = courses.filter(c => c.letter && c.letter !== 'F' && c.credits > 0);
+    const failed = courses.filter(c => c.letter === 'F');
+    const courseList = courses.map(c =>
+      c.code + '|' + c.name + '|' + c.credits + 'TC|diem10=' + c.score + '|diem4=' + c.gpa4 + '|chu=' + (c.letter||'?') + '|' + (c.status||'')
+    ).join('; ');
+    return 'THONG TIN SINH VIEN:\n' +
+      'Ten: ' + student.name + '\n' +
+      'MSSV: ' + student.mssv + '\n' +
+      'Nganh: ' + (student.major || 'CNTT') + '\n' +
+      'GPA tich luy (thang 4): ' + student.officialCumulativeGpa4 + '\n' +
+      'Tin chi tich luy: ' + student.officialCumulativeCredits + '/126\n' +
+      'Xep loai: ' + rank + '\n' +
+      'So mon da hoc: ' + courses.length + ' mon\n' +
+      'Mon dat: ' + passed.length + ' mon\n' +
+      'Mon rot (F): ' + failed.length + ' mon\n' +
+      'DANH SACH MON HOC (ma|ten|tinchi|diem10|diem4|diemchu|trangthai):\n' + courseList;
+  })() : null;
   return (
-    <div className="page-container" style={{ maxWidth: '1200px', margin: '0 auto', width: '100%' }}>
+    <div className="page-container" style={{ maxWidth: '1400px', margin: '0 auto', width: '100%' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: '24px', alignItems: 'start' }}>
+        <div>
       {/* Top Banner & Search */}
       <div style={{
         background: 'var(--bg-secondary)',
@@ -425,6 +454,19 @@ export default function GpaPage() {
           </div>
         </>
       )}
+        </div>
+      {/* AI Chat Sidebar */}
+      <div style={{ position: 'sticky', top: '20px' }}>
+        <AiChatSidebar
+          mode="results"
+          title="Chat phan tich ket qua"
+          subtitle="Tro ly hoc vu AI"
+          placeholder="Hoi ve GPA, diem chu, tin chi..."
+          quickReplies={gpaQuickReplies}
+          systemContext={gpaSystemContext}
+        />
+      </div>
+      </div>
     </div>
   );
 }
