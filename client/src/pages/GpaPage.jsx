@@ -180,21 +180,6 @@ export default function GpaPage() {
             </button>
           </div>
         </div>
-                <button
-                  key={d.mssv}
-                  onClick={() => {
-                    setMssvInput(d.mssv);
-                    handleLookup(d.mssv);
-                  }}
-                  className="btn-secondary"
-                  style={{ fontSize: '11px', padding: '4px 10px' }}
-                >
-                  {d.name.split(' (')[0]}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
 
         {/* Input Bar */}
         <div style={{ display: 'flex', gap: '10px', maxWidth: '600px' }}>
