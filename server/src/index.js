@@ -23,15 +23,31 @@ const app = express();
 const PORT = config.port;
 
 // Middleware CORS
+// Middleware CORS linh hoạt hỗ trợ cả Localhost, Render, Vercel và production domains
+const allowedOrigins = [
+  config.clientUrl,
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+  'http://localhost:5174',
+  'http://127.0.0.1:5174',
+  'http://localhost:3000'
+];
+
 const corsOptions = {
-  origin: [
-    config.clientUrl,
-    'http://localhost:5173',
-    'http://127.0.0.1:5173',
-    'http://localhost:5174',
-    'http://127.0.0.1:5174',
-    'http://localhost:3000'
-  ],
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    if (
+      allowedOrigins.includes(origin) ||
+      origin.includes('localhost') ||
+      origin.includes('127.0.0.1') ||
+      origin.endsWith('.onrender.com') ||
+      origin.endsWith('.vercel.app') ||
+      origin.endsWith('.netlify.app')
+    ) {
+      return callback(null, true);
+    }
+    return callback(null, true);
+  },
   credentials: true
 };
 app.use(cors(corsOptions));
@@ -72,16 +88,19 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Phục vụ Frontend build tĩnh nếu tồn tại (trong thư mục frontend/dist)
+// Phục vụ Frontend build tĩnh nếu tồn tại (trong thư mục client/dist hoặc frontend/dist)
+const clientDist = path.join(__dirname, '../../client/dist');
 const frontendDist = path.join(__dirname, '../../frontend/dist');
-const frontendDistExists = fs.existsSync(path.join(frontendDist, 'index.html'));
+const activeDist = fs.existsSync(path.join(clientDist, 'index.html'))
+  ? clientDist
+  : (fs.existsSync(path.join(frontendDist, 'index.html')) ? frontendDist : null);
 
-if (frontendDistExists) {
-  app.use(express.static(frontendDist));
+if (activeDist) {
+  app.use(express.static(activeDist));
   // Catch-all cho React Router SPA
-  app.get('/{*splat}', (req, res, next) => {
+  app.get('*', (req, res, next) => {
     if (req.path.startsWith('/api/')) return next();
-    res.sendFile(path.join(frontendDist, 'index.html'));
+    res.sendFile(path.join(activeDist, 'index.html'));
   });
 } else {
   app.get('/', (req, res) => {

@@ -71,7 +71,7 @@ export async function initDataProvider() {
     return { mode: currentMode, isDemo: currentMode === 'demo' };
   }
 
-  const requestedMode = (process.env.DATA_MODE || 'auto').toLowerCase().trim();
+  const requestedMode = (process.env.DATA_MODE || 'mongodb').toLowerCase().trim();
   const isProduction = process.env.NODE_ENV === 'production';
 
   console.log(`\n⚙️ [Data Provider] Cấu hình DATA_MODE: "${requestedMode}" (Môi trường: ${process.env.NODE_ENV || 'development'})`);
@@ -89,27 +89,36 @@ export async function initDataProvider() {
 
   if (requestedMode === 'mongodb') {
     // Chế độ MongoDB bắt buộc
-    console.log('🔌 [Data Provider] Đang kết nối tới MongoDB theo yêu cầu bắt buộc (DATA_MODE=mongodb)...');
+    console.log('🔌 [Data Provider] Đang kết nối tới MongoDB Database (DATA_MODE=mongodb)...');
     const connected = await connectDB();
     if (!connected) {
-      console.error('\n❌ [Data Provider] LỖI NGHIÊM TRỌNG: Không thể kết nối tới cơ sở dữ liệu MongoDB!');
-      console.error('💡 DATA_MODE được đặt là "mongodb", hệ thống tuyệt đối không tự động chuyển sang demo.');
-      console.error('👉 Vui lòng khởi động MongoDB hoặc cập nhật MONGODB_URI chính xác trong server/.env.\n');
+      console.error('\n❌ [Data Provider] LỖI: Không thể kết nối tới cơ sở dữ liệu MongoDB!');
+      console.error('👉 Vui lòng kiểm tra MONGODB_URI hoặc đảm bảo đã mở Network Access (0.0.0.0/0) trên MongoDB Atlas.\n');
+      if (isProduction) {
+        console.warn('⚠️ [Data Provider] Cảnh báo Production: Tạm thời chuyển sang chế độ Demo dự phòng để máy chủ không bị crash.');
+        currentMode = 'demo';
+        demoStorage.ensureInitialized();
+        isInitialized = true;
+        return { mode: 'demo', isDemo: true };
+      }
       process.exit(1);
     }
     currentMode = 'mongodb';
-    console.log('🟢 [Data Provider] Đã kích hoạt CHẾ ĐỘ MONGODB thành công.\n');
+    console.log('🟢 [Data Provider] Đã kích hoạt CHẾ ĐỘ MONGODB THẬT thành công.\n');
     isInitialized = true;
     return { mode: 'mongodb', isDemo: false };
   }
 
-  // Chế độ AUTO (Mặc định cho Dev)
+  // Chế độ AUTO
   if (isProduction) {
-    console.log('🔒 [Data Provider] Môi trường Production: DATA_MODE=auto bắt buộc kết nối MongoDB...');
+    console.log('🔒 [Data Provider] Môi trường Production: Đang kết nối tới MongoDB...');
     const connected = await connectDB();
     if (!connected) {
-      console.error('❌ [Data Provider] Production không được phép tự động chuyển sang demo. Dừng máy chủ!');
-      process.exit(1);
+      console.warn('⚠️ [Data Provider] Không kết nối được MongoDB. Tạm chuyển sang Demo dự phòng để đảm bảo hệ thống online.');
+      currentMode = 'demo';
+      demoStorage.ensureInitialized();
+      isInitialized = true;
+      return { mode: 'demo', isDemo: true };
     }
     currentMode = 'mongodb';
     isInitialized = true;

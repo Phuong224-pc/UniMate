@@ -18,11 +18,11 @@ dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
 export const config = {
   port: parseInt(process.env.PORT || '5001', 10),
   nodeEnv: process.env.NODE_ENV || 'development',
-  dataMode: (process.env.DATA_MODE || 'auto').toLowerCase().trim(),
+  dataMode: (process.env.DATA_MODE || 'mongodb').toLowerCase().trim(),
   demoDataPath: process.env.DEMO_DATA_PATH || '',
-  mongodbUri: process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/vlu_bot',
+  mongodbUri: process.env.MONGODB_URI || 'mongodb+srv://phuongtruong:123@cluster0.fpboe9w.mongodb.net/chatbox',
   clientUrl: process.env.CLIENT_URL || 'http://localhost:5173',
-  jwtSecret: process.env.JWT_SECRET || 'vlu_jwt_secret_production_ready_2025',
+  jwtSecret: process.env.JWT_SECRET || 'vlu_smart_assistant_super_secret_jwt_key_2025_cnh',
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || '7d',
   geminiApiKey: process.env.GEMINI_API_KEY || ''
 };

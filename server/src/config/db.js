@@ -5,7 +5,7 @@ let isConnected = false;
 let listenersAttached = false;
 
 export async function connectDB(options = {}) {
-  const { timeoutMs = 5000, silentError = false } = options;
+  const { timeoutMs = 15000, silentError = false } = options;
   const uri = config.mongodbUri;
 
   if (!uri) {
