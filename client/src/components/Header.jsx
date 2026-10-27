@@ -186,25 +186,6 @@ export default function Header({
           <History size={18} color="var(--vlu-red)" />
         </button>
 
-        {/* Nhãn nhận biết Chế độ Demo / MongoDB */}
-        <div 
-          className="hide-on-mobile"
-          title="UniMate sử dụng dữ liệu tham khảo của Đại học Văn Lang để demo tính năng"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '5px',
-            background: 'var(--vlu-red-light)',
-            border: '1px solid rgba(196, 18, 48, 0.2)',
-            color: 'var(--vlu-red)',
-            padding: '4px 10px',
-            borderRadius: '20px',
-            fontSize: '11.5px',
-            fontWeight: 600
-          }}
-        >
-          <span>Dữ liệu demo: VLU</span>
-        </div>
 
         {systemStatus?.isDemo ? (
           <div 

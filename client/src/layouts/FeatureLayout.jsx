@@ -86,7 +86,7 @@ export default function FeatureLayout({ children }) {
               </div>
               <div className="hide-on-mobile" style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }}>
                 <span>Trợ lý học tập</span>
-                <span style={{ fontSize: '9px', background: 'var(--vlu-red-light)', color: 'var(--vlu-red)', padding: '0 4px', borderRadius: '3px', fontWeight: 600 }}>Demo: VLU</span>
+                <span style={{ fontSize: '9px', background: 'var(--vlu-red-light)', color: 'var(--vlu-red)', padding: '0 4px', borderRadius: '3px', fontWeight: 600 }}>VLU</span>
               </div>
             </div>
           </div>

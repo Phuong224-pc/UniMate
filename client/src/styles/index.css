@@ -83,22 +83,24 @@ body {
   overflow-x: hidden;
 }
 
-/* Desktop: lock body scroll for chatbot shell */
-@media (min-width: 769px) {
-  body { overflow: hidden; height: 100vh; max-height: 100vh; }
-}
-/* Mobile: allow natural scroll */
-@media (max-width: 768px) {
-  body { overflow-x: hidden; overflow-y: auto; }
+/* Lock body and root scroll so app-shell controls viewport height reliably with 100dvh */
+body {
+  overflow: hidden;
+  height: 100%;
+  height: 100vh;
+  height: 100dvh;
+  max-height: 100dvh;
 }
 
-#root { display: flex; flex-direction: column; width: 100%; }
-
-@media (min-width: 769px) {
-  #root { height: 100vh; max-height: 100vh; overflow: hidden; }
-}
-@media (max-width: 768px) {
-  #root { min-height: 100vh; min-height: 100dvh; }
+#root {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  height: 100vh;
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
 }
 
 /* ── Scrollbars ── */
@@ -165,16 +167,24 @@ body {
   overflow: hidden;
   position: relative;
 }
-@media (min-width: 769px) {
-  .app-shell { height: 100vh; height: 100dvh; }
+.app-shell {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  height: 100vh;
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
+  position: relative;
 }
 @media (max-width: 768px) {
   .app-shell {
     flex-direction: column;
-    min-height: 100vh;
-    min-height: 100dvh;
-    height: auto;
-    overflow: visible;
+    height: 100%;
+    height: 100vh;
+    height: 100dvh;
+    max-height: 100dvh;
+    overflow: hidden;
   }
 }
 
@@ -185,12 +195,10 @@ body {
   background-color: var(--bg-primary);
   position: relative;
   min-width: 0;
-}
-@media (min-width: 769px) {
-  .main-view { height: 100%; overflow: hidden; }
-}
-@media (max-width: 768px) {
-  .main-view { width: 100%; min-height: 0; flex: 1; }
+  min-height: 0;
+  height: 100%;
+  max-height: 100%;
+  overflow: hidden;
 }
 
 .page-container {
@@ -365,27 +373,23 @@ body {
   }
 
   .has-bottom-nav {
-    padding-bottom: calc(64px + var(--safe-bottom)) !important;
+    padding-bottom: calc(58px + var(--safe-bottom)) !important;
   }
 }
 
 /* ============================================================
-   CHAT PAGE — MOBILE
+   CHAT PAGE — MOBILE & DESKTOP FIXED COMPOSER
    ============================================================ */
 
 .chat-page-wrapper {
   display: flex;
   flex-direction: column;
+  height: 100%;
+  max-height: 100%;
+  min-height: 0;
+  overflow: hidden;
   position: relative;
-}
-@media (min-width: 769px) { .chat-page-wrapper { height: 100%; } }
-@media (max-width: 768px) {
-  .chat-page-wrapper {
-    min-height: 0;
-    flex: 1;
-    height: calc(100vh - 52px);
-    height: calc(100dvh - 52px);
-  }
+  width: 100%;
 }
 
 .chat-messages-area {
@@ -397,24 +401,63 @@ body {
   flex-direction: column;
   align-items: center;
   min-height: 0;
+  padding: 20px 20px 28px 20px;
 }
 @media (max-width: 768px) {
-  .chat-messages-area { padding: 12px !important; }
+  .chat-messages-area {
+    padding: 12px 12px 24px 12px !important;
+  }
   .chat-messages-area > div { width: 100% !important; max-width: 100% !important; }
 }
 
-.chat-composer { flex-shrink: 0; }
+.chat-composer {
+  flex-shrink: 0;
+  width: 100%;
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  z-index: 30;
+}
 @media (max-width: 768px) {
   .chat-composer {
-    position: sticky;
-    bottom: 0;
-    background: var(--bg-primary);
-    border-top: 1px solid var(--border-color);
-    box-shadow: 0 -4px 16px rgba(0,0,0,0.06);
-    padding: 8px 12px;
-    padding-bottom: calc(8px + var(--safe-bottom));
-    z-index: 10;
+    position: relative !important;
+    bottom: auto !important;
+    padding: 8px 12px 6px 12px !important;
+    background: var(--bg-secondary) !important;
+    border-top: 1px solid var(--border-color) !important;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.04) !important;
+    flex-shrink: 0 !important;
   }
+}
+
+/* Textarea styling & ellipsis placeholder prevention */
+.chat-textarea-input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  outline: none;
+  resize: none;
+  font-size: 15px;
+  color: var(--text-main);
+  min-height: 40px;
+  max-height: 120px;
+  padding: 9px 8px;
+  font-family: inherit;
+  line-height: 1.4;
+  box-sizing: border-box;
+}
+
+.chat-textarea-input::placeholder {
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  color: var(--text-muted);
+  opacity: 0.85;
+  font-size: 14px;
 }
 
 @media (max-width: 768px) {
@@ -430,10 +473,40 @@ body {
   .suggestion-card-desc { display: none; }
   .message-bubble { max-width: 92% !important; }
   .message-bubble-user { max-width: 85% !important; }
-  .chat-input-area { padding: 0 !important; }
-  .chat-input-textarea { font-size: 16px !important; min-height: 44px; max-height: 120px; padding: 10px 12px !important; }
-  .chat-input-actions { gap: 6px !important; }
-  .chat-input-btn { width: 36px !important; height: 36px !important; min-width: 36px; min-height: 36px; }
+  
+  .chat-input-area {
+    padding: 3px 6px !important;
+    border-radius: 20px !important;
+    gap: 4px !important;
+  }
+  .chat-textarea-input {
+    font-size: 14px !important;
+    min-height: 38px !important;
+    padding: 8px 6px !important;
+    line-height: 1.35 !important;
+  }
+  .chat-textarea-input::placeholder {
+    font-size: 13px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+  .chat-action-btn {
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    min-height: 34px !important;
+  }
+  .chat-send-btn {
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    min-height: 36px !important;
+  }
+  .chat-disclaimer-text {
+    font-size: 10px !important;
+    margin-top: 3px !important;
+  }
 }
 @media (max-width: 480px) {
   .suggestions-grid { grid-template-columns: 1fr !important; gap: 6px !important; }

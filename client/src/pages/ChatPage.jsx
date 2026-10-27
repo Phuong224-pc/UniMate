@@ -37,9 +37,9 @@ const BOTS = [
     name: 'UniMate Toàn Diện',
     icon: Bot,
     badge: 'Đa năng',
-    desc: 'Tư vấn thông tin học tập, quy chế, học phí & học phần (Dữ liệu demo: VLU)',
+    desc: 'Tư vấn thông tin học tập, quy chế, học phí & chương trình đào tạo VLU',
     color: 'var(--vlu-red)',
-    placeholder: 'Hỏi UniMate bất cứ điều gì về học tập, quy chế, học phần... (Enter để gửi)',
+    placeholder: 'Hỏi UniMate bất cứ điều gì về học tập, quy chế...',
     suggestions: [
       { title: 'Các cơ sở đào tạo', desc: 'CS3 Đặng Thùy Trâm, CS1 Q.1, CS2 Q.6', query: 'Trường Đại học Văn Lang có những cơ sở nào tại TP.HCM?' },
       { title: 'Học phí & Học bổng', desc: 'Chính sách miễn giảm và thời hạn', query: 'Lịch đóng học phí trường Văn Lang năm học 2025-2026' },
@@ -54,7 +54,7 @@ const BOTS = [
     badge: 'Xét tốt nghiệp',
     desc: 'Kiểm tra 126 tín chỉ K30, chuẩn ngoại ngữ & tin học ra trường',
     color: '#10b981',
-    placeholder: 'Nhập MSSV hoặc hỏi điều kiện tốt nghiệp... (Enter để gửi)',
+    placeholder: 'Nhập MSSV hoặc hỏi điều kiện tốt nghiệp...',
     suggestions: [
       { title: 'Tiến độ SV 2474802010458', desc: 'Kiểm tra tín chỉ và môn còn nợ', query: 'Xem tiến độ và điều kiện tốt nghiệp của sinh viên MSSV 2474802010458' },
       { title: 'Điều kiện tốt nghiệp K30', desc: '126 tín chỉ, MOS, TOEIC, GDQP', query: 'Điều kiện tốt nghiệp ngành CNTT K30 Đại học Văn Lang gồm những gì?' },
@@ -69,7 +69,7 @@ const BOTS = [
     badge: 'Học vụ & Điểm',
     desc: 'Phân tích bảng điểm, cảnh báo môn nợ, tính GPA mục tiêu',
     color: '#3b82f6',
-    placeholder: 'Hỏi về điểm môn học, cách tính GPA, cảnh báo học vụ... (Enter để gửi)',
+    placeholder: 'Hỏi về điểm môn học, GPA, môn nợ...',
     suggestions: [
       { title: 'Bảng điểm SV 2474802010458', desc: 'Xem GPA và xếp loại học tập', query: 'Phân tích bảng điểm và xếp loại học tập của sinh viên MSSV 2474802010458' },
       { title: 'Kế hoạch nâng GPA', desc: 'Cách kéo GPA lên 3.2 Giỏi', query: 'Hiện tại GPA của tôi là 2.8, kỳ tới học 15 tín chỉ thì cần bao nhiêu điểm để đạt 3.2?' },
@@ -84,7 +84,7 @@ const BOTS = [
     badge: 'Lộ trình K30',
     desc: 'Tư vấn đăng ký môn học, kiểm tra điều kiện tiên quyết',
     color: '#8b5cf6',
-    placeholder: 'Hỏi môn tiên quyết, thứ tự đăng ký môn học... (Enter để gửi)',
+    placeholder: 'Hỏi môn tiên quyết, đăng ký môn học...',
     suggestions: [
       { title: 'Môn nên học kỳ tới', desc: 'Theo tiến độ chuẩn K30 CNTT', query: 'Tôi là sinh viên K30 CNTT năm 2, kỳ tới nên đăng ký những môn nào?' },
       { title: 'Điều kiện môn tiên quyết', desc: 'CSDL, Cấu trúc dữ liệu', query: 'Môn Cấu trúc dữ liệu và giải thuật cần học trước môn nào?' },
@@ -99,7 +99,7 @@ const BOTS = [
     badge: 'Career & Tech',
     desc: 'Tư vấn hướng đi nghề nghiệp, tech stack, roadmap 90 ngày',
     color: '#f59e0b',
-    placeholder: 'Hỏi về định hướng việc làm, công nghệ cần học... (Enter để gửi)',
+    placeholder: 'Hỏi về định hướng nghề nghiệp, kỹ năng...',
     suggestions: [
       { title: 'Lộ trình Fullstack Web', desc: 'React, Node.js, SQL, Cloud', query: 'Lộ trình 90 ngày tự học để trở thành Fullstack Web Developer cho sinh viên VLU' },
       { title: 'Kỹ sư AI / Data Science', desc: 'Xu hướng thị trường việc làm', query: 'Sinh viên năm 2 muốn theo hướng Trí tuệ nhân tạo (AI) thì cần chuẩn bị kiến thức gì?' },
@@ -596,25 +596,27 @@ export default function ChatPage({ activeChat, onUpdateChat }) {
             <div style={{ position: 'relative' }}>
               <button
                 type="button"
+                className="chat-action-btn"
                 onClick={() => setAttachMenuOpen(!attachMenuOpen)}
                 style={{
                   background: 'var(--bg-tertiary)',
                   border: 'none',
-                  width: '40px',
-                  height: '40px',
-                  minWidth: '40px',
-                  minHeight: '40px',
+                  width: '38px',
+                  height: '38px',
+                  minWidth: '38px',
+                  minHeight: '38px',
                   borderRadius: '50%',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   cursor: 'pointer',
                   color: 'var(--text-main)',
-                  transition: 'var(--transition)'
+                  transition: 'var(--transition)',
+                  flexShrink: 0
                 }}
                 title="Tính năng mở rộng & Đính kèm"
               >
-                <Plus size={20} />
+                <Plus size={19} />
               </button>
 
               {attachMenuOpen && (
@@ -680,45 +682,34 @@ export default function ChatPage({ activeChat, onUpdateChat }) {
 
             {/* Main Textarea */}
             <textarea
+              className="chat-textarea-input"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder={currentBot.placeholder}
               rows={1}
-              style={{
-                flex: 1,
-                border: 'none',
-                background: 'transparent',
-                outline: 'none',
-                resize: 'none',
-                fontSize: '15px',
-                color: 'var(--text-main)',
-                minHeight: '40px',
-                maxHeight: '140px',
-                padding: '8px 4px',
-                fontFamily: 'inherit',
-                lineHeight: '1.4'
-              }}
             />
 
             {/* Mic & Send */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '5px', flexShrink: 0 }}>
               <button
                 type="button"
+                className="chat-action-btn"
                 onClick={toggleSpeechRecognition}
                 style={{
                   background: isRecording ? 'rgba(239, 68, 68, 0.15)' : 'none',
                   border: 'none',
                   color: isRecording ? '#ef4444' : 'var(--text-muted)',
                   cursor: 'pointer',
-                  width: '40px',
-                  height: '40px',
-                  minWidth: '40px',
-                  minHeight: '40px',
+                  width: '38px',
+                  height: '38px',
+                  minWidth: '38px',
+                  minHeight: '38px',
                   borderRadius: '50%',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center'
+                  justifyContent: 'center',
+                  flexShrink: 0
                 }}
                 title={isRecording ? "Đang ghi âm (Bấm để dừng)" : "Nhập bằng giọng nói"}
               >
@@ -727,16 +718,17 @@ export default function ChatPage({ activeChat, onUpdateChat }) {
 
               <button
                 type="button"
+                className="chat-send-btn"
                 onClick={() => handleSend()}
                 disabled={(!input.trim() && !attachedImage) || loading}
                 style={{
                   background: (input.trim() || attachedImage) && !loading ? 'var(--vlu-red)' : 'var(--border-color)',
                   color: 'white',
                   border: 'none',
-                  width: '44px',
-                  height: '44px',
-                  minWidth: '44px',
-                  minHeight: '44px',
+                  width: '40px',
+                  height: '40px',
+                  minWidth: '40px',
+                  minHeight: '40px',
                   borderRadius: '50%',
                   display: 'flex',
                   alignItems: 'center',
@@ -753,8 +745,8 @@ export default function ChatPage({ activeChat, onUpdateChat }) {
             </div>
           </div>
 
-          <div style={{ textAlign: 'center', fontSize: '11px', color: 'var(--text-muted)', marginTop: '8px' }}>
-            UniMate có thể đưa ra thông tin chưa cập nhật. Hãy đối chiếu thông tin chính thức với cơ sở đào tạo. <span style={{ fontWeight: 600, color: 'var(--vlu-red)' }}>(Dữ liệu demo: VLU)</span>
+          <div className="chat-disclaimer-text" style={{ textAlign: 'center', fontSize: '11px', color: 'var(--text-muted)', marginTop: '4px', lineHeight: 1.3 }}>
+            UniMate có thể đưa ra thông tin chưa cập nhật. Hãy đối chiếu với thông tin chính thức của Trường Đại học Văn Lang.
           </div>
         </div>
       </div>

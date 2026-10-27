@@ -63,7 +63,7 @@ export default function ChatLayout({
           onSelectSuggestion={onSelectSuggestion}
         />
 
-        <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+        <div className="chat-layout-content" style={{ flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column', height: '100%' }}>
           {children}
         </div>
       </div>
