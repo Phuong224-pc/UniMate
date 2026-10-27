@@ -1,0 +1,4674 @@
+{
+  "users": [
+    {
+      "_id": "usr_admin_001",
+      "email": "admin@vanlanguni.vn",
+      "mssv": "ADMIN001",
+      "passwordHash": "$2b$10$BFU4D3JXR2xDUlLub9aNUeqapPIcWbzldCwYtI9TeDyyzXmXbgYrS",
+      "role": "admin",
+      "status": "active",
+      "lastLogin": "2026-10-22T09:53:56.557Z",
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "usr_gv_001",
+      "email": "gv.hoangnam@vanlanguni.vn",
+      "mssv": "GV001",
+      "passwordHash": "$2b$10$UeezySNsTyeP.qnA5.OQZeNgI7Uwr9b6gBpI/ntjD0Y7duCOJjvEe",
+      "role": "lecturer",
+      "status": "active",
+      "lastLogin": null,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "usr_sv_2474802010458",
+      "email": "2474802010458@vanlanguni.vn",
+      "mssv": "2474802010458",
+      "passwordHash": "$2b$10$DCdnfH/VEj3Pvk46pExvZOrIcNpY3H.M0RpSZ8A88caC/tTgO8t1S",
+      "role": "student",
+      "status": "active",
+      "lastLogin": "2026-10-22T09:53:56.557Z",
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "usr_sv_2474802010414",
+      "email": "2474802010414@vanlanguni.vn",
+      "mssv": "2474802010414",
+      "passwordHash": "$2b$10$DCdnfH/VEj3Pvk46pExvZOrIcNpY3H.M0RpSZ8A88caC/tTgO8t1S",
+      "role": "student",
+      "status": "active",
+      "lastLogin": null,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "usr_sv_2474802010071",
+      "email": "2474802010071@vanlanguni.vn",
+      "mssv": "2474802010071",
+      "passwordHash": "$2b$10$DCdnfH/VEj3Pvk46pExvZOrIcNpY3H.M0RpSZ8A88caC/tTgO8t1S",
+      "role": "student",
+      "status": "active",
+      "lastLogin": null,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "usr_sv_2474802010419",
+      "email": "2474802010419@vanlanguni.vn",
+      "mssv": "2474802010419",
+      "passwordHash": "$2b$10$DCdnfH/VEj3Pvk46pExvZOrIcNpY3H.M0RpSZ8A88caC/tTgO8t1S",
+      "role": "student",
+      "status": "active",
+      "lastLogin": null,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "usr_sv_2474802010118",
+      "email": "2474802010118@vanlanguni.vn",
+      "mssv": "2474802010118",
+      "passwordHash": "$2b$10$DCdnfH/VEj3Pvk46pExvZOrIcNpY3H.M0RpSZ8A88caC/tTgO8t1S",
+      "role": "student",
+      "status": "active",
+      "lastLogin": null,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    }
+  ],
+  "students": [
+    {
+      "_id": "prof_admin_001",
+      "userId": "usr_admin_001",
+      "mssv": "ADMIN001",
+      "fullName": "Quản Trị Viên Hệ Thống VLU",
+      "email": "admin@vanlanguni.vn",
+      "phone": "028 7109 9221",
+      "dob": "01/01/1985",
+      "gender": "Nam",
+      "className": "Ban Quản Trị Hệ Thống",
+      "faculty": "Khoa Công Nghệ Thông Tin",
+      "major": "Kỹ thuật Phần mềm & AI",
+      "cohort": "2024 - 2028",
+      "trainingCourse": "K30",
+      "ethnicity": "Kinh",
+      "nationality": "Việt Nam",
+      "address": "69/68 Đặng Thùy Trâm, P. 13, Q. Bình Thạnh, TP.HCM",
+      "idNumber": "079085001234",
+      "officialCumulativeGpa4": 4,
+      "officialCumulativeCredits": 126,
+      "officialRating": "Xuất sắc",
+      "source": "Hệ thống Quản trị Đại học Văn Lang",
+      "avatarUrl": null,
+      "completedCourses": [],
+      "courses": [],
+      "activities": [
+        {
+          "id": 1,
+          "type": "activity",
+          "name": "Ban cố vấn học tập VLU Assistant",
+          "role": "Trưởng ban",
+          "year": "2024",
+          "icon": "🛡️"
+        }
+      ],
+      "certs": [
+        {
+          "id": 1,
+          "name": "Quản trị hệ thống Cloud AWS Certified",
+          "score": "Đạt",
+          "issuer": "Amazon Web Services",
+          "date": "2024",
+          "status": "Đạt chuẩn"
+        }
+      ],
+      "docs": [],
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "prof_gv_001",
+      "userId": "usr_gv_001",
+      "mssv": "GV001",
+      "fullName": "ThS. Hoàng Trọng Nam",
+      "email": "gv.hoangnam@vanlanguni.vn",
+      "phone": "0912 345 678",
+      "dob": "15/08/1988",
+      "gender": "Nam",
+      "className": "Khoa CNTT - Giảng viên",
+      "faculty": "Khoa Công Nghệ Thông Tin",
+      "major": "Công nghệ thông tin",
+      "cohort": "K30",
+      "trainingCourse": "K30",
+      "ethnicity": "Kinh",
+      "nationality": "Việt Nam",
+      "address": "Cơ sở 3 - Đặng Thùy Trâm, Bình Thạnh, TP.HCM",
+      "idNumber": "079088009876",
+      "officialCumulativeGpa4": 3.9,
+      "officialCumulativeCredits": 126,
+      "officialRating": "Xuất sắc",
+      "source": "Hồ sơ Cán bộ Giảng viên VLU",
+      "avatarUrl": null,
+      "completedCourses": [],
+      "courses": [],
+      "activities": [
+        {
+          "id": 1,
+          "type": "activity",
+          "name": "Bộ môn Kỹ thuật Phần mềm VLU",
+          "role": "Giảng viên chính",
+          "year": "2024",
+          "icon": "👨‍🏫"
+        }
+      ],
+      "certs": [],
+      "docs": [],
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "prof_sv_2474802010414",
+      "userId": "usr_sv_2474802010414",
+      "mssv": "2474802010414",
+      "fullName": "Võ Thành Trung",
+      "email": "2474802010414@vanlanguni.vn",
+      "phone": "0918 000 414",
+      "dob": "15/05/2006",
+      "gender": "Nam",
+      "className": "K30 CNTT",
+      "faculty": "Khoa Công Nghệ Thông Tin",
+      "major": "Công nghệ thông tin",
+      "cohort": "K30",
+      "trainingCourse": "K30",
+      "ethnicity": "Kinh",
+      "nationality": "Việt Nam",
+      "address": "TP. Hồ Chí Minh, Việt Nam",
+      "idNumber": "079206010414",
+      "officialCumulativeGpa4": 3.09,
+      "officialCumulativeCredits": 72,
+      "officialRating": "Khá",
+      "source": "Bảng điểm sinh viên cung cấp - cập nhật 2025-2026 HK02",
+      "avatarUrl": null,
+      "completedCourses": [
+        "71ENG01000",
+        "71ENG11013",
+        "71ITBS10103",
+        "71ITBS10203",
+        "71SSK11023",
+        "71ENG21023",
+        "71ITMA10104",
+        "71ITNW30103",
+        "71ITSE30103",
+        "71PEBA1052",
+        "71POLP1013",
+        "71ENG31033",
+        "71ITIS30103",
+        "71ITSE30303",
+        "71MATL10053",
+        "71NAD11013",
+        "71NAD21022",
+        "71NAD31032",
+        "71NAD41044",
+        "71POLE1022",
+        "71ENG41043",
+        "71ITMA10403",
+        "71ITSE30203",
+        "71ITSE30503",
+        "71ITSE30603",
+        "71ENG51053",
+        "71ITDS30103",
+        "71ITIS30303",
+        "71ITSE30403",
+        "71POLS10032"
+      ],
+      "courses": [
+        {
+          "code": "71ENG01000",
+          "name": "Kiểm tra tiếng Anh đầu khóa",
+          "credits": 0,
+          "score": 5,
+          "point4": 2,
+          "letter": "D",
+          "semester": "2024-2025 HK01",
+          "area": "Ngoại ngữ",
+          "status": "Đạt",
+          "countCredit": false,
+          "countGpa": false
+        },
+        {
+          "code": "71ENG11013",
+          "name": "Anh văn 1 (AV1)",
+          "credits": 3,
+          "score": 8,
+          "point4": 3.2,
+          "letter": "B+",
+          "semester": "2024-2025 HK01",
+          "area": "Ngoại ngữ",
+          "status": "Đạt"
+        },
+        {
+          "code": "71ITBS10103",
+          "name": "Nhập môn công nghệ thông tin",
+          "credits": 3,
+          "score": 7.8,
+          "point4": 3.12,
+          "letter": "B",
+          "semester": "2024-2025 HK01",
+          "area": "Cơ sở khối ngành",
+          "status": "Đạt"
+        },
+        {
+          "code": "71ITBS10203",
+          "name": "Cơ sở lập trình",
+          "credits": 3,
+          "score": 8.6,
+          "point4": 3.44,
+          "letter": "A",
+          "semester": "2024-2025 HK01",
+          "area": "Cơ sở khối ngành",
+          "status": "Đạt"
+        },
+        {
+          "code": "71SSK11023",
+          "name": "Kỹ năng công dân toàn cầu",
+          "credits": 3,
+          "score": 8.5,
+          "point4": 3.4,
+          "letter": "A",
+          "semester": "2024-2025 HK01",
+          "area": "Kỹ năng",
+          "status": "Đạt"
+        },
+        {
+          "code": "71ENG21023",
+          "name": "Anh văn 2 (AV2)",
+          "credits": 3,
+          "score": 7,
+          "point4": 2.8,
+          "letter": "B",
+          "semester": "2024-2025 HK02",
+          "area": "Ngoại ngữ",
+          "status": "Đạt"
+        },
+        {
+          "code": "71ITMA10104",
+          "name": "Toán cao cấp và ứng dụng",
+          "credits": 4,
+          "score": 6.9,
+          "point4": 2.76,
+          "letter": "C+",
+          "semester": "2024-2025 HK02",
+          "area": "Cơ sở khối ngành",
+          "status": "Đạt"
+        },
+        {
+          "code": "71ITNW30103",
+          "name": "Nhập môn mạng máy tính và điện toán đám mây",
+          "credits": 3,
+          "score": 8.3,
+          "point4": 3.32,
+          "letter": "B+",
+          "semester": "2024-2025 HK02",
+          "area": "Cơ sở khối ngành",
+          "status": "Đạt"
+        },
+        {
+          "code": "71ITSE30103",
+          "name": "Kỹ thuật lập trình",
+          "credits": 3,
+          "score": 9.9,
+          "point4": 3.96,
+          "letter": "A+",
+          "semester": "2024-2025 HK02",
+          "area": "Cơ sở khối ngành",
+          "status": "Đạt"
+        },
+        {
+          "code": "71PEBA1052",
+          "name": "Cầu lông",
+          "credits": 2,
+          "score": 10,
+          "point4": 4,
+          "letter": "A+",
+          "semester": "2024-2025 HK02",
+          "area": "Giáo dục thể chất",
+          "status": "Đạt",
+          "countCredit": false,
+          "countGpa": false
+        },
+        {
+          "code": "71POLP1013",
+          "name": "Triết học Mác-Lênin",
+          "credits": 3,
+          "score": 6.9,
+          "point4": 2.76,
+          "letter": "C+",
+          "semester": "2024-2025 HK02",
+          "area": "Lý luận chính trị",
+          "status": "Đạt"
+        },
+        {
+          "code": "71ENG31033",
+          "name": "Anh văn 3 (AV3)",
+          "credits": 3,
+          "score": 5.7,
+          "point4": 2.28,
+          "letter": "C",
+          "semester": "2024-2025 HK03",
+          "area": "Ngoại ngữ",
+          "status": "Đạt thấp"
+        },
+        {
+          "code": "71ITIS30103",
+          "name": "Cơ sở dữ liệu",
+          "credits": 3,
+          "score": 7.5,
+          "point4": 3,
+          "letter": "B",
+          "semester": "2024-2025 HK03",
+          "area": "Cơ sở ngành",
+          "status": "Đạt"
+        },
+        {
+          "code": "71ITSE30303",
+          "name": "Cấu trúc dữ liệu và giải thuật",
+          "credits": 3,
+          "score": 8.9,
+          "point4": 3.56,
+          "letter": "A",
+          "semester": "2024-2025 HK03",
+          "area": "Cơ sở ngành",
+          "status": "Đạt"
+        },
+        {
+          "code": "71MATL10053",
+          "name": "Đại số tuyến tính và ứng dụng",
+          "credits": 3,
+          "score": 8,
+          "point4": 3.2,
+          "letter": "B+",
+          "semester": "2024-2025 HK03",
+          "area": "Cơ sở khối ngành",
+          "status": "Đạt"
+        },
+        {
+          "code": "71NAD11013",
+          "name": "GDQP1: Đường lối QP và AN của ĐCSVN",
+          "credits": 3,
+          "score": 8.7,
+          "point4": 3.48,
+          "letter": "A",
+          "semester": "2024-2025 HK03",
+          "area": "Giáo dục quốc phòng",
+          "status": "Đạt",
+          "countCredit": false,
+          "countGpa": false
+        },
+        {
+          "code": "71NAD21022",
+          "name": "GDQP2: Công tác quốc phòng và an ninh",
+          "credits": 2,
+          "score": 8.8,
+          "point4": 3.52,
+          "letter": "A",
+          "semester": "2024-2025 HK03",
+          "area": "Giáo dục quốc phòng",
+          "status": "Đạt",
+          "countCredit": false,
+          "countGpa": false
+        },
+        {
+          "code": "71NAD31032",
+          "name": "GDQP3: Quân sự chung",
+          "credits": 2,
+          "score": 8.5,
+          "point4": 3.4,
+          "letter": "A",
+          "semester": "2024-2025 HK03",
+          "area": "Giáo dục quốc phòng",
+          "status": "Đạt",
+          "countCredit": false,
+          "countGpa": false
+        },
+        {
+          "code": "71NAD41044",
+          "name": "GDQP4: Kỹ thuật chiến đấu bộ binh và chiến thuật",
+          "credits": 4,
+          "score": 8.7,
+          "point4": 3.48,
+          "letter": "A",
+          "semester": "2024-2025 HK03",
+          "area": "Giáo dục quốc phòng",
+          "status": "Đạt",
+          "countCredit": false,
+          "countGpa": false
+        },
+        {
+          "code": "71POLE1022",
+          "name": "Kinh tế chính trị Mác-Lênin",
+          "credits": 2,
+          "score": 6.3,
+          "point4": 2.52,
+          "letter": "C",
+          "semester": "2024-2025 HK03",
+          "area": "Lý luận chính trị",
+          "status": "Đạt thấp"
+        },
+        {
+          "code": "71ENG41043",
+          "name": "Anh văn 4 (AV4)",
+          "credits": 3,
+          "score": 8,
+          "point4": 3.2,
+          "letter": "B+",
+          "semester": "2025-2026 HK01",
+          "area": "Ngoại ngữ",
+          "status": "Đạt"
+        },
+        {
+          "code": "71ITMA10403",
+          "name": "Toán rời rạc",
+          "credits": 4,
+          "score": 8.8,
+          "point4": 3.52,
+          "letter": "A",
+          "semester": "2025-2026 HK01",
+          "area": "Cơ sở ngành",
+          "status": "Đạt"
+        },
+        {
+          "code": "71ITSE30203",
+          "name": "Lập trình hướng đối tượng",
+          "credits": 3,
+          "score": 6.9,
+          "point4": 2.76,
+          "letter": "C+",
+          "semester": "2025-2026 HK01",
+          "area": "Cơ sở ngành",
+          "status": "Đạt"
+        },
+        {
+          "code": "71ITSE30503",
+          "name": "Lập trình ứng dụng web",
+          "credits": 3,
+          "score": 9.2,
+          "point4": 3.68,
+          "letter": "A+",
+          "semester": "2025-2026 HK01",
+          "area": "Cơ sở ngành",
+          "status": "Đạt"
+        },
+        {
+          "code": "71ITSE30603",
+          "name": "Lập trình ứng dụng di động",
+          "credits": 3,
+          "score": 7.8,
+          "point4": 3.12,
+          "letter": "B",
+          "semester": "2025-2026 HK01",
+          "area": "Cơ sở ngành",
+          "status": "Đạt"
+        },
+        {
+          "code": "71ENG51053",
+          "name": "Anh văn 5 (AV5)",
+          "credits": 3,
+          "score": 6.7,
+          "point4": 2.68,
+          "letter": "C+",
+          "semester": "2025-2026 HK02",
+          "area": "Ngoại ngữ",
+          "status": "Đạt"
+        },
+        {
+          "code": "71ITDS30103",
+          "name": "Các nền tảng phát triển phần mềm",
+          "credits": 3,
+          "score": 7.5,
+          "point4": 3,
+          "letter": "B",
+          "semester": "2025-2026 HK02",
+          "area": "Cơ sở ngành",
+          "status": "Đạt"
+        },
+        {
+          "code": "71ITIS30303",
+          "name": "Quản lý dự án công nghệ thông tin",
+          "credits": 3,
+          "score": 8.2,
+          "point4": 3.28,
+          "letter": "B+",
+          "semester": "2025-2026 HK02",
+          "area": "Cơ sở ngành",
+          "status": "Đạt"
+        },
+        {
+          "code": "71ITSE30403",
+          "name": "Lập trình ứng dụng Java",
+          "credits": 3,
+          "score": 6.7,
+          "point4": 2.68,
+          "letter": "C+",
+          "semester": "2025-2026 HK02",
+          "area": "Cơ sở ngành",
+          "status": "Đạt"
+        },
+        {
+          "code": "71POLS10032",
+          "name": "Chủ nghĩa xã hội khoa học",
+          "credits": 2,
+          "score": 6.3,
+          "point4": 2.52,
+          "letter": "C",
+          "semester": "2025-2026 HK02",
+          "area": "Lý luận chính trị",
+          "status": "Đạt thấp"
+        }
+      ],
+      "activities": [
+        {
+          "id": 1,
+          "type": "activity",
+          "name": "CLB Tin học Văn Lang IT Club",
+          "role": "Thành viên",
+          "year": "2024",
+          "icon": "💻"
+        },
+        {
+          "id": 2,
+          "type": "skill",
+          "name": "Phát triển Web React & Node.js",
+          "level": "Trung cấp",
+          "icon": "⚛️"
+        }
+      ],
+      "certs": [
+        {
+          "id": 1,
+          "name": "TOEIC Chuẩn đầu ra",
+          "score": "650/990",
+          "issuer": "IIG",
+          "date": "2024",
+          "status": "Đạt chuẩn"
+        },
+        {
+          "id": 2,
+          "name": "Tin học chuẩn MOS",
+          "score": "Đạt",
+          "issuer": "Microsoft",
+          "date": "2024",
+          "status": "Đạt chuẩn"
+        }
+      ],
+      "docs": [],
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "prof_sv_2474802010118",
+      "userId": "usr_sv_2474802010118",
+      "mssv": "2474802010118",
+      "fullName": "Huỳnh Nhựt Hoà",
+      "email": "2474802010118@vanlanguni.vn",
+      "phone": "0918 000 118",
+      "dob": "15/05/2006",
+      "gender": "Nam",
+      "className": "K30 CNTT",
+      "faculty": "Khoa Công Nghệ Thông Tin",
+      "major": "Công nghệ thông tin",
+      "cohort": "K30",
+      "trainingCourse": "K30",
+      "ethnicity": "Kinh",
+      "nationality": "Việt Nam",
+      "address": "TP. Hồ Chí Minh, Việt Nam",
+      "idNumber": "079206010118",
+      "officialCumulativeGpa4": 2.7,
+      "officialCumulativeCredits": 74,
+      "officialRating": "Khá",
+      "source": "Bảng điểm sinh viên cung cấp - cập nhật 2025-2026 HK02",
+      "avatarUrl": null,
+      "completedCourses": [
+        "71ENG01012",
+        "71ENG01000",
+        "71ENG11013",
+        "71ITBS10103",
+        "71ITBS10203",
+        "71SSK11023",
+        "71ENG21023",
+        "71ITMA10104",
+        "71ITNW30103",
+        "71ITSE30103",
+        "71PEBA1052",
+        "71POLP1013",
+        "71ENG31003",
+        "71ITIS30103",
+        "71ITSE30303",
+        "71MATL10053",
+        "71NAD11013",
+        "71NAD21002",
+        "71NAD31003",
+        "71NAD41004",
+        "71ENG41003",
+        "71ITMA10403",
+        "71ITSE30203",
+        "71ITSE30503",
+        "71ITSE30603",
+        "71ENG51003",
+        "71ENVH10012",
+        "71ITDS30103",
+        "71ITNW30303",
+        "71ITSE30403",
+        "71LAWG10012",
+        "71POLS10032"
+      ],
+      "courses": [
+        {
+          "code": "71ENG01012",
+          "name": "Anh văn dự bị (AV0)",
+          "credits": 2,
+          "score": null,
+          "point4": null,
+          "letter": "MT",
+          "semester": "Điểm bảo lưu",
+          "area": "Ngoại ngữ",
+          "status": "Miễn/ bảo lưu",
+          "countCredit": false,
+          "countGpa": false
+        },
+        {
+          "code": "71ENG01000",
+          "name": "Kiểm tra tiếng Anh đầu khóa",
+          "credits": 0,
+          "score": 5,
+          "point4": 2,
+          "letter": "D",
+          "semester": "2024-2025 HK01",
+          "area": "Ngoại ngữ",
+          "status": "Đạt",
+          "countCredit": false,
+          "countGpa": false
+        },
+        {
+          "code": "71ENG11013",
+          "name": "Anh văn 1 (AV1)",
+          "credits": 3,
+          "score": 7.4,
+          "point4": 2.96,
+          "letter": "B",
+          "semester": "2024-2025 HK01",
+          "area": "Ngoại ngữ",
+          "status": "Đạt"
+        },
+        {
+          "code": "71ITBS10103",
+          "name": "Nhập môn công nghệ thông tin",
+          "credits": 3,
+          "score": 6.6,
+          "point4": 2.64,
+          "letter": "C+",
+          "semester": "2024-2025 HK01",
+          "area": "Cơ sở khối ngành",
+          "status": "Đạt"
+        },
+        {
+          "code": "71ITBS10203",
+          "name": "Cơ sở lập trình",
+          "credits": 3,
+          "score": 5.8,
+          "point4": 2.32,
+          "letter": "C",
+          "semester": "2024-2025 HK01",
+          "area": "Cơ sở khối ngành",
+          "status": "Đạt thấp"
+        },
+        {
+          "code": "71SSK11023",
+          "name": "Kỹ năng công dân toàn cầu",
+          "credits": 3,
+          "score": 8.1,
+          "point4": 3.24,
+          "letter": "B+",
+          "semester": "2024-2025 HK01",
+          "area": "Kỹ năng",
+          "status": "Đạt"
+        },
+        {
+          "code": "71ENG21023",
+          "name": "Anh văn 2 (AV2)",
+          "credits": 3,
+          "score": 5.5,
+          "point4": 2.2,
+          "letter": "C",
+          "semester": "2024-2025 HK02",
+          "area": "Ngoại ngữ",
+          "status": "Đạt thấp"
+        },
+        {
+          "code": "71ITMA10104",
+          "name": "Toán cao cấp và ứng dụng",
+          "credits": 4,
+          "score": 6.4,
+          "point4": 2.56,
+          "letter": "C",
+          "semester": "2024-2025 HK02",
+          "area": "Cơ sở khối ngành",
+          "status": "Đạt thấp"
+        },
+        {
+          "code": "71ITNW30103",
+          "name": "Nhập môn mạng máy tính và điện toán đám mây",
+          "credits": 3,
+          "score": 6.1,
+          "point4": 2.44,
+          "letter": "C",
+          "semester": "2024-2025 HK02",
+          "area": "Cơ sở khối ngành",
+          "status": "Đạt thấp"
+        },
+        {
+          "code": "71ITSE30103",
+          "name": "Kỹ thuật lập trình",
+          "credits": 3,
+          "score": 8.1,
+          "point4": 3.24,
+          "letter": "B+",
+          "semester": "2024-2025 HK02",
+          "area": "Cơ sở khối ngành",
+          "status": "Đạt"
+        },
+        {
+          "code": "71PEBA1052",
+          "name": "Cầu lông",
+          "credits": 2,
+          "score": 7.1,
+          "point4": 2.84,
+          "letter": "B",
+          "semester": "2024-2025 HK02",
+          "area": "Giáo dục thể chất",
+          "status": "Đạt",
+          "countCredit": false,
+          "countGpa": false
+        },
+        {
+          "code": "71POLP1013",
+          "name": "Triết học Mác-Lênin",
+          "credits": 3,
+          "score": 5.3,
+          "point4": 2.12,
+          "letter": "D",
+          "semester": "2024-2025 HK02",
+          "area": "Lý luận chính trị",
+          "status": "Đạt thấp"
+        },
+        {
+          "code": "71ENG31003",
+          "name": "Anh văn 3 (AV3)",
+          "credits": 3,
+          "score": 6.7,
+          "point4": 2.68,
+          "letter": "C+",
+          "semester": "2024-2025 HK03",
+          "area": "Ngoại ngữ",
+          "status": "Đạt"
+        },
+        {
+          "code": "71ITIS30103",
+          "name": "Cơ sở dữ liệu",
+          "credits": 3,
+          "score": 5.9,
+          "point4": 2.36,
+          "letter": "C",
+          "semester": "2024-2025 HK03",
+          "area": "Cơ sở ngành",
+          "status": "Đạt thấp"
+        },
+        {
+          "code": "71ITSE30303",
+          "name": "Cấu trúc dữ liệu và giải thuật",
+          "credits": 3,
+          "score": 6.3,
+          "point4": 2.52,
+          "letter": "C",
+          "semester": "2024-2025 HK03",
+          "area": "Cơ sở ngành",
+          "status": "Đạt thấp"
+        },
+        {
+          "code": "71MATL10053",
+          "name": "Đại số tuyến tính và ứng dụng",
+          "credits": 3,
+          "score": 5.6,
+          "point4": 2.24,
+          "letter": "C",
+          "semester": "2024-2025 HK03",
+          "area": "Cơ sở khối ngành",
+          "status": "Đạt thấp"
+        },
+        {
+          "code": "71NAD11013",
+          "name": "GDQP1: Đường lối QP và AN của ĐCSVN",
+          "credits": 3,
+          "score": 8.1,
+          "point4": 3.24,
+          "letter": "B+",
+          "semester": "2024-2025 HK03",
+          "area": "Giáo dục quốc phòng",
+          "status": "Đạt",
+          "countCredit": false,
+          "countGpa": false
+        },
+        {
+          "code": "71NAD21002",
+          "name": "GDQP2: Công tác quốc phòng và an ninh",
+          "credits": 2,
+          "score": 8.1,
+          "point4": 3.24,
+          "letter": "B+",
+          "semester": "2024-2025 HK03",
+          "area": "Giáo dục quốc phòng",
+          "status": "Đạt",
+          "countCredit": false,
+          "countGpa": false
+        },
+        {
+          "code": "71NAD31003",
+          "name": "GDQP3: Quân sự chung",
+          "credits": 2,
+          "score": 8,
+          "point4": 3.2,
+          "letter": "B+",
+          "semester": "2024-2025 HK03",
+          "area": "Giáo dục quốc phòng",
+          "status": "Đạt",
+          "countCredit": false,
+          "countGpa": false
+        },
+        {
+          "code": "71NAD41004",
+          "name": "GDQP4: Kỹ thuật chiến đấu bộ binh và chiến thuật",
+          "credits": 4,
+          "score": 7,
+          "point4": 2.8,
+          "letter": "B",
+          "semester": "2024-2025 HK03",
+          "area": "Giáo dục quốc phòng",
+          "status": "Đạt",
+          "countCredit": false,
+          "countGpa": false
+        },
+        {
+          "code": "71POLE1002",
+          "name": "Kinh tế chính trị Mác-Lênin",
+          "credits": 2,
+          "score": 4.7,
+          "point4": 1.88,
+          "letter": "F",
+          "semester": "2024-2025 HK03",
+          "area": "Lý luận chính trị",
+          "status": "Không đạt"
+        },
+        {
+          "code": "71ENG41003",
+          "name": "Anh văn 4 (AV4)",
+          "credits": 3,
+          "score": 6.5,
+          "point4": 2.6,
+          "letter": "C+",
+          "semester": "2025-2026 HK01",
+          "area": "Ngoại ngữ",
+          "status": "Đạt"
+        },
+        {
+          "code": "71ITMA10403",
+          "name": "Toán rời rạc",
+          "credits": 4,
+          "score": 8.1,
+          "point4": 3.24,
+          "letter": "B+",
+          "semester": "2025-2026 HK01",
+          "area": "Cơ sở ngành",
+          "status": "Đạt"
+        },
+        {
+          "code": "71ITSE30203",
+          "name": "Lập trình hướng đối tượng",
+          "credits": 3,
+          "score": 7.1,
+          "point4": 2.84,
+          "letter": "B",
+          "semester": "2025-2026 HK01",
+          "area": "Cơ sở ngành",
+          "status": "Đạt"
+        },
+        {
+          "code": "71ITSE30503",
+          "name": "Lập trình ứng dụng web",
+          "credits": 3,
+          "score": 8.4,
+          "point4": 3.36,
+          "letter": "B+",
+          "semester": "2025-2026 HK01",
+          "area": "Cơ sở ngành",
+          "status": "Đạt"
+        },
+        {
+          "code": "71ITSE30603",
+          "name": "Lập trình ứng dụng di động",
+          "credits": 3,
+          "score": 5.6,
+          "point4": 2.24,
+          "letter": "C",
+          "semester": "2025-2026 HK01",
+          "area": "Cơ sở ngành",
+          "status": "Đạt thấp"
+        },
+        {
+          "code": "71ENG51003",
+          "name": "Anh văn 5 (AV5)",
+          "credits": 3,
+          "score": 6.3,
+          "point4": 2.52,
+          "letter": "C",
+          "semester": "2025-2026 HK02",
+          "area": "Ngoại ngữ",
+          "status": "Đạt thấp"
+        },
+        {
+          "code": "71ENVH10012",
+          "name": "Môi trường và con người",
+          "credits": 2,
+          "score": 8.8,
+          "point4": 3.52,
+          "letter": "A",
+          "semester": "2025-2026 HK02",
+          "area": "Đại cương",
+          "status": "Đạt"
+        },
+        {
+          "code": "71ITDS30103",
+          "name": "Các nền tảng phát triển phần mềm",
+          "credits": 3,
+          "score": 8,
+          "point4": 3.2,
+          "letter": "B+",
+          "semester": "2025-2026 HK02",
+          "area": "Cơ sở ngành",
+          "status": "Đạt"
+        },
+        {
+          "code": "71ITNW30303",
+          "name": "An ninh mạng máy tính",
+          "credits": 3,
+          "score": 6.5,
+          "point4": 2.6,
+          "letter": "C+",
+          "semester": "2025-2026 HK02",
+          "area": "Cơ sở ngành",
+          "status": "Đạt"
+        },
+        {
+          "code": "71ITSE30403",
+          "name": "Lập trình ứng dụng Java",
+          "credits": 3,
+          "score": 6.6,
+          "point4": 2.64,
+          "letter": "C+",
+          "semester": "2025-2026 HK02",
+          "area": "Cơ sở ngành",
+          "status": "Đạt"
+        },
+        {
+          "code": "71LAWG10012",
+          "name": "Pháp luật đại cương",
+          "credits": 2,
+          "score": 6.6,
+          "point4": 2.64,
+          "letter": "C+",
+          "semester": "2025-2026 HK02",
+          "area": "Đại cương",
+          "status": "Đạt"
+        },
+        {
+          "code": "71POLS10032",
+          "name": "Chủ nghĩa xã hội khoa học",
+          "credits": 2,
+          "score": 6.7,
+          "point4": 2.68,
+          "letter": "C+",
+          "semester": "2025-2026 HK02",
+          "area": "Lý luận chính trị",
+          "status": "Đạt"
+        }
+      ],
+      "activities": [
+        {
+          "id": 1,
+          "type": "activity",
+          "name": "CLB Tin học Văn Lang IT Club",
+          "role": "Thành viên",
+          "year": "2024",
+          "icon": "💻"
+        },
+        {
+          "id": 2,
+          "type": "skill",
+          "name": "Phát triển Web React & Node.js",
+          "level": "Trung cấp",
+          "icon": "⚛️"
+        }
+      ],
+      "certs": [
+        {
+          "id": 1,
+          "name": "TOEIC Chuẩn đầu ra",
+          "score": "650/990",
+          "issuer": "IIG",
+          "date": "2024",
+          "status": "Đạt chuẩn"
+        },
+        {
+          "id": 2,
+          "name": "Tin học chuẩn MOS",
+          "score": "Đạt",
+          "issuer": "Microsoft",
+          "date": "2024",
+          "status": "Đạt chuẩn"
+        }
+      ],
+      "docs": [],
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "prof_sv_2474802010419",
+      "userId": "usr_sv_2474802010419",
+      "mssv": "2474802010419",
+      "fullName": "Phan Thanh Tú",
+      "email": "2474802010419@vanlanguni.vn",
+      "phone": "0918 000 419",
+      "dob": "15/05/2006",
+      "gender": "Nữ",
+      "className": "K30 CNTT",
+      "faculty": "Khoa Công Nghệ Thông Tin",
+      "major": "Công nghệ thông tin",
+      "cohort": "K30",
+      "trainingCourse": "K30",
+      "ethnicity": "Kinh",
+      "nationality": "Việt Nam",
+      "address": "TP. Hồ Chí Minh, Việt Nam",
+      "idNumber": "079206010419",
+      "officialCumulativeGpa4": 3.39,
+      "officialCumulativeCredits": 65,
+      "officialRating": "Giỏi",
+      "source": "Bảng điểm sinh viên cung cấp - cập nhật 2025-2026 HK03",
+      "avatarUrl": null,
+      "completedCourses": [
+        "71ENG01012",
+        "71ENG01000",
+        "71ENG11013",
+        "71ITBS10103",
+        "71ITBS10203",
+        "71SSK11023",
+        "71ENG21023",
+        "71ITMA10104",
+        "71ITNW30103",
+        "71ITSE30103",
+        "71PESW10042",
+        "71POLP10013",
+        "71ENG31033",
+        "71ITIS30103",
+        "71ITSE30303",
+        "71MATL10053",
+        "71NAD11013",
+        "71NAD21002",
+        "71NAD31003",
+        "71NAD41004",
+        "71POLE10022",
+        "71ENG41043",
+        "71ITMA10403",
+        "71ITSE30203",
+        "71ITSE30503",
+        "71ITDS30103",
+        "71ITDS40203",
+        "71LAWG10012",
+        "71PEBB10032",
+        "71POLS10032"
+      ],
+      "courses": [
+        {
+          "code": "71ENG01012",
+          "name": "Anh văn dự bị (AV0)",
+          "credits": 2,
+          "score": null,
+          "point4": null,
+          "letter": "MT",
+          "semester": "Điểm bảo lưu",
+          "area": "Ngoại ngữ",
+          "status": "Miễn/ bảo lưu",
+          "countCredit": false,
+          "countGpa": false
+        },
+        {
+          "code": "71ENG01000",
+          "name": "Kiểm tra tiếng Anh đầu khóa",
+          "credits": 0,
+          "score": 5,
+          "point4": 2,
+          "letter": "D",
+          "semester": "2024-2025 HK01",
+          "area": "Ngoại ngữ",
+          "status": "Đạt",
+          "countCredit": false,
+          "countGpa": false
+        },
+        {
+          "code": "71ENG11013",
+          "name": "Anh văn 1 (AV1)",
+          "credits": 3,
+          "score": 7.2,
+          "point4": 2.88,
+          "letter": "B",
+          "semester": "2024-2025 HK01",
+          "area": "Ngoại ngữ",
+          "status": "Đạt"
+        },
+        {
+          "code": "71ITBS10103",
+          "name": "Nhập môn công nghệ thông tin",
+          "credits": 3,
+          "score": 8.2,
+          "point4": 3.28,
+          "letter": "B+",
+          "semester": "2024-2025 HK01",
+          "area": "Cơ sở khối ngành",
+          "status": "Đạt"
+        },
+        {
+          "code": "71ITBS10203",
+          "name": "Cơ sở lập trình",
+          "credits": 3,
+          "score": 8.4,
+          "point4": 3.36,
+          "letter": "B+",
+          "semester": "2024-2025 HK01",
+          "area": "Cơ sở khối ngành",
+          "status": "Đạt"
+        },
+        {
+          "code": "71SSK11023",
+          "name": "Kỹ năng công dân toàn cầu",
+          "credits": 3,
+          "score": 9.3,
+          "point4": 3.72,
+          "letter": "A+",
+          "semester": "2024-2025 HK01",
+          "area": "Kỹ năng",
+          "status": "Đạt"
+        },
+        {
+          "code": "71ENG21023",
+          "name": "Anh văn 2 (AV2)",
+          "credits": 3,
+          "score": 7.2,
+          "point4": 2.88,
+          "letter": "B",
+          "semester": "2024-2025 HK02",
+          "area": "Ngoại ngữ",
+          "status": "Đạt"
+        },
+        {
+          "code": "71ITMA10104",
+          "name": "Toán cao cấp và ứng dụng",
+          "credits": 4,
+          "score": 8.1,
+          "point4": 3.24,
+          "letter": "B+",
+          "semester": "2024-2025 HK02",
+          "area": "Cơ sở khối ngành",
+          "status": "Đạt"
+        },
+        {
+          "code": "71ITNW30103",
+          "name": "Nhập môn mạng máy tính và điện toán đám mây",
+          "credits": 3,
+          "score": 9.4,
+          "point4": 3.76,
+          "letter": "A+",
+          "semester": "2024-2025 HK02",
+          "area": "Cơ sở khối ngành",
+          "status": "Đạt"
+        },
+        {
+          "code": "71ITSE30103",
+          "name": "Kỹ thuật lập trình",
+          "credits": 3,
+          "score": 9.5,
+          "point4": 3.8,
+          "letter": "A+",
+          "semester": "2024-2025 HK02",
+          "area": "Cơ sở khối ngành",
+          "status": "Đạt"
+        },
+        {
+          "code": "71PESW10042",
+          "name": "Bơi lội",
+          "credits": 2,
+          "score": 9.6,
+          "point4": 3.84,
+          "letter": "A+",
+          "semester": "2024-2025 HK02",
+          "area": "Giáo dục thể chất",
+          "status": "Đạt",
+          "countCredit": false,
+          "countGpa": false
+        },
+        {
+          "code": "71POLP10013",
+          "name": "Triết học Mác-Lênin",
+          "credits": 3,
+          "score": 6.6,
+          "point4": 2.64,
+          "letter": "C+",
+          "semester": "2024-2025 HK02",
+          "area": "Lý luận chính trị",
+          "status": "Đạt"
+        },
+        {
+          "code": "71ENG31033",
+          "name": "Anh văn 3 (AV3)",
+          "credits": 3,
+          "score": 6.7,
+          "point4": 2.68,
+          "letter": "C+",
+          "semester": "2024-2025 HK03",
+          "area": "Ngoại ngữ",
+          "status": "Đạt"
+        },
+        {
+          "code": "71ITIS30103",
+          "name": "Cơ sở dữ liệu",
+          "credits": 3,
+          "score": 6.8,
+          "point4": 2.72,
+          "letter": "C+",
+          "semester": "2024-2025 HK03",
+          "area": "Cơ sở ngành",
+          "status": "Đạt"
+        },
+        {
+          "code": "71ITSE30303",
+          "name": "Cấu trúc dữ liệu và giải thuật",
+          "credits": 3,
+          "score": 9.3,
+          "point4": 3.72,
+          "letter": "A+",
+          "semester": "2024-2025 HK03",
+          "area": "Cơ sở ngành",
+          "status": "Đạt"
+        },
+        {
+          "code": "71MATL10053",
+          "name": "Đại số tuyến tính và ứng dụng",
+          "credits": 3,
+          "score": 9,
+          "point4": 3.6,
+          "letter": "A+",
+          "semester": "2024-2025 HK03",
+          "area": "Cơ sở khối ngành",
+          "status": "Đạt"
+        },
+        {
+          "code": "71NAD11013",
+          "name": "GDQP1: Đường lối QP và AN của ĐCSVN",
+          "credits": 3,
+          "score": 8.4,
+          "point4": 3.36,
+          "letter": "B+",
+          "semester": "2024-2025 HK03",
+          "area": "Giáo dục quốc phòng",
+          "status": "Đạt",
+          "countCredit": false,
+          "countGpa": false
+        },
+        {
+          "code": "71NAD21002",
+          "name": "GDQP2: Công tác quốc phòng và an ninh",
+          "credits": 2,
+          "score": 8.9,
+          "point4": 3.56,
+          "letter": "A",
+          "semester": "2024-2025 HK03",
+          "area": "Giáo dục quốc phòng",
+          "status": "Đạt",
+          "countCredit": false,
+          "countGpa": false
+        },
+        {
+          "code": "71NAD31003",
+          "name": "GDQP3: Quân sự chung",
+          "credits": 2,
+          "score": 8.6,
+          "point4": 3.44,
+          "letter": "A",
+          "semester": "2024-2025 HK03",
+          "area": "Giáo dục quốc phòng",
+          "status": "Đạt",
+          "countCredit": false,
+          "countGpa": false
+        },
+        {
+          "code": "71NAD41004",
+          "name": "GDQP4: Kỹ thuật chiến đấu bộ binh và chiến thuật",
+          "credits": 4,
+          "score": 8.3,
+          "point4": 3.32,
+          "letter": "B+",
+          "semester": "2024-2025 HK03",
+          "area": "Giáo dục quốc phòng",
+          "status": "Đạt",
+          "countCredit": false,
+          "countGpa": false
+        },
+        {
+          "code": "71POLE10022",
+          "name": "Kinh tế chính trị Mác-Lênin",
+          "credits": 2,
+          "score": 7.3,
+          "point4": 2.92,
+          "letter": "B",
+          "semester": "2024-2025 HK03",
+          "area": "Lý luận chính trị",
+          "status": "Đạt"
+        },
+        {
+          "code": "71ENG41043",
+          "name": "Anh văn 4 (AV4)",
+          "credits": 3,
+          "score": 7.9,
+          "point4": 3.16,
+          "letter": "B",
+          "semester": "2025-2026 HK01",
+          "area": "Ngoại ngữ",
+          "status": "Đạt"
+        },
+        {
+          "code": "71ITMA10403",
+          "name": "Toán rời rạc",
+          "credits": 4,
+          "score": 10,
+          "point4": 4,
+          "letter": "A+",
+          "semester": "2025-2026 HK01",
+          "area": "Cơ sở ngành",
+          "status": "Đạt"
+        },
+        {
+          "code": "71ITSE30203",
+          "name": "Lập trình hướng đối tượng",
+          "credits": 3,
+          "score": 8.2,
+          "point4": 3.28,
+          "letter": "B+",
+          "semester": "2025-2026 HK01",
+          "area": "Cơ sở ngành",
+          "status": "Đạt"
+        },
+        {
+          "code": "71ITSE30503",
+          "name": "Lập trình ứng dụng web",
+          "credits": 3,
+          "score": 8.8,
+          "point4": 3.52,
+          "letter": "A",
+          "semester": "2025-2026 HK01",
+          "area": "Cơ sở ngành",
+          "status": "Đạt"
+        },
+        {
+          "code": "71ITDS30103",
+          "name": "Các nền tảng phát triển phần mềm",
+          "credits": 3,
+          "score": 9.4,
+          "point4": 3.76,
+          "letter": "A+",
+          "semester": "2025-2026 HK02",
+          "area": "Cơ sở ngành",
+          "status": "Đạt"
+        },
+        {
+          "code": "71ITDS40203",
+          "name": "Xác suất thống kê ứng dụng",
+          "credits": 3,
+          "score": 9.7,
+          "point4": 3.88,
+          "letter": "A+",
+          "semester": "2025-2026 HK02",
+          "area": "Cơ sở ngành",
+          "status": "Đạt"
+        },
+        {
+          "code": "71LAWG10012",
+          "name": "Pháp luật đại cương",
+          "credits": 2,
+          "score": 9.6,
+          "point4": 3.84,
+          "letter": "A+",
+          "semester": "2025-2026 HK02",
+          "area": "Đại cương",
+          "status": "Đạt"
+        },
+        {
+          "code": "71PEBB10032",
+          "name": "Bóng rổ",
+          "credits": 2,
+          "score": 10,
+          "point4": 4,
+          "letter": "A+",
+          "semester": "2025-2026 HK02",
+          "area": "Giáo dục thể chất",
+          "status": "Đạt",
+          "countCredit": false,
+          "countGpa": false
+        },
+        {
+          "code": "71POLS10032",
+          "name": "Chủ nghĩa xã hội khoa học",
+          "credits": 2,
+          "score": 9.7,
+          "point4": 3.88,
+          "letter": "A+",
+          "semester": "2025-2026 HK02",
+          "area": "Lý luận chính trị",
+          "status": "Đạt"
+        },
+        {
+          "code": "71ITAI40103",
+          "name": "Nhập môn trí tuệ nhân tạo",
+          "credits": 3,
+          "score": null,
+          "point4": null,
+          "letter": "",
+          "semester": "2025-2026 HK03",
+          "area": "Cơ sở ngành",
+          "status": "Đang học",
+          "countCredit": false,
+          "countGpa": false
+        }
+      ],
+      "activities": [
+        {
+          "id": 1,
+          "type": "activity",
+          "name": "CLB Tin học Văn Lang IT Club",
+          "role": "Thành viên",
+          "year": "2024",
+          "icon": "💻"
+        },
+        {
+          "id": 2,
+          "type": "skill",
+          "name": "Phát triển Web React & Node.js",
+          "level": "Trung cấp",
+          "icon": "⚛️"
+        }
+      ],
+      "certs": [
+        {
+          "id": 1,
+          "name": "TOEIC Chuẩn đầu ra",
+          "score": "650/990",
+          "issuer": "IIG",
+          "date": "2024",
+          "status": "Đạt chuẩn"
+        },
+        {
+          "id": 2,
+          "name": "Tin học chuẩn MOS",
+          "score": "Đạt",
+          "issuer": "Microsoft",
+          "date": "2024",
+          "status": "Đạt chuẩn"
+        }
+      ],
+      "docs": [],
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "prof_sv_2474802010071",
+      "userId": "usr_sv_2474802010071",
+      "mssv": "2474802010071",
+      "fullName": "Võ Ngọc Duy",
+      "email": "2474802010071@vanlanguni.vn",
+      "phone": "0918 000 071",
+      "dob": "15/05/2006",
+      "gender": "Nam",
+      "className": "K30 CNTT",
+      "faculty": "Khoa Công Nghệ Thông Tin",
+      "major": "Công nghệ thông tin",
+      "cohort": "K30",
+      "trainingCourse": "K30",
+      "ethnicity": "Kinh",
+      "nationality": "Việt Nam",
+      "address": "TP. Hồ Chí Minh, Việt Nam",
+      "idNumber": "079206010071",
+      "officialCumulativeGpa4": 3.25,
+      "officialCumulativeCredits": 69,
+      "officialRating": "Giỏi",
+      "source": "Bảng điểm sinh viên cung cấp - cập nhật 2025-2026 HK02",
+      "avatarUrl": null,
+      "completedCourses": [
+        "71ENG01000",
+        "71ENG01012",
+        "71ITBS10103",
+        "71ITBS10203",
+        "71SSK11023",
+        "71ENG11013",
+        "71ITMA10104",
+        "71ITNW30103",
+        "71ITSE30103",
+        "71PEVB10022",
+        "71POLP10013",
+        "71ENG21023",
+        "71ITIS30103",
+        "71ITSE30303",
+        "71MATL10053",
+        "71NAD11013",
+        "71NAD21002",
+        "71NAD31003",
+        "71NAD41044",
+        "71POLE10022",
+        "71ENG31033",
+        "71ITMA10403",
+        "71ITSE30203",
+        "71ITSE30503",
+        "71ITSE30603",
+        "71PESW10042",
+        "71ENG41043",
+        "71ITDS30103",
+        "71ITIS30303",
+        "71ITSE30403",
+        "71POLS10032"
+      ],
+      "courses": [
+        {
+          "code": "71ENG01000",
+          "name": "Kiểm tra tiếng Anh đầu khóa",
+          "credits": 0,
+          "score": 5,
+          "point4": 2,
+          "letter": "D",
+          "semester": "2024-2025 HK01",
+          "area": "Ngoại ngữ",
+          "status": "Đạt",
+          "countCredit": false,
+          "countGpa": false
+        },
+        {
+          "code": "71ENG01012",
+          "name": "Anh văn dự bị (AV0)",
+          "credits": 2,
+          "score": 9.5,
+          "point4": 3.8,
+          "letter": "A+",
+          "semester": "2024-2025 HK01",
+          "area": "Ngoại ngữ",
+          "status": "Đạt / không tính TC",
+          "countCredit": false,
+          "countGpa": false
+        },
+        {
+          "code": "71ITBS10103",
+          "name": "Nhập môn công nghệ thông tin",
+          "credits": 3,
+          "score": 7.8,
+          "point4": 3.12,
+          "letter": "B",
+          "semester": "2024-2025 HK01",
+          "area": "Cơ sở khối ngành",
+          "status": "Đạt"
+        },
+        {
+          "code": "71ITBS10203",
+          "name": "Cơ sở lập trình",
+          "credits": 3,
+          "score": 5.8,
+          "point4": 2.32,
+          "letter": "C",
+          "semester": "2024-2025 HK01",
+          "area": "Cơ sở khối ngành",
+          "status": "Đạt thấp"
+        },
+        {
+          "code": "71SSK11023",
+          "name": "Kỹ năng công dân toàn cầu",
+          "credits": 3,
+          "score": 8.4,
+          "point4": 3.36,
+          "letter": "B+",
+          "semester": "2024-2025 HK01",
+          "area": "Kỹ năng",
+          "status": "Đạt"
+        },
+        {
+          "code": "71ENG11013",
+          "name": "Anh văn 1 (AV1)",
+          "credits": 3,
+          "score": 7.6,
+          "point4": 3.04,
+          "letter": "B",
+          "semester": "2024-2025 HK02",
+          "area": "Ngoại ngữ",
+          "status": "Đạt"
+        },
+        {
+          "code": "71ITMA10104",
+          "name": "Toán cao cấp và ứng dụng",
+          "credits": 4,
+          "score": 7,
+          "point4": 2.8,
+          "letter": "B",
+          "semester": "2024-2025 HK02",
+          "area": "Cơ sở khối ngành",
+          "status": "Đạt"
+        },
+        {
+          "code": "71ITNW30103",
+          "name": "Nhập môn mạng máy tính và điện toán đám mây",
+          "credits": 3,
+          "score": 8.7,
+          "point4": 3.48,
+          "letter": "A",
+          "semester": "2024-2025 HK02",
+          "area": "Cơ sở khối ngành",
+          "status": "Đạt"
+        },
+        {
+          "code": "71ITSE30103",
+          "name": "Kỹ thuật lập trình",
+          "credits": 3,
+          "score": 9.9,
+          "point4": 3.96,
+          "letter": "A+",
+          "semester": "2024-2025 HK02",
+          "area": "Cơ sở khối ngành",
+          "status": "Đạt"
+        },
+        {
+          "code": "71PEVB10022",
+          "name": "Bóng chuyền",
+          "credits": 2,
+          "score": 9.5,
+          "point4": 3.8,
+          "letter": "A+",
+          "semester": "2024-2025 HK02",
+          "area": "Giáo dục thể chất",
+          "status": "Đạt",
+          "countCredit": false,
+          "countGpa": false
+        },
+        {
+          "code": "71POLP10013",
+          "name": "Triết học Mác-Lênin",
+          "credits": 3,
+          "score": 7.2,
+          "point4": 2.88,
+          "letter": "B",
+          "semester": "2024-2025 HK02",
+          "area": "Lý luận chính trị",
+          "status": "Đạt"
+        },
+        {
+          "code": "71ENG21023",
+          "name": "Anh văn 2 (AV2)",
+          "credits": 3,
+          "score": 8.3,
+          "point4": 3.32,
+          "letter": "B+",
+          "semester": "2024-2025 HK03",
+          "area": "Ngoại ngữ",
+          "status": "Đạt"
+        },
+        {
+          "code": "71ITIS30103",
+          "name": "Cơ sở dữ liệu",
+          "credits": 3,
+          "score": 7.5,
+          "point4": 3,
+          "letter": "B",
+          "semester": "2024-2025 HK03",
+          "area": "Cơ sở ngành",
+          "status": "Đạt"
+        },
+        {
+          "code": "71ITSE30303",
+          "name": "Cấu trúc dữ liệu và giải thuật",
+          "credits": 3,
+          "score": 8.5,
+          "point4": 3.4,
+          "letter": "A",
+          "semester": "2024-2025 HK03",
+          "area": "Cơ sở ngành",
+          "status": "Đạt"
+        },
+        {
+          "code": "71MATL10053",
+          "name": "Đại số tuyến tính và ứng dụng",
+          "credits": 3,
+          "score": 8.4,
+          "point4": 3.36,
+          "letter": "B+",
+          "semester": "2024-2025 HK03",
+          "area": "Cơ sở khối ngành",
+          "status": "Đạt"
+        },
+        {
+          "code": "71NAD11013",
+          "name": "GDQP1: Đường lối QP và AN của ĐCSVN",
+          "credits": 3,
+          "score": 9.3,
+          "point4": 3.72,
+          "letter": "A+",
+          "semester": "2024-2025 HK03",
+          "area": "Giáo dục quốc phòng",
+          "status": "Đạt",
+          "countCredit": false,
+          "countGpa": false
+        },
+        {
+          "code": "71NAD21002",
+          "name": "GDQP2: Công tác quốc phòng và an ninh",
+          "credits": 2,
+          "score": 9.6,
+          "point4": 3.84,
+          "letter": "A+",
+          "semester": "2024-2025 HK03",
+          "area": "Giáo dục quốc phòng",
+          "status": "Đạt",
+          "countCredit": false,
+          "countGpa": false
+        },
+        {
+          "code": "71NAD31003",
+          "name": "GDQP3: Quân sự chung",
+          "credits": 2,
+          "score": 9.3,
+          "point4": 3.72,
+          "letter": "A+",
+          "semester": "2024-2025 HK03",
+          "area": "Giáo dục quốc phòng",
+          "status": "Đạt",
+          "countCredit": false,
+          "countGpa": false
+        },
+        {
+          "code": "71NAD41044",
+          "name": "GDQP4: Kỹ thuật chiến đấu bộ binh và chiến thuật",
+          "credits": 4,
+          "score": 8.8,
+          "point4": 3.52,
+          "letter": "A",
+          "semester": "2024-2025 HK03",
+          "area": "Giáo dục quốc phòng",
+          "status": "Đạt",
+          "countCredit": false,
+          "countGpa": false
+        },
+        {
+          "code": "71POLE10022",
+          "name": "Kinh tế chính trị Mác-Lênin",
+          "credits": 2,
+          "score": 7.6,
+          "point4": 3.04,
+          "letter": "B",
+          "semester": "2024-2025 HK03",
+          "area": "Lý luận chính trị",
+          "status": "Đạt"
+        },
+        {
+          "code": "71ENG31033",
+          "name": "Anh văn 3 (AV3)",
+          "credits": 3,
+          "score": 8.8,
+          "point4": 3.6,
+          "letter": "A",
+          "semester": "2025-2026 HK01",
+          "area": "Ngoại ngữ",
+          "status": "Đạt"
+        },
+        {
+          "code": "71ITMA10403",
+          "name": "Toán rời rạc",
+          "credits": 4,
+          "score": 9.6,
+          "point4": 3.84,
+          "letter": "A+",
+          "semester": "2025-2026 HK01",
+          "area": "Cơ sở ngành",
+          "status": "Đạt"
+        },
+        {
+          "code": "71ITSE30203",
+          "name": "Lập trình hướng đối tượng",
+          "credits": 3,
+          "score": 8.4,
+          "point4": 3.36,
+          "letter": "B+",
+          "semester": "2025-2026 HK01",
+          "area": "Cơ sở ngành",
+          "status": "Đạt"
+        },
+        {
+          "code": "71ITSE30503",
+          "name": "Lập trình ứng dụng web",
+          "credits": 3,
+          "score": 9.3,
+          "point4": 3.72,
+          "letter": "A+",
+          "semester": "2025-2026 HK01",
+          "area": "Cơ sở ngành",
+          "status": "Đạt"
+        },
+        {
+          "code": "71ITSE30603",
+          "name": "Lập trình ứng dụng di động",
+          "credits": 3,
+          "score": 7.1,
+          "point4": 2.84,
+          "letter": "B",
+          "semester": "2025-2026 HK01",
+          "area": "Cơ sở ngành",
+          "status": "Đạt"
+        },
+        {
+          "code": "71PESW10042",
+          "name": "Bơi lội",
+          "credits": 2,
+          "score": 9.4,
+          "point4": 3.76,
+          "letter": "A+",
+          "semester": "2025-2026 HK01",
+          "area": "Giáo dục thể chất",
+          "status": "Đạt",
+          "countCredit": false,
+          "countGpa": false
+        },
+        {
+          "code": "71ENG41043",
+          "name": "Anh văn 4 (AV4)",
+          "credits": 3,
+          "score": 8.4,
+          "point4": 3.36,
+          "letter": "B+",
+          "semester": "2025-2026 HK02",
+          "area": "Ngoại ngữ",
+          "status": "Đạt"
+        },
+        {
+          "code": "71ITDS30103",
+          "name": "Các nền tảng phát triển phần mềm",
+          "credits": 3,
+          "score": 9,
+          "point4": 3.6,
+          "letter": "A+",
+          "semester": "2025-2026 HK02",
+          "area": "Cơ sở ngành",
+          "status": "Đạt"
+        },
+        {
+          "code": "71ITIS30303",
+          "name": "Quản lý dự án công nghệ thông tin",
+          "credits": 3,
+          "score": 8.8,
+          "point4": 3.52,
+          "letter": "A",
+          "semester": "2025-2026 HK02",
+          "area": "Cơ sở ngành",
+          "status": "Đạt"
+        },
+        {
+          "code": "71ITSE30403",
+          "name": "Lập trình ứng dụng Java",
+          "credits": 3,
+          "score": 9.1,
+          "point4": 3.64,
+          "letter": "A+",
+          "semester": "2025-2026 HK02",
+          "area": "Cơ sở ngành",
+          "status": "Đạt"
+        },
+        {
+          "code": "71POLS10032",
+          "name": "Chủ nghĩa xã hội khoa học",
+          "credits": 2,
+          "score": 9.1,
+          "point4": 3.64,
+          "letter": "A+",
+          "semester": "2025-2026 HK02",
+          "area": "Lý luận chính trị",
+          "status": "Đạt"
+        }
+      ],
+      "activities": [
+        {
+          "id": 1,
+          "type": "activity",
+          "name": "CLB Tin học Văn Lang IT Club",
+          "role": "Thành viên",
+          "year": "2024",
+          "icon": "💻"
+        },
+        {
+          "id": 2,
+          "type": "skill",
+          "name": "Phát triển Web React & Node.js",
+          "level": "Trung cấp",
+          "icon": "⚛️"
+        }
+      ],
+      "certs": [
+        {
+          "id": 1,
+          "name": "TOEIC Chuẩn đầu ra",
+          "score": "650/990",
+          "issuer": "IIG",
+          "date": "2024",
+          "status": "Đạt chuẩn"
+        },
+        {
+          "id": 2,
+          "name": "Tin học chuẩn MOS",
+          "score": "Đạt",
+          "issuer": "Microsoft",
+          "date": "2024",
+          "status": "Đạt chuẩn"
+        }
+      ],
+      "docs": [],
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "prof_sv_2474802010458",
+      "userId": "usr_sv_2474802010458",
+      "mssv": "2474802010458",
+      "fullName": "Trương Trần Thanh Phương",
+      "email": "2474802010458@vanlanguni.vn",
+      "phone": "0901 234 567",
+      "dob": "02/01/2006",
+      "gender": "Nam",
+      "className": "K30 CNTT",
+      "faculty": "Khoa Công Nghệ Thông Tin",
+      "major": "Công nghệ thông tin",
+      "cohort": "K30",
+      "trainingCourse": "K30",
+      "ethnicity": "Kinh",
+      "nationality": "Việt Nam",
+      "address": "TP. Hồ Chí Minh, Việt Nam",
+      "idNumber": "079206010458",
+      "officialCumulativeGpa4": 3.24,
+      "officialCumulativeCredits": 72,
+      "officialRating": "Giỏi",
+      "source": "Bảng điểm sinh viên cung cấp - cập nhật 2025-2026 HK02",
+      "avatarUrl": null,
+      "completedCourses": [
+        "71ENG01012",
+        "71ENG01000",
+        "71ENG11013",
+        "71ITBS10103",
+        "71ITBS10203",
+        "71SSK11023",
+        "71ENG21023",
+        "71ITMA10104",
+        "71ITNW30103",
+        "71ITSE30103",
+        "71PEKC10062",
+        "71POLP10013",
+        "71ENG31033",
+        "71ITIS30103",
+        "71ITSE30303",
+        "71MATL10053",
+        "71NAD11013",
+        "71NAD21002",
+        "71NAD31003",
+        "71NAD41044",
+        "71POLE10022",
+        "71ENG41043",
+        "71ITMA10403",
+        "71ITSE30203",
+        "71ITSE30503",
+        "71ITSE30603",
+        "71ENG51053",
+        "71ITDS30103",
+        "71ITIS30303",
+        "71ITSE30403",
+        "71POLS10032"
+      ],
+      "courses": [
+        {
+          "code": "71ENG01012",
+          "name": "Anh văn dự bị (AV0)",
+          "credits": 2,
+          "score": null,
+          "point4": null,
+          "letter": "MT",
+          "semester": "Điểm bảo lưu",
+          "area": "Ngoại ngữ",
+          "status": "Miễn/ bảo lưu",
+          "countCredit": false,
+          "countGpa": false
+        },
+        {
+          "code": "71ENG01000",
+          "name": "Kiểm tra tiếng Anh đầu khóa",
+          "credits": 0,
+          "score": 5,
+          "point4": 2,
+          "letter": "D",
+          "semester": "2024-2025 HK01",
+          "area": "Ngoại ngữ",
+          "status": "Đạt",
+          "countCredit": false,
+          "countGpa": false
+        },
+        {
+          "code": "71ENG11013",
+          "name": "Anh văn 1 (AV1)",
+          "credits": 3,
+          "score": 7.8,
+          "point4": 3.12,
+          "letter": "B",
+          "semester": "2024-2025 HK01",
+          "area": "Ngoại ngữ",
+          "status": "Đạt"
+        },
+        {
+          "code": "71ITBS10103",
+          "name": "Nhập môn công nghệ thông tin",
+          "credits": 3,
+          "score": 8.1,
+          "point4": 3.24,
+          "letter": "B+",
+          "semester": "2024-2025 HK01",
+          "area": "Cơ sở khối ngành",
+          "status": "Đạt"
+        },
+        {
+          "code": "71ITBS10203",
+          "name": "Cơ sở lập trình",
+          "credits": 3,
+          "score": 7,
+          "point4": 2.8,
+          "letter": "B",
+          "semester": "2024-2025 HK01",
+          "area": "Cơ sở khối ngành",
+          "status": "Đạt"
+        },
+        {
+          "code": "71SSK11023",
+          "name": "Kỹ năng công dân toàn cầu",
+          "credits": 3,
+          "score": 9,
+          "point4": 3.6,
+          "letter": "A+",
+          "semester": "2024-2025 HK01",
+          "area": "Kỹ năng",
+          "status": "Đạt"
+        },
+        {
+          "code": "71ENG21023",
+          "name": "Anh văn 2 (AV2)",
+          "credits": 3,
+          "score": 7.1,
+          "point4": 2.84,
+          "letter": "B",
+          "semester": "2024-2025 HK02",
+          "area": "Ngoại ngữ",
+          "status": "Đạt"
+        },
+        {
+          "code": "71ITMA10104",
+          "name": "Toán cao cấp và ứng dụng",
+          "credits": 4,
+          "score": 6.5,
+          "point4": 2.6,
+          "letter": "C+",
+          "semester": "2024-2025 HK02",
+          "area": "Cơ sở khối ngành",
+          "status": "Đạt thấp"
+        },
+        {
+          "code": "71ITNW30103",
+          "name": "Nhập môn mạng máy tính và điện toán đám mây",
+          "credits": 3,
+          "score": 8.6,
+          "point4": 3.44,
+          "letter": "A",
+          "semester": "2024-2025 HK02",
+          "area": "Cơ sở khối ngành",
+          "status": "Đạt"
+        },
+        {
+          "code": "71ITSE30103",
+          "name": "Kỹ thuật lập trình",
+          "credits": 3,
+          "score": 8.8,
+          "point4": 3.52,
+          "letter": "A",
+          "semester": "2024-2025 HK02",
+          "area": "Cơ sở khối ngành",
+          "status": "Đạt"
+        },
+        {
+          "code": "71PEKC10062",
+          "name": "Cờ vua",
+          "credits": 2,
+          "score": 8.5,
+          "point4": 3.4,
+          "letter": "A",
+          "semester": "2024-2025 HK02",
+          "area": "Giáo dục thể chất",
+          "status": "Đạt",
+          "countCredit": false,
+          "countGpa": false
+        },
+        {
+          "code": "71POLP10013",
+          "name": "Triết học Mác-Lênin",
+          "credits": 3,
+          "score": 7.5,
+          "point4": 3,
+          "letter": "B",
+          "semester": "2024-2025 HK02",
+          "area": "Lý luận chính trị",
+          "status": "Đạt"
+        },
+        {
+          "code": "71ENG31033",
+          "name": "Anh văn 3 (AV3)",
+          "credits": 3,
+          "score": 6.4,
+          "point4": 2.56,
+          "letter": "C",
+          "semester": "2024-2025 HK03",
+          "area": "Ngoại ngữ",
+          "status": "Đạt thấp"
+        },
+        {
+          "code": "71ITIS30103",
+          "name": "Cơ sở dữ liệu",
+          "credits": 3,
+          "score": 7.9,
+          "point4": 3.16,
+          "letter": "B",
+          "semester": "2024-2025 HK03",
+          "area": "Cơ sở ngành",
+          "status": "Đạt"
+        },
+        {
+          "code": "71ITSE30303",
+          "name": "Cấu trúc dữ liệu và giải thuật",
+          "credits": 3,
+          "score": 8.4,
+          "point4": 3.36,
+          "letter": "B+",
+          "semester": "2024-2025 HK03",
+          "area": "Cơ sở ngành",
+          "status": "Đạt"
+        },
+        {
+          "code": "71MATL10053",
+          "name": "Đại số tuyến tính và ứng dụng",
+          "credits": 3,
+          "score": 8.9,
+          "point4": 3.56,
+          "letter": "A",
+          "semester": "2024-2025 HK03",
+          "area": "Cơ sở khối ngành",
+          "status": "Đạt"
+        },
+        {
+          "code": "71NAD11013",
+          "name": "GDQP1: Đường lối QP và AN của ĐCSVN",
+          "credits": 3,
+          "score": 8.6,
+          "point4": 3.44,
+          "letter": "A",
+          "semester": "2024-2025 HK03",
+          "area": "Giáo dục quốc phòng",
+          "status": "Đạt",
+          "countCredit": false,
+          "countGpa": false
+        },
+        {
+          "code": "71NAD21002",
+          "name": "GDQP2: Công tác quốc phòng và an ninh",
+          "credits": 2,
+          "score": 8.8,
+          "point4": 3.52,
+          "letter": "A",
+          "semester": "2024-2025 HK03",
+          "area": "Giáo dục quốc phòng",
+          "status": "Đạt",
+          "countCredit": false,
+          "countGpa": false
+        },
+        {
+          "code": "71NAD31003",
+          "name": "GDQP3: Quân sự chung",
+          "credits": 2,
+          "score": 8.8,
+          "point4": 3.52,
+          "letter": "A",
+          "semester": "2024-2025 HK03",
+          "area": "Giáo dục quốc phòng",
+          "status": "Đạt",
+          "countCredit": false,
+          "countGpa": false
+        },
+        {
+          "code": "71NAD41044",
+          "name": "GDQP4: Kỹ thuật chiến đấu bộ binh và chiến thuật",
+          "credits": 4,
+          "score": 8.1,
+          "point4": 3.24,
+          "letter": "B+",
+          "semester": "2024-2025 HK03",
+          "area": "Giáo dục quốc phòng",
+          "status": "Đạt",
+          "countCredit": false,
+          "countGpa": false
+        },
+        {
+          "code": "71POLE10022",
+          "name": "Kinh tế chính trị Mác-Lênin",
+          "credits": 2,
+          "score": 8.7,
+          "point4": 3.48,
+          "letter": "A",
+          "semester": "2024-2025 HK03",
+          "area": "Lý luận chính trị",
+          "status": "Đạt"
+        },
+        {
+          "code": "71ENG41043",
+          "name": "Anh văn 4 (AV4)",
+          "credits": 3,
+          "score": 7.4,
+          "point4": 2.96,
+          "letter": "B",
+          "semester": "2025-2026 HK01",
+          "area": "Ngoại ngữ",
+          "status": "Đạt"
+        },
+        {
+          "code": "71ITMA10403",
+          "name": "Toán rời rạc",
+          "credits": 4,
+          "score": 9.7,
+          "point4": 3.88,
+          "letter": "A+",
+          "semester": "2025-2026 HK01",
+          "area": "Cơ sở ngành",
+          "status": "Đạt"
+        },
+        {
+          "code": "71ITSE30203",
+          "name": "Lập trình hướng đối tượng",
+          "credits": 3,
+          "score": 8.2,
+          "point4": 3.28,
+          "letter": "B+",
+          "semester": "2025-2026 HK01",
+          "area": "Cơ sở ngành",
+          "status": "Đạt"
+        },
+        {
+          "code": "71ITSE30503",
+          "name": "Lập trình ứng dụng web",
+          "credits": 3,
+          "score": 9.3,
+          "point4": 3.72,
+          "letter": "A+",
+          "semester": "2025-2026 HK01",
+          "area": "Cơ sở ngành",
+          "status": "Đạt"
+        },
+        {
+          "code": "71ITSE30603",
+          "name": "Lập trình ứng dụng di động",
+          "credits": 3,
+          "score": 7.9,
+          "point4": 3.16,
+          "letter": "B",
+          "semester": "2025-2026 HK01",
+          "area": "Cơ sở ngành",
+          "status": "Đạt"
+        },
+        {
+          "code": "71ENG51053",
+          "name": "Anh văn 5 (AV5)",
+          "credits": 3,
+          "score": 6.3,
+          "point4": 2.52,
+          "letter": "C",
+          "semester": "2025-2026 HK02",
+          "area": "Ngoại ngữ",
+          "status": "Đạt thấp"
+        },
+        {
+          "code": "71ITDS30103",
+          "name": "Các nền tảng phát triển phần mềm",
+          "credits": 3,
+          "score": 9,
+          "point4": 3.6,
+          "letter": "A+",
+          "semester": "2025-2026 HK02",
+          "area": "Cơ sở ngành",
+          "status": "Đạt"
+        },
+        {
+          "code": "71ITIS30303",
+          "name": "Quản lý dự án công nghệ thông tin",
+          "credits": 3,
+          "score": 8.1,
+          "point4": 3.24,
+          "letter": "B+",
+          "semester": "2025-2026 HK02",
+          "area": "Cơ sở ngành",
+          "status": "Đạt"
+        },
+        {
+          "code": "71ITSE30403",
+          "name": "Lập trình ứng dụng Java",
+          "credits": 3,
+          "score": 9.9,
+          "point4": 3.96,
+          "letter": "A+",
+          "semester": "2025-2026 HK02",
+          "area": "Cơ sở ngành",
+          "status": "Đạt"
+        },
+        {
+          "code": "71POLS10032",
+          "name": "Chủ nghĩa xã hội khoa học",
+          "credits": 2,
+          "score": 8.1,
+          "point4": 3.24,
+          "letter": "B+",
+          "semester": "2025-2026 HK02",
+          "area": "Lý luận chính trị",
+          "status": "Đạt"
+        }
+      ],
+      "activities": [
+        {
+          "id": 1,
+          "type": "activity",
+          "name": "CLB Tin học Văn Lang IT Club",
+          "role": "Thành viên",
+          "year": "2024",
+          "icon": "💻"
+        },
+        {
+          "id": 2,
+          "type": "skill",
+          "name": "Phát triển Web React & Node.js",
+          "level": "Trung cấp",
+          "icon": "⚛️"
+        }
+      ],
+      "certs": [
+        {
+          "id": 1,
+          "name": "TOEIC Chuẩn đầu ra",
+          "score": "650/990",
+          "issuer": "IIG",
+          "date": "2024",
+          "status": "Đạt chuẩn"
+        },
+        {
+          "id": 2,
+          "name": "Tin học chuẩn MOS",
+          "score": "Đạt",
+          "issuer": "Microsoft",
+          "date": "2024",
+          "status": "Đạt chuẩn"
+        }
+      ],
+      "docs": [],
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    }
+  ],
+  "curriculum": [
+    {
+      "_id": "cur_k30_cntt",
+      "program": "K30 CNTT",
+      "major": "Công nghệ thông tin",
+      "totalCredits": 126,
+      "sections": [
+        {
+          "name": "Default",
+          "courses": [
+            {
+              "code": "71LAWG10012",
+              "name": "Pháp luật đại cương",
+              "credits": 2,
+              "prerequisites": []
+            },
+            {
+              "code": "71ENVH10012",
+              "name": "Môi trường và con người",
+              "credits": 2,
+              "prerequisites": []
+            },
+            {
+              "code": "71ITMA10104",
+              "name": "Toán cao cấp và ứng dụng",
+              "credits": 4,
+              "prerequisites": []
+            },
+            {
+              "code": "71MATL10053",
+              "name": "Đại số tuyến tính và ứng dụng",
+              "credits": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "71SSK110023",
+              "name": "Kỹ năng công dân toàn cầu",
+              "credits": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "71POLP10013",
+              "name": "Triết học Mác - Lênin",
+              "credits": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "71POLE10022",
+              "name": "Kinh tế chính trị Mác - Lênin",
+              "credits": 2,
+              "prerequisites": [
+                ": 71POLP10013 - Triết học Mác - Lênin"
+              ]
+            },
+            {
+              "code": "71POLS10032",
+              "name": "Chủ nghĩa xã hội khoa học",
+              "credits": 2,
+              "prerequisites": [
+                ": 71POLP10013 - Triết học Mác - Lênin"
+              ]
+            },
+            {
+              "code": "71POLH10042",
+              "name": "Tư tưởng Hồ Chí Minh",
+              "credits": 2,
+              "prerequisites": [
+                ": 71POLE10022 - Kinh tế chính trị Mác - Lênin",
+                "71POLS10032 - Chủ nghĩa xã hội khoa học"
+              ]
+            },
+            {
+              "code": "71POLC10052",
+              "name": "Lịch sử Đảng Cộng sản Việt Nam",
+              "credits": 2,
+              "prerequisites": [
+                ": 71POLE10022 - Kinh tế chính trị Mác - Lênin",
+                "71POLS10032 - Chủ nghĩa xã hội khoa học"
+              ]
+            },
+            {
+              "code": "71ENG110013",
+              "name": "Anh văn 1 (AV1)",
+              "credits": 3,
+              "prerequisites": [
+                ": 71ENG010012 - Anh văn dự bị (AV0)"
+              ]
+            },
+            {
+              "code": "71ENG210023",
+              "name": "Anh văn 2 (AV2)",
+              "credits": 3,
+              "prerequisites": [
+                ": 71ENG110013 - Anh văn 1 (AV1)"
+              ]
+            },
+            {
+              "code": "71ENG310033",
+              "name": "Anh văn 3 (AV3)",
+              "credits": 3,
+              "prerequisites": [
+                ": 71ENG210023 - Anh văn 2 (AV2)"
+              ]
+            },
+            {
+              "code": "71ENG410043",
+              "name": "Anh văn 4 (AV4)",
+              "credits": 3,
+              "prerequisites": [
+                ": 71ENG310033 - Anh văn 3 (AV3)"
+              ]
+            },
+            {
+              "code": "71ENG510053",
+              "name": "Anh văn 5 (AV5)",
+              "credits": 3,
+              "prerequisites": [
+                ": 71ENG410043 - Anh văn 4 (AV4)"
+              ]
+            },
+            {
+              "code": "71ENG610063",
+              "name": "Anh văn 6 (AV6)",
+              "credits": 3,
+              "prerequisites": [
+                ": 71ENG510053 - Anh văn 5 (AV5)"
+              ]
+            },
+            {
+              "code": "71ENG710073",
+              "name": "Anh văn 7 (AV7)",
+              "credits": 3,
+              "prerequisites": [
+                ": 71ENG610063 - Anh văn 6 (AV6)"
+              ]
+            },
+            {
+              "code": "71PEKC10062",
+              "name": "Cờ vua",
+              "credits": 2,
+              "prerequisites": []
+            },
+            {
+              "code": "71PESW10042",
+              "name": "Bơi lội",
+              "credits": 2,
+              "prerequisites": []
+            },
+            {
+              "code": "71PEYO10142",
+              "name": "Hatha yoga",
+              "credits": 2,
+              "prerequisites": []
+            },
+            {
+              "code": "71PEKC10172",
+              "name": "Cờ vua nâng cao",
+              "credits": 2,
+              "prerequisites": [
+                ": 71PEKC10062 - Cờ vua"
+              ]
+            },
+            {
+              "code": "71PEBA10052",
+              "name": "Cầu lông",
+              "credits": 2,
+              "prerequisites": []
+            },
+            {
+              "code": "71PEBB10032",
+              "name": "Bóng rổ",
+              "credits": 2,
+              "prerequisites": []
+            },
+            {
+              "code": "71PEDA10102",
+              "name": "Khiêu vũ",
+              "credits": 2,
+              "prerequisites": []
+            },
+            {
+              "code": "71PEFI10072",
+              "name": "Fitness",
+              "credits": 2,
+              "prerequisites": []
+            },
+            {
+              "code": "71PEFU10082",
+              "name": "Futsal",
+              "credits": 2,
+              "prerequisites": []
+            },
+            {
+              "code": "71PEGO10092",
+              "name": "Golf",
+              "credits": 2,
+              "prerequisites": []
+            },
+            {
+              "code": "71PEMA10132",
+              "name": "Võ thuật",
+              "credits": 2,
+              "prerequisites": []
+            },
+            {
+              "code": "71PEMT10152",
+              "name": "Marathon",
+              "credits": 2,
+              "prerequisites": []
+            },
+            {
+              "code": "71PESC10112",
+              "name": "Leo núi thể thao",
+              "credits": 2,
+              "prerequisites": []
+            },
+            {
+              "code": "71PESS10162",
+              "name": "Bắn súng thể thao",
+              "credits": 2,
+              "prerequisites": []
+            },
+            {
+              "code": "71PETE10122",
+              "name": "Tennis",
+              "credits": 2,
+              "prerequisites": []
+            },
+            {
+              "code": "71PETT10012",
+              "name": "Bóng bàn",
+              "credits": 2,
+              "prerequisites": []
+            },
+            {
+              "code": "71PEVB10022",
+              "name": "Bóng chuyền",
+              "credits": 2,
+              "prerequisites": []
+            },
+            {
+              "code": "71NAD110013",
+              "name": "GDQP1: Đường lối quốc phòng và an ninh của Đảng Cộng sản Việt Nam",
+              "credits": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "71NAD210022",
+              "name": "GDQP2: Công tác quốc phòng và an ninh",
+              "credits": 2,
+              "prerequisites": []
+            },
+            {
+              "code": "71NAD310032",
+              "name": "GDQP3: Quân sự chung",
+              "credits": 2,
+              "prerequisites": []
+            },
+            {
+              "code": "71NAD410044",
+              "name": "GDQP4: Kỹ thuật chiến đấu bộ binh và chiến thuật",
+              "credits": 4,
+              "prerequisites": []
+            },
+            {
+              "code": "71ITBS10103",
+              "name": "Nhập môn Công nghệ thông tin",
+              "credits": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "71ITBS10203",
+              "name": "Cơ sở lập trình",
+              "credits": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "71ITIS30103",
+              "name": "Cơ sở dữ liệu",
+              "credits": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "71ITNW30103",
+              "name": "Nhập môn Mạng máy tính và điện toán đám mây",
+              "credits": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "71ITSE30303",
+              "name": "Cấu trúc dữ liệu và giải thuật",
+              "credits": 3,
+              "prerequisites": [
+                ": 71ITBS10203 - Cơ sở lập trình"
+              ]
+            },
+            {
+              "code": "71ITMA10404",
+              "name": "Toán rời rạc",
+              "credits": 4,
+              "prerequisites": [
+                ": 71ITMA10104 - Toán cao cấp và ứng dụng"
+              ]
+            },
+            {
+              "code": "71ITSE30103",
+              "name": "Kỹ thuật lập trình",
+              "credits": 3,
+              "prerequisites": [
+                ": 71ITBS10203 - Cơ sở lập trình"
+              ]
+            },
+            {
+              "code": "71ITSE30203",
+              "name": "Lập trình hướng đối tượng",
+              "credits": 3,
+              "prerequisites": [
+                ": 71ITBS10203 - Cơ sở lập trình"
+              ]
+            },
+            {
+              "code": "71ITDS30103",
+              "name": "Các nền tảng phát triển phần mềm",
+              "credits": 3,
+              "prerequisites": [
+                ": 71ITBS10103 - Nhập môn Công nghệ thông tin"
+              ]
+            },
+            {
+              "code": "71ITSE30503",
+              "name": "Lập trình ứng dụng Web",
+              "credits": 3,
+              "prerequisites": [
+                ": 71ITBS10203 - Cơ sở lập trình"
+              ]
+            },
+            {
+              "code": "71ITAI40103",
+              "name": "Nhập môn Trí tuệ nhân tạo",
+              "credits": 3,
+              "prerequisites": [
+                ": 71ITBS10203 - Cơ sở lập trình"
+              ]
+            },
+            {
+              "code": "71ITDS30203",
+              "name": "Nhập môn Phân tích Dữ liệu và Học sâu",
+              "credits": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "71ITDS40203",
+              "name": "Xác suất thống kê ứng dụng",
+              "credits": 3,
+              "prerequisites": [
+                ": 71ITMA10404 - Toán rời rạc"
+              ]
+            },
+            {
+              "code": "71ITSE30403",
+              "name": "Lập trình ứng dụng Java",
+              "credits": 3,
+              "prerequisites": [
+                ": 71ITSE30103 - Kỹ thuật lập trình"
+              ]
+            },
+            {
+              "code": "71NWSE40103",
+              "name": "Nhập môn hệ thống nhúng",
+              "credits": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "71ISBC30103",
+              "name": "Nhập môn Hệ thống thông tin",
+              "credits": 3,
+              "prerequisites": [
+                ": 71ITBS10103 - Nhập môn Công nghệ thông tin"
+              ]
+            },
+            {
+              "code": "71ITNW30303",
+              "name": "An ninh Mạng máy tính",
+              "credits": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "71ITIS30303",
+              "name": "Quản lý Dự án Công nghệ Thông tin",
+              "credits": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "71ITSE30903",
+              "name": "Thiết kế giao diện người dùng",
+              "credits": 3,
+              "prerequisites": []
+            }
+          ]
+        },
+        {
+          "name": "II.3.2-1. Chuyên ngành Công nghệ Phần mềm",
+          "courses": [
+            {
+              "code": "71ITSE41003",
+              "name": "Nhập môn Công nghệ phần mềm",
+              "credits": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "71ITSE41103",
+              "name": "Kỹ thuật lấy yêu cầu",
+              "credits": 3,
+              "prerequisites": [
+                ": 71ITSE41003 - Nhập môn Công nghệ phần mềm"
+              ]
+            },
+            {
+              "code": "71ITSE41203",
+              "name": "Kiểm thử phần mềm",
+              "credits": 3,
+              "prerequisites": [
+                ": 71ITSE41003 - Nhập môn Công nghệ phần mềm"
+              ]
+            },
+            {
+              "code": "71ITSE41303",
+              "name": "Phân tích và thiết kế hệ thống theo hướng đối tượng",
+              "credits": 3,
+              "prerequisites": [
+                ": 71ITSE41103 - Kỹ thuật lấy yêu cầu"
+              ]
+            },
+            {
+              "code": "71ITSE41403",
+              "name": "Lập trình Web nâng cao",
+              "credits": 3,
+              "prerequisites": [
+                ": 71ITSE30503 - Lập trình ứng dụng Web"
+              ]
+            },
+            {
+              "code": "71ITSE41503",
+              "name": "Quản lý dự án phần mềm",
+              "credits": 3,
+              "prerequisites": [
+                ": 71ITSE41003 - Nhập môn Công nghệ phần mềm"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "II.3.2-2. Chuyên ngành Công nghệ Dữ liệu",
+          "courses": [
+            {
+              "code": "71ITDS40303",
+              "name": "Nhập môn Phân tích Dữ liệu lớn",
+              "credits": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "71ITAI40203",
+              "name": "Nhập môn học máy",
+              "credits": 3,
+              "prerequisites": [
+                ": 71ITDS40203 - Xác suất thống kê ứng dụng"
+              ]
+            },
+            {
+              "code": "71ITAI40303",
+              "name": "Các hệ hỗ trợ ra quyết định",
+              "credits": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "71ITDS40403",
+              "name": "Số hóa và quản trị thông tin số",
+              "credits": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "71ITAI40903",
+              "name": "Lập trình tính toán song song",
+              "credits": 3,
+              "prerequisites": [
+                ": 71ITSE30303 - Cấu trúc dữ liệu và giải thuật"
+              ]
+            },
+            {
+              "code": "71ITDS40503",
+              "name": "Mã hóa dữ liệu và chuỗi khối (Blockchain)",
+              "credits": 3,
+              "prerequisites": [
+                ": 71ITIS30103 - Cơ sở dữ liệu"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "II.3.2-3. Chuyên ngành Trí tuệ Nhân tạo",
+          "courses": [
+            {
+              "code": "71ITAI40803",
+              "name": "Nhập môn xử lý ảnh số",
+              "credits": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "71ITAI41203",
+              "name": "Học máy ứng dụng",
+              "credits": 3,
+              "prerequisites": [
+                ": 71ITDS40203 - Xác suất thống kê ứng dụng"
+              ]
+            },
+            {
+              "code": "71ITAI40503",
+              "name": "Trí tuệ nhân tạo ứng dụng",
+              "credits": 3,
+              "prerequisites": [
+                ": 71ITDS40203 - Xác suất thống kê ứng dụng"
+              ]
+            },
+            {
+              "code": "71ITAI40603",
+              "name": "Thị giác máy tính",
+              "credits": 3,
+              "prerequisites": [
+                ": 71ITAI41203 - Học máy ứng dụng"
+              ]
+            },
+            {
+              "code": "71ITAI40403",
+              "name": "Giới thiệu về học sâu",
+              "credits": 3,
+              "prerequisites": [
+                ": 71ITAI40503 - Trí tuệ nhân tạo ứng dụng"
+              ]
+            },
+            {
+              "code": "71ITAI41303",
+              "name": "Các công cụ và nền tảng cho trí tuệ nhân tạo",
+              "credits": 3,
+              "prerequisites": []
+            }
+          ]
+        },
+        {
+          "name": "II.3.2-5. Chuyên ngành Tự chọn",
+          "courses": [
+            {
+              "code": "71ITIS30203",
+              "name": "Hệ quản trị cơ sở dữ liệu",
+              "credits": 3,
+              "prerequisites": [
+                "71ITIS30103"
+              ]
+            },
+            {
+              "code": "71ITSE30603",
+              "name": "Lập trình ứng dụng di động",
+              "credits": 3,
+              "prerequisites": [
+                "71ITBS10203"
+              ]
+            },
+            {
+              "code": "71ITSE30703",
+              "name": "Lập trình di động nâng cao",
+              "credits": 3,
+              "prerequisites": [
+                "71ITSE30603"
+              ]
+            },
+            {
+              "code": "71ITSE31003",
+              "name": "Lập trình Python nâng cao",
+              "credits": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "71ITNW30403",
+              "name": "Lập trình hệ thống nhúng và IoT",
+              "credits": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "71ITAI51403",
+              "name": "Nhập môn tối ưu hóa",
+              "credits": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "71ITSE30803",
+              "name": "Lập trình Java nâng cao",
+              "credits": 3,
+              "prerequisites": [
+                "71ITSE30403"
+              ]
+            },
+            {
+              "code": "71ITSE41603",
+              "name": "Kiểm thử tự động",
+              "credits": 3,
+              "prerequisites": [
+                "71ITSE41203"
+              ]
+            },
+            {
+              "code": "71ITIN40304",
+              "name": "Đồ án thực tập",
+              "credits": 4,
+              "prerequisites": []
+            },
+            {
+              "code": "71ITGR40206",
+              "name": "Đồ án tốt nghiệp",
+              "credits": 6,
+              "prerequisites": []
+            },
+            {
+              "code": "71ITIS30603",
+              "name": "Chuyên đề tối ưu hóa máy tìm kiếm",
+              "credits": 3,
+              "prerequisites": []
+            },
+            {
+              "code": "71ITIS30503",
+              "name": "Chuyên đề thương mại điện tử",
+              "credits": 3,
+              "prerequisites": []
+            }
+          ]
+        }
+      ],
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    }
+  ],
+  "courses": [
+    {
+      "_id": "crs_71LAWG10012",
+      "code": "71LAWG10012",
+      "name": "Pháp luật đại cương",
+      "credits": 2,
+      "prerequisites": [],
+      "sectionName": "Default",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71ENVH10012",
+      "code": "71ENVH10012",
+      "name": "Môi trường và con người",
+      "credits": 2,
+      "prerequisites": [],
+      "sectionName": "Default",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71ITMA10104",
+      "code": "71ITMA10104",
+      "name": "Toán cao cấp và ứng dụng",
+      "credits": 4,
+      "prerequisites": [],
+      "sectionName": "Default",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71MATL10053",
+      "code": "71MATL10053",
+      "name": "Đại số tuyến tính và ứng dụng",
+      "credits": 3,
+      "prerequisites": [],
+      "sectionName": "Default",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71SSK110023",
+      "code": "71SSK110023",
+      "name": "Kỹ năng công dân toàn cầu",
+      "credits": 3,
+      "prerequisites": [],
+      "sectionName": "Default",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71POLP10013",
+      "code": "71POLP10013",
+      "name": "Triết học Mác - Lênin",
+      "credits": 3,
+      "prerequisites": [],
+      "sectionName": "Default",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71POLE10022",
+      "code": "71POLE10022",
+      "name": "Kinh tế chính trị Mác - Lênin",
+      "credits": 2,
+      "prerequisites": [
+        ": 71POLP10013 - Triết học Mác - Lênin"
+      ],
+      "sectionName": "Default",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71POLS10032",
+      "code": "71POLS10032",
+      "name": "Chủ nghĩa xã hội khoa học",
+      "credits": 2,
+      "prerequisites": [
+        ": 71POLP10013 - Triết học Mác - Lênin"
+      ],
+      "sectionName": "Default",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71POLH10042",
+      "code": "71POLH10042",
+      "name": "Tư tưởng Hồ Chí Minh",
+      "credits": 2,
+      "prerequisites": [
+        ": 71POLE10022 - Kinh tế chính trị Mác - Lênin",
+        "71POLS10032 - Chủ nghĩa xã hội khoa học"
+      ],
+      "sectionName": "Default",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71POLC10052",
+      "code": "71POLC10052",
+      "name": "Lịch sử Đảng Cộng sản Việt Nam",
+      "credits": 2,
+      "prerequisites": [
+        ": 71POLE10022 - Kinh tế chính trị Mác - Lênin",
+        "71POLS10032 - Chủ nghĩa xã hội khoa học"
+      ],
+      "sectionName": "Default",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71ENG110013",
+      "code": "71ENG110013",
+      "name": "Anh văn 1 (AV1)",
+      "credits": 3,
+      "prerequisites": [
+        ": 71ENG010012 - Anh văn dự bị (AV0)"
+      ],
+      "sectionName": "Default",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71ENG210023",
+      "code": "71ENG210023",
+      "name": "Anh văn 2 (AV2)",
+      "credits": 3,
+      "prerequisites": [
+        ": 71ENG110013 - Anh văn 1 (AV1)"
+      ],
+      "sectionName": "Default",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71ENG310033",
+      "code": "71ENG310033",
+      "name": "Anh văn 3 (AV3)",
+      "credits": 3,
+      "prerequisites": [
+        ": 71ENG210023 - Anh văn 2 (AV2)"
+      ],
+      "sectionName": "Default",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71ENG410043",
+      "code": "71ENG410043",
+      "name": "Anh văn 4 (AV4)",
+      "credits": 3,
+      "prerequisites": [
+        ": 71ENG310033 - Anh văn 3 (AV3)"
+      ],
+      "sectionName": "Default",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71ENG510053",
+      "code": "71ENG510053",
+      "name": "Anh văn 5 (AV5)",
+      "credits": 3,
+      "prerequisites": [
+        ": 71ENG410043 - Anh văn 4 (AV4)"
+      ],
+      "sectionName": "Default",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71ENG610063",
+      "code": "71ENG610063",
+      "name": "Anh văn 6 (AV6)",
+      "credits": 3,
+      "prerequisites": [
+        ": 71ENG510053 - Anh văn 5 (AV5)"
+      ],
+      "sectionName": "Default",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71ENG710073",
+      "code": "71ENG710073",
+      "name": "Anh văn 7 (AV7)",
+      "credits": 3,
+      "prerequisites": [
+        ": 71ENG610063 - Anh văn 6 (AV6)"
+      ],
+      "sectionName": "Default",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71PEKC10062",
+      "code": "71PEKC10062",
+      "name": "Cờ vua",
+      "credits": 2,
+      "prerequisites": [],
+      "sectionName": "Default",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71PESW10042",
+      "code": "71PESW10042",
+      "name": "Bơi lội",
+      "credits": 2,
+      "prerequisites": [],
+      "sectionName": "Default",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71PEYO10142",
+      "code": "71PEYO10142",
+      "name": "Hatha yoga",
+      "credits": 2,
+      "prerequisites": [],
+      "sectionName": "Default",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71PEKC10172",
+      "code": "71PEKC10172",
+      "name": "Cờ vua nâng cao",
+      "credits": 2,
+      "prerequisites": [
+        ": 71PEKC10062 - Cờ vua"
+      ],
+      "sectionName": "Default",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71PEBA10052",
+      "code": "71PEBA10052",
+      "name": "Cầu lông",
+      "credits": 2,
+      "prerequisites": [],
+      "sectionName": "Default",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71PEBB10032",
+      "code": "71PEBB10032",
+      "name": "Bóng rổ",
+      "credits": 2,
+      "prerequisites": [],
+      "sectionName": "Default",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71PEDA10102",
+      "code": "71PEDA10102",
+      "name": "Khiêu vũ",
+      "credits": 2,
+      "prerequisites": [],
+      "sectionName": "Default",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71PEFI10072",
+      "code": "71PEFI10072",
+      "name": "Fitness",
+      "credits": 2,
+      "prerequisites": [],
+      "sectionName": "Default",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71PEFU10082",
+      "code": "71PEFU10082",
+      "name": "Futsal",
+      "credits": 2,
+      "prerequisites": [],
+      "sectionName": "Default",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71PEGO10092",
+      "code": "71PEGO10092",
+      "name": "Golf",
+      "credits": 2,
+      "prerequisites": [],
+      "sectionName": "Default",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71PEMA10132",
+      "code": "71PEMA10132",
+      "name": "Võ thuật",
+      "credits": 2,
+      "prerequisites": [],
+      "sectionName": "Default",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71PEMT10152",
+      "code": "71PEMT10152",
+      "name": "Marathon",
+      "credits": 2,
+      "prerequisites": [],
+      "sectionName": "Default",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71PESC10112",
+      "code": "71PESC10112",
+      "name": "Leo núi thể thao",
+      "credits": 2,
+      "prerequisites": [],
+      "sectionName": "Default",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71PESS10162",
+      "code": "71PESS10162",
+      "name": "Bắn súng thể thao",
+      "credits": 2,
+      "prerequisites": [],
+      "sectionName": "Default",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71PETE10122",
+      "code": "71PETE10122",
+      "name": "Tennis",
+      "credits": 2,
+      "prerequisites": [],
+      "sectionName": "Default",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71PETT10012",
+      "code": "71PETT10012",
+      "name": "Bóng bàn",
+      "credits": 2,
+      "prerequisites": [],
+      "sectionName": "Default",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71PEVB10022",
+      "code": "71PEVB10022",
+      "name": "Bóng chuyền",
+      "credits": 2,
+      "prerequisites": [],
+      "sectionName": "Default",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71NAD110013",
+      "code": "71NAD110013",
+      "name": "GDQP1: Đường lối quốc phòng và an ninh của Đảng Cộng sản Việt Nam",
+      "credits": 3,
+      "prerequisites": [],
+      "sectionName": "Default",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71NAD210022",
+      "code": "71NAD210022",
+      "name": "GDQP2: Công tác quốc phòng và an ninh",
+      "credits": 2,
+      "prerequisites": [],
+      "sectionName": "Default",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71NAD310032",
+      "code": "71NAD310032",
+      "name": "GDQP3: Quân sự chung",
+      "credits": 2,
+      "prerequisites": [],
+      "sectionName": "Default",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71NAD410044",
+      "code": "71NAD410044",
+      "name": "GDQP4: Kỹ thuật chiến đấu bộ binh và chiến thuật",
+      "credits": 4,
+      "prerequisites": [],
+      "sectionName": "Default",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71ITBS10103",
+      "code": "71ITBS10103",
+      "name": "Nhập môn Công nghệ thông tin",
+      "credits": 3,
+      "prerequisites": [],
+      "sectionName": "Default",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71ITBS10203",
+      "code": "71ITBS10203",
+      "name": "Cơ sở lập trình",
+      "credits": 3,
+      "prerequisites": [],
+      "sectionName": "Default",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71ITIS30103",
+      "code": "71ITIS30103",
+      "name": "Cơ sở dữ liệu",
+      "credits": 3,
+      "prerequisites": [],
+      "sectionName": "Default",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71ITNW30103",
+      "code": "71ITNW30103",
+      "name": "Nhập môn Mạng máy tính và điện toán đám mây",
+      "credits": 3,
+      "prerequisites": [],
+      "sectionName": "Default",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71ITSE30303",
+      "code": "71ITSE30303",
+      "name": "Cấu trúc dữ liệu và giải thuật",
+      "credits": 3,
+      "prerequisites": [
+        ": 71ITBS10203 - Cơ sở lập trình"
+      ],
+      "sectionName": "Default",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71ITMA10404",
+      "code": "71ITMA10404",
+      "name": "Toán rời rạc",
+      "credits": 4,
+      "prerequisites": [
+        ": 71ITMA10104 - Toán cao cấp và ứng dụng"
+      ],
+      "sectionName": "Default",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71ITSE30103",
+      "code": "71ITSE30103",
+      "name": "Kỹ thuật lập trình",
+      "credits": 3,
+      "prerequisites": [
+        ": 71ITBS10203 - Cơ sở lập trình"
+      ],
+      "sectionName": "Default",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71ITSE30203",
+      "code": "71ITSE30203",
+      "name": "Lập trình hướng đối tượng",
+      "credits": 3,
+      "prerequisites": [
+        ": 71ITBS10203 - Cơ sở lập trình"
+      ],
+      "sectionName": "Default",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71ITDS30103",
+      "code": "71ITDS30103",
+      "name": "Các nền tảng phát triển phần mềm",
+      "credits": 3,
+      "prerequisites": [
+        ": 71ITBS10103 - Nhập môn Công nghệ thông tin"
+      ],
+      "sectionName": "Default",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71ITSE30503",
+      "code": "71ITSE30503",
+      "name": "Lập trình ứng dụng Web",
+      "credits": 3,
+      "prerequisites": [
+        ": 71ITBS10203 - Cơ sở lập trình"
+      ],
+      "sectionName": "Default",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71ITAI40103",
+      "code": "71ITAI40103",
+      "name": "Nhập môn Trí tuệ nhân tạo",
+      "credits": 3,
+      "prerequisites": [
+        ": 71ITBS10203 - Cơ sở lập trình"
+      ],
+      "sectionName": "Default",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71ITDS30203",
+      "code": "71ITDS30203",
+      "name": "Nhập môn Phân tích Dữ liệu và Học sâu",
+      "credits": 3,
+      "prerequisites": [],
+      "sectionName": "Default",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71ITDS40203",
+      "code": "71ITDS40203",
+      "name": "Xác suất thống kê ứng dụng",
+      "credits": 3,
+      "prerequisites": [
+        ": 71ITMA10404 - Toán rời rạc"
+      ],
+      "sectionName": "Default",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71ITSE30403",
+      "code": "71ITSE30403",
+      "name": "Lập trình ứng dụng Java",
+      "credits": 3,
+      "prerequisites": [
+        ": 71ITSE30103 - Kỹ thuật lập trình"
+      ],
+      "sectionName": "Default",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71NWSE40103",
+      "code": "71NWSE40103",
+      "name": "Nhập môn hệ thống nhúng",
+      "credits": 3,
+      "prerequisites": [],
+      "sectionName": "Default",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71ISBC30103",
+      "code": "71ISBC30103",
+      "name": "Nhập môn Hệ thống thông tin",
+      "credits": 3,
+      "prerequisites": [
+        ": 71ITBS10103 - Nhập môn Công nghệ thông tin"
+      ],
+      "sectionName": "Default",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71ITNW30303",
+      "code": "71ITNW30303",
+      "name": "An ninh Mạng máy tính",
+      "credits": 3,
+      "prerequisites": [],
+      "sectionName": "Default",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71ITIS30303",
+      "code": "71ITIS30303",
+      "name": "Quản lý Dự án Công nghệ Thông tin",
+      "credits": 3,
+      "prerequisites": [],
+      "sectionName": "Default",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71ITSE30903",
+      "code": "71ITSE30903",
+      "name": "Thiết kế giao diện người dùng",
+      "credits": 3,
+      "prerequisites": [],
+      "sectionName": "Default",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71ITSE41003",
+      "code": "71ITSE41003",
+      "name": "Nhập môn Công nghệ phần mềm",
+      "credits": 3,
+      "prerequisites": [],
+      "sectionName": "II.3.2-1. Chuyên ngành Công nghệ Phần mềm",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71ITSE41103",
+      "code": "71ITSE41103",
+      "name": "Kỹ thuật lấy yêu cầu",
+      "credits": 3,
+      "prerequisites": [
+        ": 71ITSE41003 - Nhập môn Công nghệ phần mềm"
+      ],
+      "sectionName": "II.3.2-1. Chuyên ngành Công nghệ Phần mềm",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71ITSE41203",
+      "code": "71ITSE41203",
+      "name": "Kiểm thử phần mềm",
+      "credits": 3,
+      "prerequisites": [
+        ": 71ITSE41003 - Nhập môn Công nghệ phần mềm"
+      ],
+      "sectionName": "II.3.2-1. Chuyên ngành Công nghệ Phần mềm",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71ITSE41303",
+      "code": "71ITSE41303",
+      "name": "Phân tích và thiết kế hệ thống theo hướng đối tượng",
+      "credits": 3,
+      "prerequisites": [
+        ": 71ITSE41103 - Kỹ thuật lấy yêu cầu"
+      ],
+      "sectionName": "II.3.2-1. Chuyên ngành Công nghệ Phần mềm",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71ITSE41403",
+      "code": "71ITSE41403",
+      "name": "Lập trình Web nâng cao",
+      "credits": 3,
+      "prerequisites": [
+        ": 71ITSE30503 - Lập trình ứng dụng Web"
+      ],
+      "sectionName": "II.3.2-1. Chuyên ngành Công nghệ Phần mềm",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71ITSE41503",
+      "code": "71ITSE41503",
+      "name": "Quản lý dự án phần mềm",
+      "credits": 3,
+      "prerequisites": [
+        ": 71ITSE41003 - Nhập môn Công nghệ phần mềm"
+      ],
+      "sectionName": "II.3.2-1. Chuyên ngành Công nghệ Phần mềm",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71ITDS40303",
+      "code": "71ITDS40303",
+      "name": "Nhập môn Phân tích Dữ liệu lớn",
+      "credits": 3,
+      "prerequisites": [],
+      "sectionName": "II.3.2-2. Chuyên ngành Công nghệ Dữ liệu",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71ITAI40203",
+      "code": "71ITAI40203",
+      "name": "Nhập môn học máy",
+      "credits": 3,
+      "prerequisites": [
+        ": 71ITDS40203 - Xác suất thống kê ứng dụng"
+      ],
+      "sectionName": "II.3.2-2. Chuyên ngành Công nghệ Dữ liệu",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71ITAI40303",
+      "code": "71ITAI40303",
+      "name": "Các hệ hỗ trợ ra quyết định",
+      "credits": 3,
+      "prerequisites": [],
+      "sectionName": "II.3.2-2. Chuyên ngành Công nghệ Dữ liệu",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71ITDS40403",
+      "code": "71ITDS40403",
+      "name": "Số hóa và quản trị thông tin số",
+      "credits": 3,
+      "prerequisites": [],
+      "sectionName": "II.3.2-2. Chuyên ngành Công nghệ Dữ liệu",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71ITAI40903",
+      "code": "71ITAI40903",
+      "name": "Lập trình tính toán song song",
+      "credits": 3,
+      "prerequisites": [
+        ": 71ITSE30303 - Cấu trúc dữ liệu và giải thuật"
+      ],
+      "sectionName": "II.3.2-2. Chuyên ngành Công nghệ Dữ liệu",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71ITDS40503",
+      "code": "71ITDS40503",
+      "name": "Mã hóa dữ liệu và chuỗi khối (Blockchain)",
+      "credits": 3,
+      "prerequisites": [
+        ": 71ITIS30103 - Cơ sở dữ liệu"
+      ],
+      "sectionName": "II.3.2-2. Chuyên ngành Công nghệ Dữ liệu",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71ITAI40803",
+      "code": "71ITAI40803",
+      "name": "Nhập môn xử lý ảnh số",
+      "credits": 3,
+      "prerequisites": [],
+      "sectionName": "II.3.2-3. Chuyên ngành Trí tuệ Nhân tạo",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71ITAI41203",
+      "code": "71ITAI41203",
+      "name": "Học máy ứng dụng",
+      "credits": 3,
+      "prerequisites": [
+        ": 71ITDS40203 - Xác suất thống kê ứng dụng"
+      ],
+      "sectionName": "II.3.2-3. Chuyên ngành Trí tuệ Nhân tạo",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71ITAI40503",
+      "code": "71ITAI40503",
+      "name": "Trí tuệ nhân tạo ứng dụng",
+      "credits": 3,
+      "prerequisites": [
+        ": 71ITDS40203 - Xác suất thống kê ứng dụng"
+      ],
+      "sectionName": "II.3.2-3. Chuyên ngành Trí tuệ Nhân tạo",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71ITAI40603",
+      "code": "71ITAI40603",
+      "name": "Thị giác máy tính",
+      "credits": 3,
+      "prerequisites": [
+        ": 71ITAI41203 - Học máy ứng dụng"
+      ],
+      "sectionName": "II.3.2-3. Chuyên ngành Trí tuệ Nhân tạo",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71ITAI40403",
+      "code": "71ITAI40403",
+      "name": "Giới thiệu về học sâu",
+      "credits": 3,
+      "prerequisites": [
+        ": 71ITAI40503 - Trí tuệ nhân tạo ứng dụng"
+      ],
+      "sectionName": "II.3.2-3. Chuyên ngành Trí tuệ Nhân tạo",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71ITAI41303",
+      "code": "71ITAI41303",
+      "name": "Các công cụ và nền tảng cho trí tuệ nhân tạo",
+      "credits": 3,
+      "prerequisites": [],
+      "sectionName": "II.3.2-3. Chuyên ngành Trí tuệ Nhân tạo",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71ITIS30203",
+      "code": "71ITIS30203",
+      "name": "Hệ quản trị cơ sở dữ liệu",
+      "credits": 3,
+      "prerequisites": [
+        "71ITIS30103"
+      ],
+      "sectionName": "II.3.2-5. Chuyên ngành Tự chọn",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71ITSE30603",
+      "code": "71ITSE30603",
+      "name": "Lập trình ứng dụng di động",
+      "credits": 3,
+      "prerequisites": [
+        "71ITBS10203"
+      ],
+      "sectionName": "II.3.2-5. Chuyên ngành Tự chọn",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71ITSE30703",
+      "code": "71ITSE30703",
+      "name": "Lập trình di động nâng cao",
+      "credits": 3,
+      "prerequisites": [
+        "71ITSE30603"
+      ],
+      "sectionName": "II.3.2-5. Chuyên ngành Tự chọn",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71ITSE31003",
+      "code": "71ITSE31003",
+      "name": "Lập trình Python nâng cao",
+      "credits": 3,
+      "prerequisites": [],
+      "sectionName": "II.3.2-5. Chuyên ngành Tự chọn",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71ITNW30403",
+      "code": "71ITNW30403",
+      "name": "Lập trình hệ thống nhúng và IoT",
+      "credits": 3,
+      "prerequisites": [],
+      "sectionName": "II.3.2-5. Chuyên ngành Tự chọn",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71ITAI51403",
+      "code": "71ITAI51403",
+      "name": "Nhập môn tối ưu hóa",
+      "credits": 3,
+      "prerequisites": [],
+      "sectionName": "II.3.2-5. Chuyên ngành Tự chọn",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71ITSE30803",
+      "code": "71ITSE30803",
+      "name": "Lập trình Java nâng cao",
+      "credits": 3,
+      "prerequisites": [
+        "71ITSE30403"
+      ],
+      "sectionName": "II.3.2-5. Chuyên ngành Tự chọn",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71ITSE41603",
+      "code": "71ITSE41603",
+      "name": "Kiểm thử tự động",
+      "credits": 3,
+      "prerequisites": [
+        "71ITSE41203"
+      ],
+      "sectionName": "II.3.2-5. Chuyên ngành Tự chọn",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71ITIN40304",
+      "code": "71ITIN40304",
+      "name": "Đồ án thực tập",
+      "credits": 4,
+      "prerequisites": [],
+      "sectionName": "II.3.2-5. Chuyên ngành Tự chọn",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71ITGR40206",
+      "code": "71ITGR40206",
+      "name": "Đồ án tốt nghiệp",
+      "credits": 6,
+      "prerequisites": [],
+      "sectionName": "II.3.2-5. Chuyên ngành Tự chọn",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71ITIS30603",
+      "code": "71ITIS30603",
+      "name": "Chuyên đề tối ưu hóa máy tìm kiếm",
+      "credits": 3,
+      "prerequisites": [],
+      "sectionName": "II.3.2-5. Chuyên ngành Tự chọn",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "crs_71ITIS30503",
+      "code": "71ITIS30503",
+      "name": "Chuyên đề thương mại điện tử",
+      "credits": 3,
+      "prerequisites": [],
+      "sectionName": "II.3.2-5. Chuyên ngành Tự chọn",
+      "program": "K30 CNTT",
+      "semesterRecommended": "",
+      "required": true,
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    }
+  ],
+  "prompts": [
+    {
+      "_id": "pmt_default",
+      "key": "default",
+      "title": "1. AI Trợ Lý Sinh Viên (Trang Chủ)",
+      "content": "Bạn là UniMate, trợ lý học tập AI thông minh và thân thiện. Hiện tại phiên bản thử nghiệm đang sử dụng dữ liệu tham khảo của Trường Đại học Văn Lang (VLU) để hỗ trợ sinh viên giải đáp quy chế, chương trình đào tạo, học phí, học bổng và thủ tục học vụ. Bạn không tự nhận là đại diện phát ngôn chính thức của trường mà là trợ lý học tập thông minh dựa trên nguồn dữ liệu tham khảo này.\n\nNHIỆM VỤ & PHONG CÁCH:\n1. GIAO TIẾP THÂN THIỆN & THÔNG MINH: Chào hỏi lịch sự, tự nhiên bằng tiếng Việt khi người dùng chào. Luôn thể hiện sự am hiểu về dữ liệu học tập và thông tin tham khảo của Đại học Văn Lang (3 cơ sở tại TP.HCM: CS3 Đặng Thùy Trâm, CS1 Nguyễn Khắc Nhu, CS2 Nguyễn Văn Luông khối sức khỏe; các khoa, ngành, học phí, học bổng, đời sống sinh viên).\n2. TRẢ LỜI ĐẦY ĐỦ, CHÍNH XÁC: Khi được hỏi về quy chế, chương trình đào tạo, học phí hay thủ tục học vụ, hãy giải thích rõ ràng, có cấu trúc mạch lạc, dùng gạch đầu dòng, bảng hoặc in đậm các ý quan trọng.\n3. GỢI Ý HỮU ÍCH: Luôn chủ động gợi ý các bước tiếp theo hoặc các chủ đề liên quan để hỗ trợ người học một cách tốt nhất.",
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "pmt_graduation",
+      "key": "graduation",
+      "title": "5. Cố Vấn Tốt Nghiệp (Graduation)",
+      "content": "Bạn là UniMate – Cố vấn Xét tốt nghiệp chuyên trách (sử dụng dữ liệu demo Khung CTĐT K30 CNTT - Trường Đại học Văn Lang VLU).\n\nNHIỆM VỤ CHÍNH:\n1. KIỂM TRA ĐIỀU KIỆN TỐT NGHIỆP: Nêu rõ và rà soát các điều kiện cốt lõi:\n   - Tích lũy đủ tối thiểu 126 tín chỉ theo Khung CTĐT K30 CNTT Văn Lang.\n   - Điểm trung bình tích lũy toàn khóa (GPA hệ 4) đạt từ 2.0 trở lên.\n   - Chứng chỉ chuẩn đầu ra Ngoại ngữ (TOEIC 450+ hoặc tương đương) và Tin học (MOS/IC3).\n   - Đã hoàn thành và đạt chứng chỉ Giáo dục Quốc phòng - An ninh (GDQP) và Giáo dục Thể chất (GDTC).\n   - Không bị kỷ luật học vụ hoặc nợ học phí.\n2. PHÂN TÍCH TIẾN ĐỘ: Nếu có dữ liệu sinh viên/MSSV, liệt kê số tín chỉ đã đạt, số tín chỉ còn thiếu, và những môn bắt buộc/chứng chỉ còn nợ.\n3. TƯ VẤN KHÓA LUẬN: Hướng dẫn điều kiện làm Khóa luận tốt nghiệp hoặc đăng ký các môn học thay thế khóa luận tốt nghiệp theo quy định.",
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "pmt_results",
+      "key": "results",
+      "title": "4. Phân Tích Kết Quả Học Tập (GPA)",
+      "content": "Bạn là UniMate – Chuyên gia Phân tích Kết quả Học tập & Cố vấn GPA (tham khảo quy chế đào tạo tín chỉ và thang điểm VLU).\n\nNHIỆM VỤ CHÍNH:\n1. TRA CỨU & PHÂN TÍCH ĐIỂM: Khi có thông tin sinh viên hoặc hỏi về môn cụ thể, tra cứu chính xác mã môn, tên môn, tín chỉ, điểm số, điểm chữ và tình trạng môn học.\n2. PHÂN TÍCH GPA HỆ 4 & XẾP LOẠI: Đánh giá GPA theo chuẩn Văn Lang (Xuất sắc >= 3.6, Giỏi >= 3.2, Khá >= 2.5, Trung bình >= 2.0, Yếu < 2.0).\n3. CẢNH BÁO HỌC VỤ & MÔN NỢ: Chỉ rõ các môn bị rớt (điểm F) cần học lại, các môn điểm D cần cân nhắc cải thiện.\n4. CHIẾN LƯỢC KÉO GPA: Đưa ra công thức và phép tính cụ thể khi sinh viên hỏi cần đạt bao nhiêu điểm ở kỳ tới để nâng GPA lên mục tiêu mong muốn.",
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "pmt_roadmap",
+      "key": "roadmap",
+      "title": "3. Lộ Trình Cá Nhân Hóa (Roadmap)",
+      "content": "Bạn là UniMate – Cố vấn Lộ trình Đào tạo (dữ liệu demo Khung K30 chuẩn 126 tín chỉ CNTT VLU).\n\nNHIỆM VỤ CHÍNH:\n1. TƯ VẤN TIẾN ĐỘ CHUẨN: Hướng dẫn danh sách môn học theo từng học kỳ từ năm 1 đến năm 4 để đảm bảo tiến độ ra trường 3.5 - 4 năm.\n2. RÀ SOÁT TIÊN QUYẾT: Nhắc nhở rõ ràng các điều kiện tiên quyết và môn học trước (ví dụ: Cơ sở lập trình -> Kỹ thuật lập trình -> Cấu trúc dữ liệu & giải thuật; Toán cao cấp -> Toán rời rạc; CSDL -> Lập trình Web/App).\n3. ĐỊNH HƯỚNG CHUYÊN NGÀNH: Gợi ý các môn chuyên ngành tự chọn (Kỹ thuật phần mềm, Trí tuệ nhân tạo, Mạng máy tính & An toàn thông tin, Khoa học dữ liệu).",
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "pmt_future",
+      "key": "future",
+      "title": "6. Định Hướng Nghề Nghiệp (Career)",
+      "content": "Bạn là UniMate – Chuyên gia Định hướng Nghề nghiệp & Công nghệ dành cho sinh viên ngành CNTT.\n\nNHIỆM VỤ CHÍNH:\n1. PHÂN TÍCH THỊ TRƯỜNG & VỊ TRÍ: Cung cấp góc nhìn thực tế về các vị trí tuyển dụng: Frontend, Backend, Fullstack, AI/Machine Learning, Data Engineer/Analyst, QA/QC, DevOps, Mobile Dev.\n2. TECH STACK ĐỀ XUẤT: Tư vấn chi tiết ngôn ngữ, framework, công cụ hiện đại mà doanh nghiệp đang cần nhất.\n3. LỘ TRÌNH 90 NGÀY THỰC CHIẾN: Lên kế hoạch tự học, xây dựng project portfolio trên GitHub, chuẩn bị CV và phỏng vấn thực tập.",
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "pmt_advisor",
+      "key": "advisor",
+      "title": "2. Cố Vấn Lộ Trình Học Tập (Advisor)",
+      "content": "Bạn là UniMate – Cố vấn Lộ trình Học tập AI (sử dụng dữ liệu demo Khung CTĐT K30 CNTT VLU).\n\nNHIỆM VỤ BẮT BUỘC:\n1. Khi sinh viên gửi ảnh bảng điểm: Đọc ảnh, trích xuất toàn bộ bảng điểm gồm Học kỳ, Mã môn, Tên môn, Số tín chỉ, Điểm số, Điểm chữ và Tình trạng.\n2. Rà soát tổng số môn và số tín chỉ đạt (chỉ tính môn đạt, không tính môn rớt).\n3. Đối chiếu Khung CTĐT K30 CNTT (126 tín chỉ) để xác định các môn còn thiếu và gợi ý môn nên đăng ký ở kỳ tới.\n4. Giải đáp điều kiện học trước và tiên quyết khi sinh viên hỏi về bất kỳ môn học nào.",
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    }
+  ],
+  "schedules": [
+    {
+      "_id": "sch_2024_hk1_1",
+      "semester": "2024-2025 HK01",
+      "academicYear": "2024-2025",
+      "courseCode": "71ITBS10103",
+      "courseName": "Nhập môn công nghệ thông tin",
+      "classSection": "K30 CNTT",
+      "lecturer": "ThS. Hoàng Trọng Nam",
+      "dayOfWeek": 2,
+      "dayOfWeekText": "Thứ Hai",
+      "startPeriod": 1,
+      "endPeriod": 3,
+      "startTime": "07:30",
+      "endTime": "10:00",
+      "room": "A.06.01 - CS3 Đặng Thùy Trâm",
+      "dateRange": "09/09/2024 - 28/12/2024",
+      "mssvList": [
+        "2474802010458",
+        "2474802010414",
+        "2474802010071",
+        "2474802010419",
+        "2474802010118"
+      ],
+      "notes": "Lý thuyết khối ngành",
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "sch_2024_hk1_2",
+      "semester": "2024-2025 HK01",
+      "academicYear": "2024-2025",
+      "courseCode": "71ITBS10203",
+      "courseName": "Cơ sở lập trình",
+      "classSection": "K30 CNTT",
+      "lecturer": "TS. Lê Thành An",
+      "dayOfWeek": 3,
+      "dayOfWeekText": "Thứ Ba",
+      "startPeriod": 4,
+      "endPeriod": 6,
+      "startTime": "10:15",
+      "endTime": "12:45",
+      "room": "Lab B.03.04 - CS3 Đặng Thùy Trâm",
+      "dateRange": "09/09/2024 - 28/12/2024",
+      "mssvList": [
+        "2474802010458",
+        "2474802010414",
+        "2474802010071",
+        "2474802010419",
+        "2474802010118"
+      ],
+      "notes": "Thực hành lập trình C++ / Python",
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "sch_2024_hk1_3",
+      "semester": "2024-2025 HK01",
+      "academicYear": "2024-2025",
+      "courseCode": "71SSK11023",
+      "courseName": "Kỹ năng công dân toàn cầu",
+      "classSection": "K30 CNTT",
+      "lecturer": "ThS. Đỗ Minh Trí",
+      "dayOfWeek": 5,
+      "dayOfWeekText": "Thứ Năm",
+      "startPeriod": 7,
+      "endPeriod": 9,
+      "startTime": "13:15",
+      "endTime": "15:45",
+      "room": "A.02.05 - CS3 Đặng Thùy Trâm",
+      "dateRange": "09/09/2024 - 28/12/2024",
+      "mssvList": [
+        "2474802010458",
+        "2474802010414",
+        "2474802010071",
+        "2474802010419",
+        "2474802010118"
+      ],
+      "notes": "Kỹ năng mềm thiết yếu",
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "sch_2024_hk1_4",
+      "semester": "2024-2025 HK01",
+      "academicYear": "2024-2025",
+      "courseCode": "71ENG11013",
+      "courseName": "Anh văn 1 (AV1)",
+      "classSection": "K30 CNTT",
+      "lecturer": "ThS. Trần Phương Lan",
+      "dayOfWeek": 6,
+      "dayOfWeekText": "Thứ Sáu",
+      "startPeriod": 1,
+      "endPeriod": 3,
+      "startTime": "07:30",
+      "endTime": "10:00",
+      "room": "A.05.08 - CS3 Đặng Thùy Trâm",
+      "dateRange": "09/09/2024 - 28/12/2024",
+      "mssvList": [
+        "2474802010458",
+        "2474802010414",
+        "2474802010071",
+        "2474802010419",
+        "2474802010118"
+      ],
+      "notes": "Ngoại ngữ chuyên ngữ",
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "sch_2024_hk2_1",
+      "semester": "2024-2025 HK02",
+      "academicYear": "2024-2025",
+      "courseCode": "71ITMA10104",
+      "courseName": "Toán cao cấp và ứng dụng",
+      "classSection": "K30 CNTT",
+      "lecturer": "TS. Nguyễn Thị Hoa",
+      "dayOfWeek": 2,
+      "dayOfWeekText": "Thứ Hai",
+      "startPeriod": 1,
+      "endPeriod": 4,
+      "startTime": "07:30",
+      "endTime": "10:50",
+      "room": "C.04.02 - CS3 Đặng Thùy Trâm",
+      "dateRange": "13/01/2025 - 17/05/2025",
+      "mssvList": [
+        "2474802010458",
+        "2474802010414",
+        "2474802010071",
+        "2474802010419",
+        "2474802010118"
+      ],
+      "notes": "Đại số và giải tích toán học",
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "sch_2024_hk2_2",
+      "semester": "2024-2025 HK02",
+      "academicYear": "2024-2025",
+      "courseCode": "71ITNW30103",
+      "courseName": "Nhập môn mạng máy tính và điện toán đám mây",
+      "classSection": "K30 CNTT",
+      "lecturer": "ThS. Vũ Hoàng Long",
+      "dayOfWeek": 3,
+      "dayOfWeekText": "Thứ Ba",
+      "startPeriod": 7,
+      "endPeriod": 9,
+      "startTime": "13:15",
+      "endTime": "15:45",
+      "room": "Lab B.02.01 - CS3 Đặng Thùy Trâm",
+      "dateRange": "13/01/2025 - 17/05/2025",
+      "mssvList": [
+        "2474802010458",
+        "2474802010414",
+        "2474802010071",
+        "2474802010419",
+        "2474802010118"
+      ],
+      "notes": "Thực hành Packet Tracer & Cloud AWS",
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "sch_2024_hk2_3",
+      "semester": "2024-2025 HK02",
+      "academicYear": "2024-2025",
+      "courseCode": "71ENG21023",
+      "courseName": "Anh văn 2 (AV2)",
+      "classSection": "K30 CNTT",
+      "lecturer": "ThS. Nguyễn Mai Linh",
+      "dayOfWeek": 4,
+      "dayOfWeekText": "Thứ Tư",
+      "startPeriod": 4,
+      "endPeriod": 6,
+      "startTime": "10:15",
+      "endTime": "12:45",
+      "room": "A.05.02 - CS3 Đặng Thùy Trâm",
+      "dateRange": "13/01/2025 - 17/05/2025",
+      "mssvList": [
+        "2474802010458",
+        "2474802010414",
+        "2474802010071",
+        "2474802010419",
+        "2474802010118"
+      ],
+      "notes": "Ngoại ngữ tăng cường",
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "sch_2024_hk2_4",
+      "semester": "2024-2025 HK02",
+      "academicYear": "2024-2025",
+      "courseCode": "71ITPR20103",
+      "courseName": "Kỹ thuật lập trình",
+      "classSection": "K30 CNTT",
+      "lecturer": "TS. Lê Thành An",
+      "dayOfWeek": 6,
+      "dayOfWeekText": "Thứ Sáu",
+      "startPeriod": 7,
+      "endPeriod": 9,
+      "startTime": "13:15",
+      "endTime": "15:45",
+      "room": "Lab B.03.04 - CS3 Đặng Thùy Trâm",
+      "dateRange": "13/01/2025 - 17/05/2025",
+      "mssvList": [
+        "2474802010458",
+        "2474802010414",
+        "2474802010071",
+        "2474802010419",
+        "2474802010118"
+      ],
+      "notes": "Học phần tiếp nối Cơ sở lập trình",
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "sch_2025_hk1_1",
+      "semester": "2025-2026 HK01",
+      "academicYear": "2025-2026",
+      "courseCode": "71ITBS20103",
+      "courseName": "Cấu trúc dữ liệu và giải thuật",
+      "classSection": "K30 CNTT",
+      "lecturer": "TS. Nguyễn Thanh Sơn",
+      "dayOfWeek": 2,
+      "dayOfWeekText": "Thứ Hai",
+      "startPeriod": 1,
+      "endPeriod": 3,
+      "startTime": "07:30",
+      "endTime": "10:00",
+      "room": "Lab B.03.02 - CS3 Đặng Thùy Trâm",
+      "dateRange": "08/09/2025 - 27/12/2025",
+      "mssvList": [
+        "2474802010458",
+        "2474802010414",
+        "2474802010071",
+        "2474802010419",
+        "2474802010118"
+      ],
+      "notes": "Tiên quyết cho các môn phát triển phần mềm",
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "sch_2025_hk1_2",
+      "semester": "2025-2026 HK01",
+      "academicYear": "2025-2026",
+      "courseCode": "71ITDB20103",
+      "courseName": "Cơ sở dữ liệu (Database Systems)",
+      "classSection": "K30 CNTT",
+      "lecturer": "ThS. Phạm Quốc Tuấn",
+      "dayOfWeek": 3,
+      "dayOfWeekText": "Thứ Ba",
+      "startPeriod": 4,
+      "endPeriod": 6,
+      "startTime": "10:15",
+      "endTime": "12:45",
+      "room": "Lab B.01.05 - CS3 Đặng Thùy Trâm",
+      "dateRange": "08/09/2025 - 27/12/2025",
+      "mssvList": [
+        "2474802010458",
+        "2474802010414",
+        "2474802010071",
+        "2474802010419",
+        "2474802010118"
+      ],
+      "notes": "Thực hành SQL Server & MongoDB",
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "sch_2025_hk1_3",
+      "semester": "2025-2026 HK01",
+      "academicYear": "2025-2026",
+      "courseCode": "71ITSE20103",
+      "courseName": "Lập trình Web hiện đại (React & Node.js)",
+      "classSection": "K30 CNTT",
+      "lecturer": "ThS. Trương Trần Thanh Phương",
+      "dayOfWeek": 5,
+      "dayOfWeekText": "Thứ Năm",
+      "startPeriod": 7,
+      "endPeriod": 9,
+      "startTime": "13:15",
+      "endTime": "15:45",
+      "room": "Lab B.03.01 - CS3 Đặng Thùy Trâm",
+      "dateRange": "08/09/2025 - 27/12/2025",
+      "mssvList": [
+        "2474802010458",
+        "2474802010414",
+        "2474802010071",
+        "2474802010419",
+        "2474802010118"
+      ],
+      "notes": "Chuyên ngành Kỹ thuật Phần mềm",
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    },
+    {
+      "_id": "sch_2025_hk1_4",
+      "semester": "2025-2026 HK01",
+      "academicYear": "2025-2026",
+      "courseCode": "71POLP10013",
+      "courseName": "Triết học Mác - Lênin",
+      "classSection": "K30 CNTT",
+      "lecturer": "TS. Trần Văn Nam",
+      "dayOfWeek": 6,
+      "dayOfWeekText": "Thứ Sáu",
+      "startPeriod": 1,
+      "endPeriod": 3,
+      "startTime": "07:30",
+      "endTime": "10:00",
+      "room": "A.03.01 - CS3 Đặng Thùy Trâm",
+      "dateRange": "08/09/2025 - 27/12/2025",
+      "mssvList": [
+        "2474802010458",
+        "2474802010414",
+        "2474802010071",
+        "2474802010419",
+        "2474802010118"
+      ],
+      "notes": "Môn lý luận chính trị",
+      "createdAt": "2026-10-22T09:53:56.557Z",
+      "updatedAt": "2026-10-22T09:53:56.557Z"
+    }
+  ]
+}

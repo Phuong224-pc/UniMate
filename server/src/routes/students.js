@@ -1,53 +1,46 @@
 import express from 'express';
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import multer from 'multer';
+import * as studentController from '../controllers/studentController.js';
+import { authenticate, optionalAuth } from '../middlewares/authMiddleware.js';
+import { requireAdmin, requireSelfOrAdmin } from '../middlewares/roleMiddleware.js';
+import { validateStudentProfileUpdate, validateStudentCreate } from '../validators/studentValidator.js';
 
 const router = express.Router();
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-const getStudentsData = () => {
-  try {
-    const filePath = path.join(__dirname, '../data/students.json');
-    if (fs.existsSync(filePath)) {
-      return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+// Cấu hình multer nhận file bộ nhớ đệm (RAM Buffer), giới hạn 15MB
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 15 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const allowed = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
+    if (allowed.includes(file.mimetype.toLowerCase())) {
+      cb(null, true);
+    } else {
+      cb(new Error('Chỉ hỗ trợ file ảnh (JPG, PNG, WebP) hoặc file tài liệu PDF'));
     }
-  } catch (err) {
-    console.error("Lỗi đọc students.json:", err.message);
   }
-  return {};
-};
-
-// Lấy danh sách tóm tắt tất cả sinh viên demo
-router.get('/', (req, res) => {
-  const students = getStudentsData();
-  const summary = Object.values(students).map(s => ({
-    mssv: s.mssv,
-    name: s.name,
-    cohort: s.cohort,
-    major: s.major,
-    className: s.className,
-    gpa4: s.officialCumulativeGpa4,
-    credits: s.officialCumulativeCredits,
-    rating: s.officialRating
-  }));
-  res.json({ success: true, data: summary });
 });
 
-// Tra cứu chi tiết điểm và môn học theo MSSV
-router.get('/:mssv', (req, res) => {
-  const { mssv } = req.params;
-  const students = getStudentsData();
-  const student = students[mssv.trim()];
+// Trích xuất OCR bảng điểm từ ảnh/camera/PDF
+router.post('/ocr-transcript', authenticate, upload.single('file'), studentController.ocrTranscript);
 
-  if (!student) {
-    return res.status(404).json({
-      success: false,
-      error: `Không tìm thấy sinh viên với MSSV: ${mssv}. Bạn có thể thử các MSSV demo: 2474802010414, 2474802010118, 2474802010419, 2474802010071, 2474802010458.`
-    });
-  }
+// Xác nhận lưu dữ liệu bảng điểm đã kiểm tra vào hồ sơ sinh viên
+router.post('/confirm-transcript', authenticate, studentController.confirmTranscript);
 
-  res.json({ success: true, data: student });
-});
+// Lấy danh sách tóm tắt sinh viên (có tìm kiếm & phân trang)
+router.get('/', optionalAuth, studentController.getStudents);
+
+// Tra cứu chi tiết hồ sơ & bảng điểm theo MSSV
+router.get('/:mssv', optionalAuth, studentController.getStudentByMssv);
+
+// Thêm sinh viên mới (chỉ Admin)
+router.post('/', authenticate, requireAdmin, validateStudentCreate, studentController.createStudent);
+
+// Cập nhật thông tin sinh viên (Sinh viên chỉ cập nhật thông tin của mình, Admin cập nhật tất cả)
+router.put('/:mssv', authenticate, requireSelfOrAdmin('mssv'), validateStudentProfileUpdate, studentController.updateStudent);
+
+// Xóa hoặc vô hiệu hóa sinh viên (chỉ Admin, ưu tiên soft-delete nếu có lịch sử học tập)
+router.delete('/:mssv', authenticate, requireAdmin, studentController.deleteStudent);
 
 export default router;
+

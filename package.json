@@ -3,12 +3,26 @@
   "version": "2.0.0",
   "description": "VLU Smart Assistant - Fullstack React + Node.js AI Platform",
   "scripts": {
+    "dev": "node run-dev.mjs auto",
+    "dev:demo": "node run-dev.mjs demo",
+    "dev:mongo": "node run-dev.mjs mongodb",
+    "demo:reset": "npm run demo:reset --prefix server",
+    "migrate": "npm run migrate --prefix server",
+    "seed": "npm run seed --prefix server",
     "dev:server": "npm run dev --prefix server",
     "dev:client": "npm run dev --prefix client",
-    "dev": "node run-dev.mjs",
+    "dev:frontend": "npm run dev --prefix client",
     "build": "npm --prefix client install && npm --prefix client run build && npm --prefix server install",
     "start": "npm start --prefix server"
   },
-  "keywords": ["vlu", "chatbot", "ai", "react", "express"],
+  "keywords": [
+    "vlu",
+    "chatbot",
+    "ai",
+    "react",
+    "express",
+    "mongodb",
+    "demo-local"
+  ],
   "author": "Trương Trần Thanh Phương"
 }

@@ -34,12 +34,12 @@ import { api } from '../services/api';
 const BOTS = [
   {
     id: 'default',
-    name: 'VLU Toàn Diện',
+    name: 'UniMate Toàn Diện',
     icon: Bot,
     badge: 'Đa năng',
-    desc: 'Tư vấn thông tin trường, quy chế, học phí & tuyển sinh',
+    desc: 'Tư vấn thông tin học tập, quy chế, học phí & học phần (Dữ liệu demo: VLU)',
     color: 'var(--vlu-red)',
-    placeholder: 'Hỏi VLU Chatbot bất cứ điều gì về trường Văn Lang... (Enter để gửi)',
+    placeholder: 'Hỏi UniMate bất cứ điều gì về học tập, quy chế, học phần... (Enter để gửi)',
     suggestions: [
       { title: 'Các cơ sở đào tạo', desc: 'CS3 Đặng Thùy Trâm, CS1 Q.1, CS2 Q.6', query: 'Trường Đại học Văn Lang có những cơ sở nào tại TP.HCM?' },
       { title: 'Học phí & Học bổng', desc: 'Chính sách miễn giảm và thời hạn', query: 'Lịch đóng học phí trường Văn Lang năm học 2025-2026' },
@@ -266,71 +266,12 @@ export default function ChatPage({ activeChat, onUpdateChat }) {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', position: 'relative' }}>
-      {/* Bot Selector Header Bar */}
-      <div style={{
-        background: 'var(--bg-secondary)',
-        borderBottom: '1px solid var(--border-color)',
-        padding: '10px 16px',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '8px',
-        overflowX: 'auto',
-        scrollbarWidth: 'none',
-        flexShrink: 0,
-        zIndex: 10
-      }}>
-        <div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)', letterSpacing: '0.5px', whiteSpace: 'nowrap', marginRight: '4px' }}>
-          Chọn Bot:
-        </div>
-        {BOTS.map((bot) => {
-          const Icon = bot.icon;
-          const isSelected = bot.id === selectedBotId;
-          return (
-            <button
-              key={bot.id}
-              onClick={() => setSelectedBotId(bot.id)}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '7px 12px',
-                borderRadius: '20px',
-                border: isSelected ? `1.5px solid ${bot.color}` : '1px solid var(--border-color)',
-                background: isSelected ? 'rgba(196, 18, 48, 0.08)' : 'var(--bg-primary)',
-                color: isSelected ? (bot.id === 'default' ? 'var(--vlu-red)' : bot.color) : 'var(--text-secondary)',
-                fontSize: '12px',
-                fontWeight: isSelected ? 700 : 500,
-                cursor: 'pointer',
-                whiteSpace: 'nowrap',
-                transition: 'all 0.15s ease',
-                boxShadow: isSelected ? 'var(--shadow-sm)' : 'none'
-              }}
-              title={bot.desc}
-            >
-              <Icon size={14} color={isSelected ? (bot.id === 'default' ? 'var(--vlu-red)' : bot.color) : 'var(--text-muted)'} />
-              <span>{bot.name}</span>
-              {isSelected && (
-                <span style={{
-                  fontSize: '10px',
-                  padding: '1px 6px',
-                  borderRadius: '10px',
-                  background: bot.id === 'default' ? 'var(--vlu-red)' : bot.color,
-                  color: 'white',
-                  fontWeight: 600
-                }}>
-                  {bot.badge}
-                </span>
-              )}
-            </button>
-          );
-        })}
-      </div>
-
+    <div className="chat-page-wrapper" style={{ display: 'flex', flexDirection: 'column', height: '100%', position: 'relative' }}>
       {/* Messages Scroll Area */}
       <div 
         ref={chatContainerRef}
         onScroll={handleScroll}
+        className="chatgpt-scroll chat-messages-area"
         style={{
           flex: 1,
           overflowY: 'auto',
@@ -340,39 +281,50 @@ export default function ChatPage({ activeChat, onUpdateChat }) {
           alignItems: 'center'
         }}
       >
-        <div style={{ width: '100%', maxWidth: '840px' }}>
+        <div style={{ width: '100%', maxWidth: '1020px' }}>
           {messages.length === 0 ? (
             /* Dynamic Welcome Screen theo Bot được chọn */
-            <div style={{ textAlign: 'center', marginTop: '30px', animation: 'fadeIn 0.35s ease-out' }}>
-              <div style={{
-                width: '68px',
-                height: '68px',
-                borderRadius: '22px',
-                background: 'var(--vlu-red-light)',
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginBottom: '14px',
-                border: '1px solid rgba(196, 18, 48, 0.2)'
-              }}>
-                <img src="/img/logovanlang.png" alt="VLU" style={{ width: '44px', height: '44px', objectFit: 'contain' }} />
-              </div>
-              
-              <h1 style={{ fontSize: '26px', fontWeight: 800, marginBottom: '6px' }}>
-                <span className="gradient-text">{currentBot.name}</span>
-              </h1>
-              
-              <p style={{ color: 'var(--text-secondary)', fontSize: '14px', maxWidth: '540px', margin: '0 auto 24px', lineHeight: 1.6 }}>
-                {currentBot.desc}. Hãy đặt câu hỏi hoặc bấm vào gợi ý bên dưới để bắt đầu ngay!
-              </p>
+            <div style={{
+              textAlign: 'center',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              alignItems: 'center',
+              minHeight: 'calc(100vh - 240px)',
+              padding: '20px 0',
+              animation: 'fadeIn 0.35s ease-out'
+            }}>
+              <div style={{ width: '100%' }}>
+                <div style={{
+                  width: '68px',
+                  height: '68px',
+                  borderRadius: '22px',
+                  background: 'var(--vlu-red-light)',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginBottom: '14px',
+                  border: '1px solid rgba(196, 18, 48, 0.2)'
+                }}>
+                  <img src="/img/unimate-logo.svg" alt="UniMate" style={{ width: '44px', height: '44px', objectFit: 'contain' }} />
+                </div>
+                
+                <h1 style={{ fontSize: '28px', fontWeight: 800, marginBottom: '6px' }}>
+                  <span className="gradient-text">{currentBot.name}</span>
+                </h1>
+                
+                <p style={{ color: 'var(--text-secondary)', fontSize: '14px', maxWidth: '640px', margin: '0 auto 28px', lineHeight: 1.6 }}>
+                  {currentBot.desc}. Hãy đặt câu hỏi hoặc bấm vào gợi ý bên dưới để bắt đầu ngay!
+                </p>
 
-              {/* Suggestion Cards */}
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-                gap: '12px',
-                textAlign: 'left'
-              }}>
+                {/* Suggestion Cards 2x2 Grid */}
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))',
+                  gap: '16px',
+                  textAlign: 'left',
+                  width: '100%'
+                }}>
                 {currentBot.suggestions.map((sug, idx) => (
                   <div 
                     key={idx}
@@ -408,6 +360,7 @@ export default function ChatPage({ activeChat, onUpdateChat }) {
                 ))}
               </div>
             </div>
+          </div>
           ) : (
             /* Messages List */
             <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
@@ -435,7 +388,7 @@ export default function ChatPage({ activeChat, onUpdateChat }) {
                         flexShrink: 0,
                         border: '1px solid rgba(196, 18, 48, 0.2)'
                       }}>
-                        <img src="/img/logovanlang.png" alt="Bot" style={{ width: '22px', height: '22px', objectFit: 'contain' }} />
+                        <img src="/img/unimate-logo.svg" alt="UniMate" style={{ width: '22px', height: '22px', objectFit: 'contain' }} />
                       </div>
                     )}
 
@@ -502,7 +455,7 @@ export default function ChatPage({ activeChat, onUpdateChat }) {
                     alignItems: 'center',
                     justifyContent: 'center'
                   }}>
-                    <img src="/img/logovanlang.png" alt="Bot" style={{ width: '22px', height: '22px', objectFit: 'contain' }} />
+                    <img src="/img/unimate-logo.svg" alt="UniMate" style={{ width: '22px', height: '22px', objectFit: 'contain' }} />
                   </div>
                   <div style={{
                     padding: '12px 18px',
@@ -526,16 +479,17 @@ export default function ChatPage({ activeChat, onUpdateChat }) {
         </div>
       </div>
 
-      {/* Scroll to bottom button */}
+      {/* Scroll to bottom button (ChatGPT floating style) */}
       {showScrollBottom && (
         <button
           onClick={scrollToBottom}
           style={{
             position: 'absolute',
-            bottom: '100px',
-            right: '30px',
-            width: '38px',
-            height: '38px',
+            bottom: '92px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: '32px',
+            height: '32px',
             borderRadius: '50%',
             background: 'var(--bg-secondary)',
             border: '1px solid var(--border-color)',
@@ -544,23 +498,27 @@ export default function ChatPage({ activeChat, onUpdateChat }) {
             alignItems: 'center',
             justifyContent: 'center',
             cursor: 'pointer',
-            color: 'var(--text-main)'
+            color: 'var(--text-main)',
+            zIndex: 30,
+            transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
           }}
+          title="Cuộn xuống tin nhắn mới nhất"
         >
-          <ArrowDown size={18} />
+          <ArrowDown size={15} />
         </button>
       )}
 
       {/* Input Area */}
-      <div style={{
+      <div className="chat-composer" style={{
         padding: '16px 20px',
         backgroundColor: 'var(--bg-secondary)',
         borderTop: '1px solid var(--border-color)',
         display: 'flex',
         flexDirection: 'column',
-        alignItems: 'center'
+        alignItems: 'center',
+        flexShrink: 0
       }}>
-        <div style={{ width: '100%', maxWidth: '840px' }}>
+        <div style={{ width: '100%', maxWidth: '1020px' }}>
           {/* Image Preview if attached */}
           {attachedImage && (
             <div style={{
@@ -592,17 +550,20 @@ export default function ChatPage({ activeChat, onUpdateChat }) {
               display: 'flex',
               gap: '6px',
               overflowX: 'auto',
+              WebkitOverflowScrolling: 'touch',
               scrollbarWidth: 'none',
               paddingBottom: '8px',
-              whiteSpace: 'nowrap'
+              whiteSpace: 'nowrap',
+              maxWidth: '100%'
             }}>
               {currentBot.suggestions.slice(0, 3).map((sug, i) => (
                 <button
                   key={i}
                   onClick={() => handleSend(sug.query)}
                   style={{
-                    fontSize: '11px',
-                    padding: '4px 10px',
+                    fontSize: '12px',
+                    padding: '6px 12px',
+                    minHeight: '34px',
                     borderRadius: '16px',
                     border: '1px solid var(--border-color)',
                     background: 'var(--bg-primary)',
@@ -610,24 +571,25 @@ export default function ChatPage({ activeChat, onUpdateChat }) {
                     cursor: 'pointer',
                     display: 'inline-flex',
                     alignItems: 'center',
-                    gap: '4px'
+                    gap: '5px',
+                    flexShrink: 0
                   }}
                 >
-                  <Zap size={11} color="var(--vlu-red)" />
+                  <Zap size={12} color="var(--vlu-red)" />
                   <span>{sug.title}</span>
                 </button>
               ))}
             </div>
           )}
 
-          <div style={{
+          <div className="chat-input-area" style={{
             display: 'flex',
             alignItems: 'flex-end',
-            gap: '10px',
+            gap: '8px',
             background: 'var(--bg-primary)',
             border: '1px solid var(--border-color)',
             borderRadius: 'var(--radius-md)',
-            padding: '8px 12px',
+            padding: '6px 10px',
             position: 'relative'
           }}>
             {/* Plus button & Menu */}
@@ -638,8 +600,10 @@ export default function ChatPage({ activeChat, onUpdateChat }) {
                 style={{
                   background: 'var(--bg-tertiary)',
                   border: 'none',
-                  width: '34px',
-                  height: '34px',
+                  width: '40px',
+                  height: '40px',
+                  minWidth: '40px',
+                  minHeight: '40px',
                   borderRadius: '50%',
                   display: 'flex',
                   alignItems: 'center',
@@ -650,7 +614,7 @@ export default function ChatPage({ activeChat, onUpdateChat }) {
                 }}
                 title="Tính năng mở rộng & Đính kèm"
               >
-                <Plus size={18} />
+                <Plus size={20} />
               </button>
 
               {attachMenuOpen && (
@@ -727,11 +691,13 @@ export default function ChatPage({ activeChat, onUpdateChat }) {
                 background: 'transparent',
                 outline: 'none',
                 resize: 'none',
-                fontSize: '14px',
+                fontSize: '15px',
                 color: 'var(--text-main)',
+                minHeight: '40px',
                 maxHeight: '140px',
-                padding: '6px 4px',
-                fontFamily: 'inherit'
+                padding: '8px 4px',
+                fontFamily: 'inherit',
+                lineHeight: '1.4'
               }}
             />
 
@@ -745,10 +711,14 @@ export default function ChatPage({ activeChat, onUpdateChat }) {
                   border: 'none',
                   color: isRecording ? '#ef4444' : 'var(--text-muted)',
                   cursor: 'pointer',
-                  padding: '6px',
-                  borderRadius: '6px',
+                  width: '40px',
+                  height: '40px',
+                  minWidth: '40px',
+                  minHeight: '40px',
+                  borderRadius: '50%',
                   display: 'flex',
-                  alignItems: 'center'
+                  alignItems: 'center',
+                  justifyContent: 'center'
                 }}
                 title={isRecording ? "Đang ghi âm (Bấm để dừng)" : "Nhập bằng giọng nói"}
               >
@@ -763,24 +733,28 @@ export default function ChatPage({ activeChat, onUpdateChat }) {
                   background: (input.trim() || attachedImage) && !loading ? 'var(--vlu-red)' : 'var(--border-color)',
                   color: 'white',
                   border: 'none',
-                  width: '34px',
-                  height: '34px',
+                  width: '44px',
+                  height: '44px',
+                  minWidth: '44px',
+                  minHeight: '44px',
                   borderRadius: '50%',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   cursor: (input.trim() || attachedImage) && !loading ? 'pointer' : 'default',
-                  transition: 'var(--transition)'
+                  transition: 'var(--transition)',
+                  boxShadow: (input.trim() || attachedImage) && !loading ? '0 2px 8px rgba(196, 18, 48, 0.35)' : 'none',
+                  flexShrink: 0
                 }}
                 title="Gửi tin nhắn (Enter)"
               >
-                <Send size={16} />
+                <Send size={18} />
               </button>
             </div>
           </div>
 
           <div style={{ textAlign: 'center', fontSize: '11px', color: 'var(--text-muted)', marginTop: '8px' }}>
-            VLU Chatbot có thể đưa ra thông tin chưa cập nhật. Hãy đối chiếu lịch đào tạo chính thức trên cổng thông tin sinh viên Văn Lang.
+            UniMate có thể đưa ra thông tin chưa cập nhật. Hãy đối chiếu thông tin chính thức với cơ sở đào tạo. <span style={{ fontWeight: 600, color: 'var(--vlu-red)' }}>(Dữ liệu demo: VLU)</span>
           </div>
         </div>
       </div>

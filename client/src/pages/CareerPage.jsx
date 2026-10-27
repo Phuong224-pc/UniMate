@@ -16,49 +16,14 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
-import { marked } from 'marked';
+import AiChatSidebar from '../components/AiChatSidebar';
 
 export default function CareerPage() {
   const navigate = useNavigate();
   const [year, setYear] = useState('2');
   const [codingLevel, setCodingLevel] = useState('intermediate');
   const [selectedInterests, setSelectedInterests] = useState(['web_dev', 'qa_qc']);
-
-  // Chat state
-  const [messages, setMessages] = useState([]);
-  const [chatInput, setChatInput] = useState('');
-  const [isChatLoading, setIsChatLoading] = useState(false);
-  const chatContainerRef = React.useRef(null);
-
-  React.useEffect(() => {
-    if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
-    }
-  }, [messages]);
-
-  const handleSendChat = async (e, quickText = null) => {
-    if (e) e.preventDefault();
-    const textToSend = quickText || chatInput;
-    if (!textToSend.trim() || isChatLoading) return;
-
-    const userMsg = { role: 'user', content: textToSend.trim() };
-    const newMessages = [...messages, userMsg];
-    setMessages(newMessages);
-    if (!quickText) setChatInput('');
-    setIsChatLoading(true);
-
-    try {
-      const res = await api.chat({
-        messages: newMessages,
-        mode: 'advisor' 
-      });
-      setMessages([...newMessages, { role: 'assistant', content: res.reply }]);
-    } catch (err) {
-      setMessages([...newMessages, { role: 'assistant', content: '⚠️ Lỗi: ' + err.message }]);
-    } finally {
-      setIsChatLoading(false);
-    }
-  };
+  const [isMobileChatOpen, setIsMobileChatOpen] = useState(false);
 
   const interestsList = [
     { id: 'web_frontend', label: 'Frontend (React, Vue, CSS)', icon: '🎨' },
@@ -161,9 +126,10 @@ export default function CareerPage() {
   }, [selectedInterests, year, codingLevel]);
 
   return (
-    <div style={{ display: 'flex', height: '100%' }}>
+    <>
+      <div className="two-column-split" style={{ width: '100%', height: 'calc(100vh - 120px)', borderRadius: '16px', overflow: 'hidden', border: '1px solid var(--border-color)' }}>
       {/* Cột trái: Nội dung chính */}
-      <div className="page-container fade-in" style={{ flex: 1, paddingRight: '20px', overflowY: 'auto', borderRight: '1px solid var(--border-color)' }}>
+      <div className="chatgpt-scroll fade-in" style={{ flex: 1, padding: '24px', overflowY: 'auto', borderRight: '1px solid var(--border-color)', background: 'var(--bg-main)' }}>
         {/* Header */}
       <div style={{
         background: 'var(--bg-secondary)',
@@ -196,9 +162,19 @@ export default function CareerPage() {
             </div>
           </div>
 
-          <button onClick={handleReset} className="btn-secondary" style={{ fontSize: '12px' }}>
-            <RotateCcw size={14} /> Thiết lập lại
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <button onClick={handleReset} className="btn-secondary" style={{ fontSize: '12px' }}>
+              <RotateCcw size={14} /> Thiết lập lại
+            </button>
+            <button
+              onClick={() => setIsMobileChatOpen(true)}
+              className="mobile-only-chat-btn"
+              title="Mở Chat box Định hướng tương lai"
+            >
+              <Bot size={15} />
+              <span>Chat box định hướng</span>
+            </button>
+          </div>
         </div>
 
         {/* Survey Controls */}
@@ -361,143 +337,55 @@ export default function CareerPage() {
       </div>
       </div>
 
-      {/* Cột phải: Chatbot Trợ lý định hướng nghề nghiệp */}
-      <div style={{ width: '380px', display: 'flex', flexDirection: 'column', background: 'var(--bg-secondary)' }}>
-        <div style={{ padding: '20px', borderBottom: '1px solid var(--border-color)', background: 'var(--bg-primary)' }}>
-          <div style={{ fontSize: '11px', fontWeight: 800, color: 'var(--vlu-red)', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '1px' }}>
-            Assistant
-          </div>
-          <h2 style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '18px', color: 'var(--text-main)', fontWeight: 800 }}>
-            <Bot size={22} color="var(--vlu-red)" /> Trợ lý định hướng nghề nghiệp
-          </h2>
-        </div>
-
-        {/* Thông tin nhanh */}
-        <div style={{ padding: '16px 20px', background: 'var(--bg-tertiary)', borderBottom: '1px solid var(--border-color)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600, color: 'var(--text-main)', marginBottom: '8px' }}>
-            <Map size={16} color="var(--vlu-red)" /> Lộ trình 90 ngày
-          </div>
-          <div style={{ fontSize: '13px', color: 'var(--text-secondary)', background: 'var(--bg-primary)', padding: '12px', borderRadius: '8px', border: '1px dashed var(--border-color)' }}>
-            Chọn ít nhất một sở thích hoặc kỹ năng bên trái để hệ thống gợi ý lộ trình 90 ngày phù hợp.
-          </div>
-          
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '16px' }}>
-            <button onClick={() => handleSendChat(null, "Nên theo hướng nào?")} className="badge badge-red" style={{ cursor: 'pointer', background: 'transparent', border: '1px solid var(--vlu-red)', padding: '4px 10px', fontSize: '12px' }}>Nên theo hướng nào?</button>
-            <button onClick={() => handleSendChat(null, "Học gì 90 ngày?")} className="badge badge-red" style={{ cursor: 'pointer', background: 'transparent', border: '1px solid var(--vlu-red)', padding: '4px 10px', fontSize: '12px' }}>Học gì 90 ngày?</button>
-            <button onClick={() => handleSendChat(null, "Project thực tập")} className="badge badge-red" style={{ cursor: 'pointer', background: 'transparent', border: '1px solid var(--vlu-red)', padding: '4px 10px', fontSize: '12px' }}>Project thực tập</button>
-          </div>
-        </div>
-
-        {/* Khung Chat */}
-        <div 
-          ref={chatContainerRef}
-          style={{ flex: 1, overflowY: 'auto', padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}
-        >
-          {/* Welcome Message */}
-          <div style={{
-            background: 'var(--bg-primary)',
-            padding: '16px',
-            borderRadius: 'var(--radius-lg)',
-            border: '1px solid var(--border-color)',
-            fontSize: '14px',
-            lineHeight: 1.5,
-            boxShadow: 'var(--shadow-sm)'
-          }}>
-            <div style={{ fontWeight: 800, color: 'var(--vlu-red)', marginBottom: '12px', textAlign: 'center' }}>Xin chào!</div>
-            Hãy chọn sở thích/kỹ năng bên trái. Mình sẽ gợi ý hướng nghề, kỹ năng còn thiếu, lộ trình 90 ngày và project nên làm.
-          </div>
-
-          {messages.map((msg, i) => (
-            <div key={i} style={{ display: 'flex', justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start' }}>
-              <div style={{
-                maxWidth: '85%',
-                padding: '12px 16px',
-                borderRadius: '16px',
-                background: msg.role === 'user' ? 'var(--vlu-red)' : 'var(--bg-primary)',
-                color: msg.role === 'user' ? '#fff' : 'var(--text-main)',
-                border: msg.role === 'user' ? 'none' : '1px solid var(--border-color)',
-                fontSize: '14px',
-                lineHeight: 1.5,
-                boxShadow: msg.role === 'user' ? '0 2px 8px rgba(196, 18, 48, 0.3)' : 'var(--shadow-sm)',
-                borderBottomRightRadius: msg.role === 'user' ? '4px' : '16px',
-                borderBottomLeftRadius: msg.role === 'assistant' ? '4px' : '16px'
-              }}>
-                {msg.role === 'user' ? (
-                  <div style={{ whiteSpace: 'pre-wrap' }}>{msg.content}</div>
-                ) : (
-                  <div 
-                    className="markdown-body custom-markdown"
-                    dangerouslySetInnerHTML={{ __html: marked.parse(msg.content || '') }}
-                  />
-                )}
-              </div>
-            </div>
-          ))}
-
-          {isChatLoading && (
-            <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
-              <div style={{
-                padding: '12px 16px',
-                borderRadius: '16px',
-                background: 'var(--bg-primary)',
-                border: '1px solid var(--border-color)',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                color: 'var(--text-muted)'
-              }}>
-                <Loader2 size={16} className="spin" /> Đang phản hồi...
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Input Chat */}
-        <div style={{ padding: '16px', borderTop: '1px solid var(--border-color)', background: 'var(--bg-primary)' }}>
-          <form onSubmit={(e) => handleSendChat(e)} style={{ position: 'relative' }}>
-            <input
-              type="text"
-              value={chatInput}
-              onChange={(e) => setChatInput(e.target.value)}
-              placeholder="Hỏi về Frontend, Backend, AI/Data, QA, BA..."
-              style={{
-                width: '100%',
-                padding: '14px 48px 14px 16px',
-                borderRadius: '24px',
-                border: '1px solid var(--border-color)',
-                background: 'var(--bg-secondary)',
-                color: 'var(--text-main)',
-                outline: 'none',
-                fontSize: '13px'
-              }}
-            />
-            <button
-              type="submit"
-              disabled={isChatLoading || !chatInput.trim()}
-              style={{
-                position: 'absolute',
-                right: '6px',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                background: 'var(--vlu-red)',
-                border: 'none',
-                color: 'white',
-                width: '36px',
-                height: '36px',
-                borderRadius: '50%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: (isChatLoading || !chatInput.trim()) ? 'not-allowed' : 'pointer',
-                opacity: (isChatLoading || !chatInput.trim()) ? 0.5 : 1,
-                transition: '0.2s'
-              }}
-            >
-              <Send size={16} />
-            </button>
-          </form>
-        </div>
+      {/* Cột phải: Chatbot Trợ lý định hướng nghề nghiệp (Chỉ hiện trên desktop, mobile mở qua nút bấm) */}
+      <div className="desktop-only-chat-column" style={{ width: '380px', flexShrink: 0, height: '100%', padding: '16px', boxSizing: 'border-box' }}>
+        <AiChatSidebar
+          mode="advisor"
+          title="Trợ lý Định hướng Nghề nghiệp"
+          subtitle={`Sinh viên Năm ${year} • ${codingLevel.toUpperCase()}`}
+          placeholder="Hỏi về Frontend, Backend, AI/Data, QA, BA..."
+          quickReplies={[
+            { label: 'Nên theo hướng nào?', text: `Dựa trên sở thích (${selectedInterests.join(', ')}) và năm học ${year}, bạn gợi ý tôi nên chuyên sâu theo hướng nào?` },
+            { label: 'Lộ trình 90 ngày?', text: 'Hãy lập cho tôi lộ trình 90 ngày chi tiết để sẵn sàng ứng tuyển thực tập.' },
+            { label: 'Project thực tập?', text: 'Những dự án thực tế nào nên có trong CV để gây ấn tượng với nhà tuyển dụng?' }
+          ]}
+          systemContext={`Sinh viên năm ${year}, trình độ lập trình: ${codingLevel}. Các lĩnh vực đang quan tâm: ${selectedInterests.join(', ')}. Hãy tư vấn hướng đi, lộ trình 90 ngày, kỹ năng còn thiếu và dự án thực tế phù hợp.`}
+          initialMessage="Xin chào! Mình là Trợ lý Định hướng Nghề nghiệp. Bạn hãy chọn sở thích và trình độ bên trái, mình sẽ tư vấn lộ trình 90 ngày, kỹ năng và dự án thực tập phù hợp nhất!"
+        />
       </div>
     </div>
+
+    {/* Nút nổi (FAB) trên Mobile để mở Chatbox ngay mà không cần lướt */}
+    <button
+      onClick={() => setIsMobileChatOpen(true)}
+      className="mobile-floating-chat-btn"
+      title="Mở Chat box Định hướng tương lai"
+    >
+      <Bot size={18} />
+      <span>Chat box định hướng</span>
+    </button>
+
+    {/* Modal Drawer Chatbox trên Mobile khi bấm nút */}
+    {isMobileChatOpen && (
+      <div className="mobile-chat-drawer-overlay" onClick={() => setIsMobileChatOpen(false)}>
+        <div className="mobile-chat-drawer-container" onClick={e => e.stopPropagation()}>
+          <AiChatSidebar
+            mode="advisor"
+            title="Trợ lý Định hướng Nghề nghiệp"
+            subtitle={`Sinh viên Năm ${year} • ${codingLevel.toUpperCase()}`}
+            placeholder="Hỏi về Frontend, Backend, AI/Data, QA, BA..."
+            quickReplies={[
+              { label: 'Nên theo hướng nào?', text: `Dựa trên sở thích (${selectedInterests.join(', ')}) và năm học ${year}, bạn gợi ý tôi nên chuyên sâu theo hướng nào?` },
+              { label: 'Lộ trình 90 ngày?', text: 'Hãy lập cho tôi lộ trình 90 ngày chi tiết để sẵn sàng ứng tuyển thực tập.' },
+              { label: 'Project thực tập?', text: 'Những dự án thực tế nào nên có trong CV để gây ấn tượng với nhà tuyển dụng?' }
+            ]}
+            systemContext={`Sinh viên năm ${year}, trình độ lập trình: ${codingLevel}. Các lĩnh vực đang quan tâm: ${selectedInterests.join(', ')}. Hãy tư vấn hướng đi, lộ trình 90 ngày, kỹ năng còn thiếu và dự án thực tế phù hợp.`}
+            initialMessage="Xin chào! Mình là Trợ lý Định hướng Nghề nghiệp. Bạn hãy chọn sở thích và trình độ bên trái, mình sẽ tư vấn lộ trình 90 ngày, kỹ năng và dự án thực tập phù hợp nhất!"
+            onClose={() => setIsMobileChatOpen(false)}
+          />
+        </div>
+      </div>
+    )}
+    </>
   );
 }

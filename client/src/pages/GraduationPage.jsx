@@ -1,26 +1,35 @@
-﻿import React, { useState, useEffect } from 'react';
-import { GraduationCap, Search, CheckCircle2, Clock, Award, AlertCircle, FileCheck, ShieldCheck, Activity } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { GraduationCap, Search, CheckCircle2, Clock, Award, AlertCircle, FileCheck, ShieldCheck, Activity, Bot } from 'lucide-react';
 import AiChatSidebar from '../components/AiChatSidebar';
 import { api } from '../services/api';
+import { useAuth } from '../hooks/useAuth';
 
 export default function GraduationPage() {
-  const [mssvInput, setMssvInput] = useState('2474802010458');
+  const { user, profile } = useAuth();
+  const initialMssv = profile?.mssv || user?.mssv || '2474802010458';
+  const [mssvInput, setMssvInput] = useState(initialMssv);
   const [student, setStudent] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [isMobileChatOpen, setIsMobileChatOpen] = useState(false);
 
   const handleLookup = async (code = mssvInput) => {
-    if (!code) return;
+    const targetCode = user?.role === 'student' ? (profile?.mssv || user?.mssv || code) : code;
+    if (!targetCode) return;
     setLoading(true); setError('');
     try {
-      const res = await api.getStudentByMssv(code.trim());
+      const res = await api.getStudentByMssv(targetCode.trim());
       if (res.success) setStudent(res.data);
     } catch (err) {
-      setError(err.message || 'Khong tim thay sinh vien'); setStudent(null);
+      setError(err.message || 'Không tìm thấy dữ liệu sinh viên'); setStudent(null);
     } finally { setLoading(false); }
   };
 
-  useEffect(() => { handleLookup('2474802010458'); }, []);
+  useEffect(() => { 
+    const activeCode = profile?.mssv || user?.mssv || initialMssv;
+    setMssvInput(activeCode);
+    handleLookup(activeCode); 
+  }, [profile?.mssv, user?.mssv]);
 
   const totalCredits = 126;
   const currentCredits = student?.officialCumulativeCredits || 0;
@@ -47,8 +56,8 @@ export default function GraduationPage() {
     : null;
 
   return (
-    <div className="page-container" style={{ maxWidth: '1400px', margin: '0 auto', width: '100%' }}>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: '24px', alignItems: 'start' }}>
+    <div style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}>
+      <div className="responsive-grid-sidebar">
 
         <div>
           <div style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-lg)', padding: '24px', marginBottom: '24px', boxShadow: 'var(--shadow-sm)' }}>
@@ -57,27 +66,46 @@ export default function GraduationPage() {
                 <h1 style={{ fontSize: '22px', fontWeight: 800, color: 'var(--text-main)', marginBottom: '4px' }}>Du Bao & Xet Tien Do Tot Nghiep</h1>
                 <p style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Danh gia 5 dieu kien tot nghiep cot loi va du bao thoi gian ra truong Dai hoc Van Lang</p>
               </div>
-              <div style={{ display: 'flex', gap: '8px' }}>
-                {['2474802010458', '2474802010414', '2474802010071'].map(code => (
-                  <button key={code} onClick={() => { setMssvInput(code); handleLookup(code); }} className="btn-secondary" style={{ fontSize: '12px', padding: '4px 10px' }}>
-                    MSSV: {code.slice(-5)}
-                  </button>
-                ))}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                {user?.role === 'student' ? (
+                  <span className="badge badge-blue" style={{ fontSize: '12px', padding: '6px 12px' }}>
+                    Hồ sơ sinh viên: {profile?.fullName || user?.email} (MSSV: {profile?.mssv || user?.mssv})
+                  </span>
+                ) : (
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    {['2474802010458', '2474802010414', '2474802010071'].map(code => (
+                      <button key={code} onClick={() => { setMssvInput(code); handleLookup(code); }} className="btn-secondary" style={{ fontSize: '12px', padding: '4px 10px' }}>
+                        MSSV: {code.slice(-5)}
+                      </button>
+                    ))}
+                  </div>
+                )}
+                <button
+                  onClick={() => setIsMobileChatOpen(true)}
+                  className="mobile-only-chat-btn"
+                  title="Mở Chat box Dự báo tốt nghiệp"
+                >
+                  <Bot size={15} />
+                  <span>Chat box tốt nghiệp</span>
+                </button>
               </div>
             </div>
             <div style={{ display: 'flex', gap: '10px', maxWidth: '540px' }}>
-              <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '10px', background: 'var(--bg-primary)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)', padding: '8px 14px' }}>
+              <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '10px', background: 'var(--bg-primary)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)', padding: '8px 14px', opacity: user?.role === 'student' ? 0.8 : 1 }}>
                 <Search size={16} color="var(--text-muted)" />
                 <input
                   type="text"
-                  placeholder="Nhap MSSV de kiem tra tien do tot nghiep..."
+                  placeholder="Nhập MSSV để kiểm tra tiến độ tốt nghiệp..."
                   value={mssvInput}
+                  disabled={user?.role === 'student'}
                   onChange={(e) => setMssvInput(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleLookup()}
-                  style={{ border: 'none', background: 'transparent', outline: 'none', width: '100%', fontSize: '14px', color: 'var(--text-main)' }}
+                  style={{ border: 'none', background: 'transparent', outline: 'none', width: '100%', fontSize: '14px', color: 'var(--text-main)', cursor: user?.role === 'student' ? 'not-allowed' : 'text' }}
                 />
               </div>
-              <button onClick={() => handleLookup()} className="btn-vlu-primary"><Search size={16} /> Kiem tra</button>
+              <button onClick={() => handleLookup()} disabled={loading} className="btn-vlu-primary" style={{ opacity: loading ? 0.7 : 1 }}>
+                {loading ? 'Đang nạp...' : (<><Search size={16} /> Kiểm tra</>)}
+              </button>
             </div>
             {error && <div style={{ marginTop: '12px', color: '#ef4444', fontSize: '13px' }}>{error}</div>}
           </div>
@@ -141,18 +169,45 @@ export default function GraduationPage() {
           )}
         </div>
 
-        <div style={{ position: 'sticky', top: '20px' }}>
+        <div className="desktop-only-chat-column" style={{ position: 'sticky', top: '20px' }}>
           <AiChatSidebar
             mode="graduation"
-            title="Tro ly xet tot nghiep"
-            subtitle="Du bao & kiem tra dieu kien"
-            placeholder="Hoc con thieu gi, khi nao tot nghiep..."
+            title="Trợ lý xét tốt nghiệp"
+            subtitle="Dự báo & kiểm tra điều kiện"
+            placeholder="Hỏi về điều kiện tốt nghiệp, tín chỉ còn thiếu..."
             quickReplies={gradQuickReplies}
             systemContext={gradSystemContext}
           />
         </div>
 
       </div>
+
+      {/* Nút nổi (FAB) trên Mobile để mở Chatbox ngay mà không cần lướt */}
+      <button
+        onClick={() => setIsMobileChatOpen(true)}
+        className="mobile-floating-chat-btn"
+        title="Mở Chat box Xét tốt nghiệp"
+      >
+        <Bot size={18} />
+        <span>Chat box tốt nghiệp</span>
+      </button>
+
+      {/* Modal Drawer Chatbox trên Mobile khi bấm nút */}
+      {isMobileChatOpen && (
+        <div className="mobile-chat-drawer-overlay" onClick={() => setIsMobileChatOpen(false)}>
+          <div className="mobile-chat-drawer-container" onClick={e => e.stopPropagation()}>
+            <AiChatSidebar
+              mode="graduation"
+              title="Trợ lý xét tốt nghiệp"
+              subtitle="Dự báo & kiểm tra điều kiện"
+              placeholder="Hỏi về điều kiện tốt nghiệp, tín chỉ còn thiếu..."
+              quickReplies={gradQuickReplies}
+              systemContext={gradSystemContext}
+              onClose={() => setIsMobileChatOpen(false)}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

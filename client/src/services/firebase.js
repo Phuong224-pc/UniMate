@@ -35,7 +35,7 @@ export const authService = {
     // Đăng nhập Mail trường Văn Lang
     const user = {
       email: 'sinhvien@vanlanguni.vn',
-      name: 'Sinh viên Văn Lang',
+      name: 'Sinh viên',
       role: 'student',
       loginTime: new Date().toISOString(),
       provider: 'Microsoft'

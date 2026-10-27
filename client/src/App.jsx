@@ -1,18 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
-import Sidebar from './components/Sidebar';
-import Header from './components/Header';
-import AuthModal from './components/AuthModal';
-import HelpModal from './components/HelpModal';
-
-import ChatPage from './pages/ChatPage';
-import AdvisorPage from './pages/AdvisorPage';
-import RoadmapPage from './pages/RoadmapPage';
-import GpaPage from './pages/GpaPage';
-import GraduationPage from './pages/GraduationPage';
-import CareerPage from './pages/CareerPage';
-import ProfilePage from './pages/ProfilePage';
-import AdminPage from './pages/AdminPage';
+import { BrowserRouter as Router, useNavigate } from 'react-router-dom';
+import AppRoutes from './routes/AppRoutes';
+import { AuthProvider } from './context/AuthContext';
 
 const SESSIONS_STORAGE_KEY = 'vlu_chatbot_sessions';
 const DARK_MODE_KEY = 'vlu_theme_dark';
@@ -104,7 +93,6 @@ function AppContent() {
 
   const handleSelectSuggestion = (suggestionText) => {
     navigate('/');
-    // Tự động gửi câu hỏi gợi ý qua ChatPage
     setTimeout(() => {
       const textarea = document.querySelector('textarea');
       if (textarea) {
@@ -115,55 +103,33 @@ function AppContent() {
   };
 
   return (
-    <div className="app-shell">
-      <Sidebar
-        isCollapsed={isSidebarCollapsed}
-        setIsCollapsed={setIsSidebarCollapsed}
-        chatSessions={chatSessions}
-        activeChatId={activeChatId}
-        onSelectChat={handleSelectChat}
-        onNewChat={handleNewChat}
-        onDeleteChat={handleDeleteChat}
-        onOpenAuth={() => setAuthModalOpen(true)}
-        onOpenHelp={() => setHelpModalOpen(true)}
-      />
-
-      <div className="main-view">
-        <Header
-          onToggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-          darkMode={darkMode}
-          setDarkMode={setDarkMode}
-          onSelectSuggestion={handleSelectSuggestion}
-        />
-
-        <div style={{ flex: 1, overflowY: 'auto' }}>
-          <Routes>
-            <Route 
-              path="/" 
-              element={<ChatPage activeChat={activeChat} onUpdateChat={handleUpdateChat} />} 
-            />
-            <Route path="/advisor" element={<AdvisorPage />} />
-            <Route path="/roadmap" element={<RoadmapPage />} />
-            <Route path="/gpa" element={<GpaPage />} />
-            <Route path="/graduation" element={<GraduationPage />} />
-            <Route path="/career" element={<CareerPage />} />
-            <Route path="/profile" element={<ProfilePage />} />
-            <Route path="/admin" element={<AdminPage />} />
-            <Route path="*" element={<ChatPage activeChat={activeChat} onUpdateChat={handleUpdateChat} />} />
-          </Routes>
-        </div>
-      </div>
-
-      <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} />
-      <HelpModal isOpen={helpModalOpen} onClose={() => setHelpModalOpen(false)} />
-    </div>
+    <AppRoutes
+      isSidebarCollapsed={isSidebarCollapsed}
+      setIsSidebarCollapsed={setIsSidebarCollapsed}
+      chatSessions={chatSessions}
+      activeChatId={activeChatId}
+      onSelectChat={handleSelectChat}
+      onNewChat={handleNewChat}
+      onDeleteChat={handleDeleteChat}
+      authModalOpen={authModalOpen}
+      setAuthModalOpen={setAuthModalOpen}
+      helpModalOpen={helpModalOpen}
+      setHelpModalOpen={setHelpModalOpen}
+      darkMode={darkMode}
+      setDarkMode={setDarkMode}
+      onSelectSuggestion={handleSelectSuggestion}
+      activeChat={activeChat}
+      onUpdateChat={handleUpdateChat}
+    />
   );
 }
 
 export default function App() {
   return (
     <Router>
-      <AppContent />
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
     </Router>
   );
 }

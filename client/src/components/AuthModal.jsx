@@ -1,62 +1,110 @@
 import React, { useState } from 'react';
-import { X, Mail, Lock, User, AlertCircle } from 'lucide-react';
-import { authService } from '../services/firebase';
+import { useNavigate } from 'react-router-dom';
+import { X, Mail, Lock, User, AlertCircle, Loader2, CheckCircle2 } from 'lucide-react';
+import { useAuth } from '../hooks/useAuth';
 
 export default function AuthModal({ isOpen, onClose }) {
+  const navigate = useNavigate();
+  const { login, register } = useAuth();
   const [isLoginTab, setIsLoginTab] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPass, setConfirmPass] = useState('');
   const [fullName, setFullName] = useState('');
+  const [mssv, setMssv] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [successMsg, setSuccessMsg] = useState('');
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    if (loading) return; // Chống bấm gửi biểu mẫu nhiều lần khi đang xử lý
+
     setError('');
+    setSuccessMsg('');
 
     if (isLoginTab) {
       if (!email || !password) {
-        setError('Vui lòng điền đầy đủ email và mật khẩu.');
+        setError('Vui lòng điền đầy đủ email hoặc MSSV và mật khẩu.');
         return;
       }
-      authService.login(email, password);
-      onClose();
+      setLoading(true);
+      try {
+        const authData = await login(email, password);
+        setSuccessMsg('Đăng nhập thành công!');
+        setTimeout(() => {
+          onClose();
+          if (authData?.user?.role === 'admin') {
+            navigate('/admin');
+          } else {
+            navigate('/');
+          }
+        }, 500);
+      } catch (err) {
+        setError(err.message || 'Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.');
+      } finally {
+        setLoading(false);
+      }
     } else {
       if (!fullName || !email || !password) {
-        setError('Vui lòng điền đầy đủ các thông tin.');
+        setError('Vui lòng điền đầy đủ họ tên, email và mật khẩu.');
+        return;
+      }
+      if (password.length < 6) {
+        setError('Mật khẩu phải có tối thiểu 6 ký tự.');
         return;
       }
       if (password !== confirmPass) {
         setError('Mật khẩu xác nhận không khớp.');
         return;
       }
-      authService.register(fullName, email, password);
-      onClose();
+      setLoading(true);
+      try {
+        await register(fullName, email, password, mssv || null);
+        setSuccessMsg('Đăng ký tài khoản thành công!');
+        setTimeout(() => {
+          onClose();
+          navigate('/');
+        }, 500);
+      } catch (err) {
+        setError(err.message || 'Đăng ký thất bại. Vui lòng kiểm tra lại thông tin.');
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
-  const handleMicrosoftLogin = () => {
-    authService.loginMicrosoft();
-    onClose();
+  const fillDemoAccount = (accEmail, accPass) => {
+    setEmail(accEmail);
+    setPassword(accPass);
+    setIsLoginTab(true);
+    setError('');
   };
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-box" onClick={(e) => e.stopPropagation()}>
+      <div className="modal-box chatgpt-scroll" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '440px' }}>
         <button 
           onClick={onClose}
           style={{
             position: 'absolute',
-            top: '16px',
-            right: '16px',
+            top: '12px',
+            right: '12px',
             background: 'none',
             border: 'none',
             color: 'var(--text-muted)',
             cursor: 'pointer',
-            padding: '4px'
+            padding: '8px',
+            width: '40px',
+            height: '40px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: '50%'
           }}
+          title="Đóng"
         >
           <X size={20} />
         </button>
@@ -64,7 +112,8 @@ export default function AuthModal({ isOpen, onClose }) {
         {/* Tabs */}
         <div style={{ display: 'flex', borderBottom: '1px solid var(--border-color)', marginBottom: '20px' }}>
           <button
-            onClick={() => { setIsLoginTab(true); setError(''); }}
+            type="button"
+            onClick={() => { setIsLoginTab(true); setError(''); setSuccessMsg(''); }}
             style={{
               flex: 1,
               padding: '12px',
@@ -80,7 +129,8 @@ export default function AuthModal({ isOpen, onClose }) {
             Đăng nhập
           </button>
           <button
-            onClick={() => { setIsLoginTab(false); setError(''); }}
+            type="button"
+            onClick={() => { setIsLoginTab(false); setError(''); setSuccessMsg(''); }}
             style={{
               flex: 1,
               padding: '12px',
@@ -110,47 +160,91 @@ export default function AuthModal({ isOpen, onClose }) {
             color: '#ef4444',
             fontSize: '13px'
           }}>
-            <AlertCircle size={16} />
+            <AlertCircle size={16} style={{ flexShrink: 0 }} />
             <span>{error}</span>
+          </div>
+        )}
+
+        {successMsg && (
+          <div style={{
+            background: 'rgba(22, 163, 74, 0.1)',
+            border: '1px solid rgba(22, 163, 74, 0.3)',
+            borderRadius: 'var(--radius-sm)',
+            padding: '10px 12px',
+            marginBottom: '16px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            color: '#16a34a',
+            fontSize: '13px'
+          }}>
+            <CheckCircle2 size={16} style={{ flexShrink: 0 }} />
+            <span>{successMsg}</span>
           </div>
         )}
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
           {!isLoginTab && (
-            <div>
-              <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '6px' }}>Họ và tên</label>
-              <div style={{ position: 'relative' }}>
-                <User size={16} style={{ position: 'absolute', left: '12px', top: '12px', color: 'var(--text-muted)' }} />
-                <input 
-                  type="text"
-                  placeholder="Nguyễn Văn A"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '10px 12px 10px 38px',
-                    borderRadius: 'var(--radius-sm)',
-                    border: '1px solid var(--border-color)',
-                    background: 'var(--bg-primary)',
-                    color: 'var(--text-main)',
-                    fontSize: '14px'
-                  }}
-                />
+            <>
+              <div>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '6px' }}>Họ và tên</label>
+                <div style={{ position: 'relative' }}>
+                  <User size={16} style={{ position: 'absolute', left: '12px', top: '12px', color: 'var(--text-muted)' }} />
+                  <input 
+                    type="text"
+                    placeholder="Trương Trần Thanh Phương"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    required
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px 10px 38px',
+                      borderRadius: 'var(--radius-sm)',
+                      border: '1px solid var(--border-color)',
+                      background: 'var(--bg-primary)',
+                      color: 'var(--text-main)',
+                      fontSize: '14px'
+                    }}
+                  />
+                </div>
               </div>
-            </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '6px' }}>Mã số sinh viên (MSSV nếu có)</label>
+                <div style={{ position: 'relative' }}>
+                  <User size={16} style={{ position: 'absolute', left: '12px', top: '12px', color: 'var(--text-muted)' }} />
+                  <input 
+                    type="text"
+                    placeholder="2474802010458 (Để trống hệ thống sẽ tự sinh)"
+                    value={mssv}
+                    onChange={(e) => setMssv(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px 10px 38px',
+                      borderRadius: 'var(--radius-sm)',
+                      border: '1px solid var(--border-color)',
+                      background: 'var(--bg-primary)',
+                      color: 'var(--text-main)',
+                      fontSize: '14px'
+                    }}
+                  />
+                </div>
+              </div>
+            </>
           )}
 
           <div>
             <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '6px' }}>
-              {isLoginTab ? "Email hoặc MSSV" : "Email sinh viên Văn Lang"}
+              {isLoginTab ? "Email hoặc Mã số sinh viên (MSSV)" : "Email sinh viên"}
             </label>
             <div style={{ position: 'relative' }}>
               <Mail size={16} style={{ position: 'absolute', left: '12px', top: '12px', color: 'var(--text-muted)' }} />
               <input 
                 type="text"
-                placeholder="ten.mssv@vanlanguni.vn"
+                placeholder={isLoginTab ? "2474802010458 hoặc email@vanlanguni.vn" : "email@vanlanguni.vn hoặc email trường/cá nhân"}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                required
                 style={{
                   width: '100%',
                   padding: '10px 12px 10px 38px',
@@ -173,6 +267,7 @@ export default function AuthModal({ isOpen, onClose }) {
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                required
                 style={{
                   width: '100%',
                   padding: '10px 12px 10px 38px',
@@ -196,6 +291,7 @@ export default function AuthModal({ isOpen, onClose }) {
                   placeholder="••••••••"
                   value={confirmPass}
                   onChange={(e) => setConfirmPass(e.target.value)}
+                  required
                   style={{
                     width: '100%',
                     padding: '10px 12px 10px 38px',
@@ -212,39 +308,63 @@ export default function AuthModal({ isOpen, onClose }) {
 
           <button 
             type="submit" 
+            disabled={loading}
             className="btn-vlu-primary" 
-            style={{ width: '100%', justifyContent: 'center', marginTop: '6px' }}
+            style={{ width: '100%', justifyContent: 'center', marginTop: '6px', opacity: loading ? 0.7 : 1 }}
           >
-            {isLoginTab ? "Đăng nhập ngay" : "Tạo tài khoản mới"}
+            {loading ? (
+              <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Loader2 size={16} className="spin" /> Đang xử lý...
+              </span>
+            ) : isLoginTab ? (
+              "Đăng nhập ngay"
+            ) : (
+              "Tạo tài khoản sinh viên"
+            )}
           </button>
         </form>
 
-        <div style={{ textAlign: 'center', margin: '16px 0', color: 'var(--text-muted)', fontSize: '12px', position: 'relative' }}>
-          <span>hoặc</span>
-        </div>
-
-        <button
-          type="button"
-          onClick={handleMicrosoftLogin}
-          style={{
-            width: '100%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '10px',
-            padding: '10px',
-            background: '#2f2f2f',
-            color: '#ffffff',
-            border: '1px solid #444',
-            borderRadius: 'var(--radius-sm)',
-            cursor: 'pointer',
-            fontSize: '13px',
-            fontWeight: 500
-          }}
-        >
-          <i className="fab fa-windows" style={{ color: '#00a4ef' }}></i>
-          <span>Đăng nhập bằng Mail Trường (Microsoft)</span>
-        </button>
+        {isLoginTab && (
+          <div style={{ marginTop: '18px', paddingTop: '14px', borderTop: '1px solid var(--border-color)' }}>
+            <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '8px', textAlign: 'center' }}>
+              Tài khoản mẫu có sẵn (Hoạt động cả Demo & MongoDB):
+            </div>
+            <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', justifyContent: 'center' }}>
+              <button
+                type="button"
+                onClick={() => fillDemoAccount('2474802010458', 'Vlu@2025!')}
+                style={{ fontSize: '11.5px', padding: '6px 10px', minHeight: '34px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-main)', cursor: 'pointer' }}
+                title="Sinh viên Trương Trần Thanh Phương (K30)"
+              >
+                SV Thanh Phương
+              </button>
+              <button
+                type="button"
+                onClick={() => fillDemoAccount('2474802010414', 'Vlu@2025!')}
+                style={{ fontSize: '11.5px', padding: '6px 10px', minHeight: '34px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-main)', cursor: 'pointer' }}
+                title="Sinh viên Võ Thành Trung (K30)"
+              >
+                SV Thành Trung
+              </button>
+              <button
+                type="button"
+                onClick={() => fillDemoAccount('admin@vanlanguni.vn', 'Admin@2025!')}
+                style={{ fontSize: '11.5px', padding: '6px 10px', minHeight: '34px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'rgba(196,18,48,0.1)', color: 'var(--vlu-red)', fontWeight: 600, cursor: 'pointer' }}
+                title="Quản trị viên hệ thống VLU"
+              >
+                Admin Quản Trị
+              </button>
+              <button
+                type="button"
+                onClick={() => fillDemoAccount('gv.hoangnam@vanlanguni.vn', 'Gv@2025!')}
+                style={{ fontSize: '11.5px', padding: '6px 10px', minHeight: '34px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: '#2563eb', cursor: 'pointer' }}
+                title="Giảng viên ThS. Hoàng Trọng Nam"
+              >
+                GV Hoàng Nam
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

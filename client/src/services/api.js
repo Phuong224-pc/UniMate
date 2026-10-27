@@ -1,81 +1,337 @@
-const API_BASE = '/api';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
+const TOKEN_KEY = 'vlu_auth_token';
+
+function getAuthHeaders(isFormData = false) {
+  const headers = {};
+  if (!isFormData) {
+    headers['Content-Type'] = 'application/json';
+  }
+  const token = localStorage.getItem(TOKEN_KEY);
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  return headers;
+}
+
+async function request(endpoint, options = {}) {
+  const url = `${API_BASE}${endpoint}`;
+  const isFormData = options.body instanceof FormData;
+
+  const config = {
+    ...options,
+    headers: {
+      ...getAuthHeaders(isFormData),
+      ...(options.headers || {})
+    }
+  };
+
+  const res = await fetch(url, config);
+  const data = await res.json().catch(() => ({}));
+
+  if (!res.ok) {
+    const errorMsg = data.error || `Lỗi máy chủ (${res.status})`;
+    const error = new Error(errorMsg);
+    error.status = res.status;
+    error.details = data.details;
+    throw error;
+  }
+
+  return data;
+}
 
 export const api = {
-  // Gửi tin nhắn đến AI
-  async chat({ messages, mode = 'default', image = null, systemPromptOverride = null }) {
-    const res = await fetch(`${API_BASE}/chat`, {
+  // ─── AUTHENTICATION ───
+  async register({ fullName, email, password, mssv }) {
+    return request('/auth/register', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ messages, mode, image, systemPromptOverride })
+      body: JSON.stringify({ fullName, email, password, mssv })
     });
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.error || `Lỗi máy chủ (${res.status})`);
-    }
-    return res.json();
   },
 
-  // Lấy toàn bộ khung chương trình K30
-  async getCurriculum() {
-    const res = await fetch(`${API_BASE}/curriculum`);
-    return res.json();
-  },
-//sfsf
-  // Tìm kiếm môn học
-  async searchCourses(query) {
-    const res = await fetch(`${API_BASE}/curriculum/search?q=${encodeURIComponent(query)}`);
-    return res.json();
-  },
-
-  // Lấy danh sách tóm tắt sinh viên demo
-  async getStudents() {
-    const res = await fetch(`${API_BASE}/students`);
-    return res.json();
-  },
-
-  // Tra cứu chi tiết theo MSSV
-  async getStudentByMssv(mssv) {
-    const res = await fetch(`${API_BASE}/students/${encodeURIComponent(mssv)}`);
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.error || `Không tìm thấy sinh viên ${mssv}`);
-    }
-    return res.json();
-  },
-
-  // Lấy danh sách System Prompts
-  async getAdminPrompts() {
-    const res = await fetch(`${API_BASE}/admin/prompts`);
-    return res.json();
-  },
-
-  // Cập nhật System Prompts
-  async updateAdminPrompts(prompts) {
-    const res = await fetch(`${API_BASE}/admin/prompts`, {
+  async login(identifier, password) {
+    return request('/auth/login', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(prompts)
+      body: JSON.stringify({ identifier, password })
     });
-    return res.json();
   },
 
-  // OCR ảnh hồ sơ sinh viên (CCCD, thẻ SV, học bạ)
+  async getMe() {
+    return request('/auth/me');
+  },
+
+  async changePassword(oldPassword, newPassword) {
+    return request('/auth/change-password', {
+      method: 'POST',
+      body: JSON.stringify({ oldPassword, newPassword })
+    });
+  },
+
+  async logout() {
+    return request('/auth/logout', { method: 'POST' });
+  },
+
+  // ─── HỒ SƠ CÁ NHÂN (MONGODB / DEMO) ───
+  async getMyProfile() {
+    return request('/profile/me');
+  },
+
+  async updateMyProfile(profileData) {
+    return request('/profile/me', {
+      method: 'PUT',
+      body: JSON.stringify(profileData)
+    });
+  },
+
   async extractProfileFromImage(imageData, mimeType = 'image/jpeg') {
-    const res = await fetch(`${API_BASE}/profile/extract-from-image`, {
+    return request('/profile/extract-from-image', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ image: { data: imageData, mimeType } })
     });
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.error || `Lỗi OCR (${res.status})`);
-    }
-    return res.json();
   },
 
-  // Kiểm tra sức khỏe hệ thống
+  // ─── SINH VIÊN & BẢNG ĐIỂM (MONGODB / DEMO) ───
+  async getStudents(params = {}) {
+    const qs = new URLSearchParams(params).toString();
+    return request(`/students${qs ? '?' + qs : ''}`);
+  },
+
+  async getStudentByMssv(mssv) {
+    return request(`/students/${encodeURIComponent(mssv)}`);
+  },
+
+  async updateStudent(mssv, data) {
+    return request(`/students/${encodeURIComponent(mssv)}`, {
+      method: 'PUT',
+      body: JSON.stringify(data)
+    });
+  },
+
+  async createStudent(data) {
+    return request('/students', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
+  },
+
+  async deleteStudent(mssv, force = false) {
+    return request(`/students/${encodeURIComponent(mssv)}?force=${force}`, {
+      method: 'DELETE'
+    });
+  },
+
+  // ─── OCR & BẢNG ĐIỂM THÔNG MINH ───
+  async ocrTranscript(fileOrPayload) {
+    if (fileOrPayload instanceof File || fileOrPayload instanceof Blob) {
+      const formData = new FormData();
+      formData.append('file', fileOrPayload);
+      return request('/students/ocr-transcript', {
+        method: 'POST',
+        body: formData
+      });
+    }
+
+    return request('/students/ocr-transcript', {
+      method: 'POST',
+      body: JSON.stringify(fileOrPayload)
+    });
+  },
+
+  async confirmTranscript({ mssv, courses, source }) {
+    return request('/students/confirm-transcript', {
+      method: 'POST',
+      body: JSON.stringify({ mssv, courses, source })
+    });
+  },
+
+  // ─── THỜI KHÓA BIỂU (MONGODB / DEMO) ───
+  async getSchedule(params = {}) {
+    const qs = new URLSearchParams(params).toString();
+    return request(`/schedule${qs ? '?' + qs : ''}`);
+  },
+
+  async getSemesters() {
+    return request('/schedule/semesters');
+  },
+
+  async createSchedule(data) {
+    return request('/schedule', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
+  },
+
+  async updateSchedule(id, data) {
+    return request(`/schedule/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data)
+    });
+  },
+
+  async deleteSchedule(id) {
+    return request(`/schedule/${id}`, {
+      method: 'DELETE'
+    });
+  },
+
+  // ─── CHƯƠNG TRÌNH ĐÀO TẠO K30 ───
+  async getCurriculum(program = 'K30 CNTT') {
+    return request(`/curriculum?program=${encodeURIComponent(program)}`);
+  },
+
+  async searchCourses(query) {
+    return request(`/curriculum/search?q=${encodeURIComponent(query || '')}`);
+  },
+
+  // ─── CHATBOT & TRỢ LÝ AI (GEMINI) ───
+  async chat({ messages, mode = 'default', image = null, systemPromptOverride = null }) {
+    return request('/chat', {
+      method: 'POST',
+      body: JSON.stringify({ messages, mode, image, systemPromptOverride })
+    });
+  },
+
+  // ─── ADMIN KHU VỰC QUẢN TRỊ ───
+  async getAdminDashboard() {
+    return request('/admin/dashboard');
+  },
+
+  async getAdminUsers(params = {}) {
+    const qs = new URLSearchParams(params).toString();
+    return request(`/admin/users${qs ? '?' + qs : ''}`);
+  },
+
+  async createAdminUser(data) {
+    return request('/admin/users', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
+  },
+
+  async updateAdminUser(id, data) {
+    return request(`/admin/users/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data)
+    });
+  },
+
+  async deleteAdminUser(id) {
+    return request(`/admin/users/${id}`, {
+      method: 'DELETE'
+    });
+  },
+
+  async getAdminCourses(params = {}) {
+    const qs = new URLSearchParams(params).toString();
+    return request(`/admin/courses${qs ? '?' + qs : ''}`);
+  },
+
+  async createAdminCourse(data) {
+    return request('/admin/courses', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
+  },
+
+  async updateAdminCourse(id, data) {
+    return request(`/admin/courses/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data)
+    });
+  },
+
+  async deleteAdminCourse(id) {
+    return request(`/admin/courses/${id}`, {
+      method: 'DELETE'
+    });
+  },
+
+  async getAdminCurriculum(program = 'K30 CNTT') {
+    return request(`/admin/curriculum?program=${encodeURIComponent(program)}`);
+  },
+
+  async updateAdminCurriculum(data) {
+    return request('/admin/curriculum', {
+      method: 'PUT',
+      body: JSON.stringify(data)
+    });
+  },
+
+  async getAdminSchedules(params = {}) {
+    const qs = new URLSearchParams(params).toString();
+    return request(`/admin/schedules${qs ? '?' + qs : ''}`);
+  },
+
+  async createAdminSchedule(data) {
+    return request('/admin/schedules', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
+  },
+
+  async updateAdminSchedule(id, data) {
+    return request(`/admin/schedules/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data)
+    });
+  },
+
+  async deleteAdminSchedule(id) {
+    return request(`/admin/schedules/${id}`, {
+      method: 'DELETE'
+    });
+  },
+
+  async getAdminPrompts() {
+    return request('/admin/prompts');
+  },
+
+  async updateAdminPrompts(prompts) {
+    return request('/admin/prompts', {
+      method: 'POST',
+      body: JSON.stringify(prompts)
+    });
+  },
+
   async checkHealth() {
-    const res = await fetch(`${API_BASE}/health`);
-    return res.json();
+    return request('/admin/health');
+  },
+
+  // ─── ADMIN BULK IMPORT (EXCEL & PDF) ───
+  async downloadAdminImportTemplate(dataType) {
+    const token = localStorage.getItem(TOKEN_KEY);
+    const res = await fetch(`${API_BASE}/admin/import/template/${dataType}`, {
+      headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+    });
+    if (!res.ok) throw new Error('Không thể tải file mẫu');
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Mau_Nhap_${dataType}_UniMate.xlsx`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+  },
+
+  async previewAdminImport(formData) {
+    return request('/admin/import/preview', {
+      method: 'POST',
+      body: formData
+    });
+  },
+
+  async confirmAdminImport({ dataType, rows, conflictMode, defaultProgram }) {
+    return request('/admin/import/confirm', {
+      method: 'POST',
+      body: JSON.stringify({ dataType, rows, conflictMode, defaultProgram })
+    });
+  },
+
+  // ─── TRẠNG THÁI HỆ THỐNG & CHẾ ĐỘ DỮ LIỆU (DEMO / MONGODB) ───
+  async getStatus() {
+    return request('/status');
   }
 };
+
+export default api;

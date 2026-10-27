@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import AiChatSidebar from '../components/AiChatSidebar';
 import { 
   Calculator, 
@@ -10,15 +10,20 @@ import {
   TrendingUp, 
   CheckCircle2, 
   XCircle,
-  HelpCircle
+  HelpCircle,
+  Bot
 } from 'lucide-react';
 import { api } from '../services/api';
+import { useAuth } from '../hooks/useAuth';
 
 export default function GpaPage() {
-  const [mssvInput, setMssvInput] = useState('2474802010458'); // Mặc định Trương Trần Thanh Phương
+  const { user, profile } = useAuth();
+  const initialMssv = profile?.mssv || user?.mssv || '2474802010458';
+  const [mssvInput, setMssvInput] = useState(initialMssv);
   const [student, setStudent] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [isMobileChatOpen, setIsMobileChatOpen] = useState(false);
   const [selectedSemester, setSelectedSemester] = useState('all');
   
   // Target GPA simulator
@@ -35,11 +40,12 @@ export default function GpaPage() {
   ];
 
   const handleLookup = async (code = mssvInput) => {
-    if (!code) return;
+    const targetCode = user?.role === 'student' ? (profile?.mssv || user?.mssv || code) : code;
+    if (!targetCode) return;
     setLoading(true);
     setError('');
     try {
-      const res = await api.getStudentByMssv(code.trim());
+      const res = await api.getStudentByMssv(targetCode.trim());
       if (res.success) {
         setStudent(res.data);
       }
@@ -52,8 +58,10 @@ export default function GpaPage() {
   };
 
   useEffect(() => {
-    handleLookup('2474802010458');
-  }, []);
+    const activeCode = profile?.mssv || user?.mssv || initialMssv;
+    setMssvInput(activeCode);
+    handleLookup(activeCode);
+  }, [profile?.mssv, user?.mssv]);
 
   // Tính toán các học kỳ có trong bảng điểm
   const semesters = student?.courses 
@@ -148,21 +156,44 @@ export default function GpaPage() {
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-            <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Mẫu thử:</span>
-            {demoMssvs.slice(0, 3).map(d => (
-              <button
-                key={d.mssv}
-                onClick={() => {
-                  setMssvInput(d.mssv);
-                  handleLookup(d.mssv);
-                }}
-                className="btn-secondary"
-                style={{ fontSize: '11px', padding: '4px 10px' }}
-              >
-                {d.name.split(' (')[0]}
-              </button>
-            ))}
+            {user?.role === 'student' ? (
+              <span className="badge badge-blue" style={{ fontSize: '12px', padding: '6px 12px' }}>
+                Hồ sơ sinh viên: {profile?.fullName || user?.email} (MSSV: {profile?.mssv || user?.mssv})
+              </span>
+            ) : (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Mẫu thử:</span>
+                {demoMssvs.slice(0, 3).map(d => (
+                  <button key={d.mssv} onClick={() => { setMssvInput(d.mssv); handleLookup(d.mssv); }} className="btn-secondary" style={{ fontSize: '12px', padding: '4px 10px' }}>
+                    MSSV: {d.mssv.slice(-5)}
+                  </button>
+                ))}
+              </div>
+            )}
+            <button
+              onClick={() => setIsMobileChatOpen(true)}
+              className="mobile-only-chat-btn"
+              title="Mở Chat box Điểm & GPA"
+            >
+              <Bot size={15} />
+              <span>Chat box GPA</span>
+            </button>
           </div>
+        </div>
+                <button
+                  key={d.mssv}
+                  onClick={() => {
+                    setMssvInput(d.mssv);
+                    handleLookup(d.mssv);
+                  }}
+                  className="btn-secondary"
+                  style={{ fontSize: '11px', padding: '4px 10px' }}
+                >
+                  {d.name.split(' (')[0]}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Input Bar */}
@@ -175,13 +206,15 @@ export default function GpaPage() {
             background: 'var(--bg-primary)',
             border: '1px solid var(--border-color)',
             borderRadius: 'var(--radius-sm)',
-            padding: '8px 14px'
+            padding: '8px 14px',
+            opacity: user?.role === 'student' ? 0.8 : 1
           }}>
             <Search size={16} color="var(--text-muted)" />
             <input 
               type="text"
               placeholder="Nhập mã số sinh viên (ví dụ: 2474802010458)..."
               value={mssvInput}
+              disabled={user?.role === 'student'}
               onChange={(e) => setMssvInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleLookup()}
               style={{
@@ -190,17 +223,19 @@ export default function GpaPage() {
                 outline: 'none',
                 width: '100%',
                 fontSize: '14px',
-                color: 'var(--text-main)'
+                color: 'var(--text-main)',
+                cursor: user?.role === 'student' ? 'not-allowed' : 'text'
               }}
             />
           </div>
 
           <button 
             onClick={() => handleLookup()}
+            disabled={loading}
             className="btn-vlu-primary"
-            style={{ flexShrink: 0 }}
+            style={{ flexShrink: 0, opacity: loading ? 0.7 : 1 }}
           >
-            <Search size={16} /> Tra cứu
+            {loading ? 'Đang nạp...' : (<><Search size={16} /> Tra cứu</>)}
           </button>
         </div>
 
@@ -455,18 +490,45 @@ export default function GpaPage() {
         </>
       )}
         </div>
-      {/* AI Chat Sidebar */}
-      <div style={{ position: 'sticky', top: '20px' }}>
+      {/* AI Chat Sidebar (Desktop) */}
+      <div className="desktop-only-chat-column" style={{ position: 'sticky', top: '20px' }}>
         <AiChatSidebar
           mode="results"
-          title="Chat phan tich ket qua"
-          subtitle="Tro ly hoc vu AI"
-          placeholder="Hoi ve GPA, diem chu, tin chi..."
+          title="Trợ lý Bảng điểm & GPA"
+          subtitle="Phân tích kết quả học tập & cải thiện"
+          placeholder="Hỏi về GPA, điểm chữ, môn cần cải thiện..."
           quickReplies={gpaQuickReplies}
           systemContext={gpaSystemContext}
         />
       </div>
       </div>
+
+      {/* Nút nổi (FAB) trên Mobile để mở Chatbox ngay mà không cần lướt */}
+      <button
+        onClick={() => setIsMobileChatOpen(true)}
+        className="mobile-floating-chat-btn"
+        title="Mở Chat box Điểm & GPA"
+      >
+        <Bot size={18} />
+        <span>Chat box GPA</span>
+      </button>
+
+      {/* Modal Drawer Chatbox trên Mobile khi bấm nút */}
+      {isMobileChatOpen && (
+        <div className="mobile-chat-drawer-overlay" onClick={() => setIsMobileChatOpen(false)}>
+          <div className="mobile-chat-drawer-container" onClick={e => e.stopPropagation()}>
+            <AiChatSidebar
+              mode="results"
+              title="Trợ lý Bảng điểm & GPA"
+              subtitle="Phân tích kết quả học tập & cải thiện"
+              placeholder="Hỏi về GPA, điểm chữ, môn cần cải thiện..."
+              quickReplies={gpaQuickReplies}
+              systemContext={gpaSystemContext}
+              onClose={() => setIsMobileChatOpen(false)}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

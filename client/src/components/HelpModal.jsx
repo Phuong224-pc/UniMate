@@ -8,7 +8,7 @@ export default function HelpModal({ isOpen, onClose }) {
     {
       num: 1,
       title: "Làm mới & Quay về trang chủ",
-      desc: "Bấm trực tiếp vào logo Đại học Văn Lang ở góc trên thanh bên (Sidebar) để làm mới cuộc hội thoại và quay về trang chủ ban đầu.",
+      desc: "Bấm trực tiếp vào logo UniMate ở góc trên thanh bên (Sidebar) để làm mới cuộc hội thoại và quay về trang chủ ban đầu.",
       icon: MessageSquare
     },
     {
@@ -33,7 +33,7 @@ export default function HelpModal({ isOpen, onClose }) {
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-box" style={{ maxWidth: '540px' }} onClick={(e) => e.stopPropagation()}>
+      <div className="modal-box chatgpt-scroll" style={{ maxWidth: '540px' }} onClick={(e) => e.stopPropagation()}>
         <button 
           onClick={onClose}
           style={{
@@ -64,8 +64,8 @@ export default function HelpModal({ isOpen, onClose }) {
             <Lightbulb size={22} />
           </div>
           <div>
-            <h2 style={{ fontSize: '17px', fontWeight: 800, color: 'var(--text-main)' }}>HƯỚNG DẪN SỬ DỤNG VLU CHATBOT</h2>
-            <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Các mẹo để sử dụng trợ lý sinh viên hiệu quả nhất</p>
+            <h2 style={{ fontSize: '17px', fontWeight: 800, color: 'var(--text-main)' }}>HƯỚNG DẪN SỬ DỤNG UNIMATE</h2>
+            <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Các mẹo để sử dụng trợ lý học tập UniMate hiệu quả nhất (Dữ liệu demo: VLU)</p>
           </div>
         </div>
 

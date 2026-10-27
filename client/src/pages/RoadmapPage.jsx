@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   Map, 
   CheckSquare, 
@@ -12,17 +13,22 @@ import {
   ChevronRight,
   Bot,
   Send,
-  Loader2
+  Loader2,
+  FileSpreadsheet
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { api } from '../services/api';
-import { marked } from 'marked';
+import { useAuth } from '../hooks/useAuth';
+import AiChatSidebar from '../components/AiChatSidebar';
 
 const STORAGE_COMPLETED_KEY = 'vlu_roadmap_completed_courses';
 
 export default function RoadmapPage() {
+  const navigate = useNavigate();
+  const { user, profile } = useAuth();
   const [curriculum, setCurriculum] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isMobileChatOpen, setIsMobileChatOpen] = useState(false);
   const [completedCodes, setCompletedCodes] = useState(() => {
     try {
       const saved = localStorage.getItem(STORAGE_COMPLETED_KEY);
@@ -31,20 +37,15 @@ export default function RoadmapPage() {
       return new Set();
     }
   });
+
+  // Đồng bộ với completedCourses từ MongoDB profile nếu có
+  useEffect(() => {
+    if (profile && Array.isArray(profile.completedCourses) && profile.completedCourses.length > 0) {
+      setCompletedCodes(new Set(profile.completedCourses));
+    }
+  }, [profile]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSection, setSelectedSection] = useState('all');
-  
-  // Chat state
-  const [messages, setMessages] = useState([]);
-  const [chatInput, setChatInput] = useState('');
-  const [isChatLoading, setIsChatLoading] = useState(false);
-  const chatContainerRef = React.useRef(null);
-
-  useEffect(() => {
-    if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
-    }
-  }, [messages]);
 
   useEffect(() => {
     api.getCurriculum()
@@ -80,32 +81,11 @@ export default function RoadmapPage() {
         next.add(code);
       }
       localStorage.setItem(STORAGE_COMPLETED_KEY, JSON.stringify([...next]));
+      if (user) {
+        api.updateMyProfile({ completedCourses: [...next] }).catch(() => {});
+      }
       return next;
     });
-  };
-
-  const handleSendChat = async (e) => {
-    if (e) e.preventDefault();
-    if (!chatInput.trim() || isChatLoading) return;
-
-    const userMsg = { role: 'user', content: chatInput.trim() };
-    const newMessages = [...messages, userMsg];
-    setMessages(newMessages);
-    setChatInput('');
-    setIsChatLoading(true);
-
-    try {
-      // Gọi AI với mode 'roadmap' để kèm dữ liệu khung chương trình
-      const res = await api.chat({
-        messages: newMessages,
-        mode: 'roadmap'
-      });
-      setMessages([...newMessages, { role: 'assistant', content: res.reply }]);
-    } catch (err) {
-      setMessages([...newMessages, { role: 'assistant', content: '⚠️ Lỗi: ' + err.message }]);
-    } finally {
-      setIsChatLoading(false);
-    }
   };
 
   const handleClearAll = () => {
@@ -174,9 +154,10 @@ export default function RoadmapPage() {
   }, [curriculum]);
 
   return (
-    <div style={{ display: 'flex', height: '100%' }}>
+    <>
+      <div className="two-column-split" style={{ width: '100%', height: 'calc(100vh - 120px)', borderRadius: '16px', overflow: 'hidden', border: '1px solid var(--border-color)' }}>
       {/* Cột trái: Lộ trình môn học */}
-      <div className="page-container fade-in" style={{ flex: 1, paddingRight: '20px', overflowY: 'auto', borderRight: '1px solid var(--border-color)' }}>
+      <div className="chatgpt-scroll fade-in" style={{ flex: 1, padding: '24px', overflowY: 'auto', borderRight: '1px solid var(--border-color)', background: 'var(--bg-main)' }}>
         {/* Header */}
         <div style={{
           display: 'flex',
@@ -212,6 +193,14 @@ export default function RoadmapPage() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <button onClick={handleClearAll} className="btn-secondary" style={{ fontSize: '13px' }}>
             <RotateCcw size={15} /> Bỏ chọn tất cả
+          </button>
+          <button
+            onClick={() => setIsMobileChatOpen(true)}
+            className="mobile-only-chat-btn"
+            title="Mở Chat box Trợ lý Lộ trình"
+          >
+            <Bot size={15} />
+            <span>Chat box lộ trình</span>
           </button>
         </div>
       </div>
@@ -395,137 +384,55 @@ export default function RoadmapPage() {
       )}
       </div>
 
-      {/* Cột phải: Chatbot Trợ lý lộ trình */}
-      <div style={{ width: '380px', display: 'flex', flexDirection: 'column', background: 'var(--bg-secondary)' }}>
-        <div style={{ padding: '20px', borderBottom: '1px solid var(--border-color)', background: 'var(--bg-primary)' }}>
-          <h2 style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '18px', color: 'var(--vlu-red)' }}>
-            <Bot size={22} /> Trợ lý Lộ trình Học tập
-          </h2>
-        </div>
-
-        {/* Thông tin nhanh */}
-        <div style={{ padding: '16px 20px', background: 'var(--bg-tertiary)', borderBottom: '1px solid var(--border-color)' }}>
-          <div style={{ fontWeight: 600, color: 'var(--text-main)', marginBottom: '8px' }}>Khóa 30 - CNTT</div>
-          <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
-            Đã tích lũy: <strong style={{ color: 'var(--vlu-red)' }}>{earnedCredits}/{totalTargetCredits} TC</strong>
-          </div>
-          <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
-            Còn thiếu: <strong style={{ color: 'var(--vlu-red)' }}>{remainingCredits} TC</strong>
-          </div>
-        </div>
-
-        {/* Khung Chat */}
-        <div 
-          ref={chatContainerRef}
-          style={{ flex: 1, overflowY: 'auto', padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}
-        >
-          {/* Welcome Message */}
-          <div style={{
-            background: 'var(--bg-primary)',
-            padding: '16px',
-            borderRadius: 'var(--radius-lg)',
-            border: '1px solid var(--border-color)',
-            fontSize: '14px',
-            lineHeight: 1.5,
-            boxShadow: 'var(--shadow-sm)'
-          }}>
-            Chào bạn! Mình có thể tư vấn về <strong style={{ color: 'var(--vlu-red)' }}>môn học, tín chỉ, môn tiên quyết và lộ trình học tập.</strong> Bạn tích các môn đã học bên trái rồi hỏi mình nhé.
-          </div>
-
-          {messages.map((msg, i) => (
-            <div key={i} style={{ display: 'flex', justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start' }}>
-              <div style={{
-                maxWidth: '85%',
-                padding: '12px 16px',
-                borderRadius: '16px',
-                background: msg.role === 'user' ? 'var(--vlu-red)' : 'var(--bg-primary)',
-                color: msg.role === 'user' ? '#fff' : 'var(--text-main)',
-                border: msg.role === 'user' ? 'none' : '1px solid var(--border-color)',
-                fontSize: '14px',
-                lineHeight: 1.5,
-                boxShadow: msg.role === 'user' ? '0 2px 8px rgba(196, 18, 48, 0.3)' : 'var(--shadow-sm)',
-                borderBottomRightRadius: msg.role === 'user' ? '4px' : '16px',
-                borderBottomLeftRadius: msg.role === 'assistant' ? '4px' : '16px'
-              }}>
-                {msg.role === 'user' ? (
-                  <div style={{ whiteSpace: 'pre-wrap' }}>{msg.content}</div>
-                ) : (
-                  <div 
-                    className="markdown-body custom-markdown"
-                    dangerouslySetInnerHTML={{ __html: marked.parse(msg.content || '') }}
-                  />
-                )}
-              </div>
-            </div>
-          ))}
-
-          {isChatLoading && (
-            <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
-              <div style={{
-                padding: '12px 16px',
-                borderRadius: '16px',
-                background: 'var(--bg-primary)',
-                border: '1px solid var(--border-color)',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                color: 'var(--text-muted)'
-              }}>
-                <Loader2 size={16} className="spin" /> Đang phản hồi...
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Input Chat */}
-        <div style={{ padding: '16px', borderTop: '1px solid var(--border-color)', background: 'var(--bg-primary)' }}>
-          <form onSubmit={handleSendChat} style={{ position: 'relative' }}>
-            <input
-              type="text"
-              value={chatInput}
-              onChange={(e) => setChatInput(e.target.value)}
-              placeholder="Ví dụ: Mình nên học môn nào tiếp?"
-              style={{
-                width: '100%',
-                padding: '14px 48px 14px 16px',
-                borderRadius: '24px',
-                border: '1px solid var(--border-color)',
-                background: 'var(--bg-secondary)',
-                color: 'var(--text-main)',
-                outline: 'none',
-                fontSize: '14px'
-              }}
-            />
-            <button
-              type="submit"
-              disabled={isChatLoading || !chatInput.trim()}
-              style={{
-                position: 'absolute',
-                right: '6px',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                background: 'var(--vlu-red)',
-                border: 'none',
-                color: 'white',
-                width: '36px',
-                height: '36px',
-                borderRadius: '50%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: (isChatLoading || !chatInput.trim()) ? 'not-allowed' : 'pointer',
-                opacity: (isChatLoading || !chatInput.trim()) ? 0.5 : 1,
-                transition: '0.2s'
-              }}
-            >
-              <Send size={16} />
-            </button>
-          </form>
-          <div style={{ textAlign: 'center', fontSize: '11px', color: 'var(--text-muted)', marginTop: '8px' }}>
-            Trợ lý chỉ trả lời trọng tâm về lộ trình và dữ liệu môn học của khóa đang chọn.
-          </div>
-        </div>
+      {/* Cột phải: Chatbot Trợ lý lộ trình (Chỉ hiện trên desktop, mobile mở qua nút bấm) */}
+      <div className="desktop-only-chat-column" style={{ width: '380px', flexShrink: 0, height: '100%', padding: '16px', boxSizing: 'border-box' }}>
+        <AiChatSidebar
+          mode="roadmap"
+          title="Trợ lý Lộ trình Học tập"
+          subtitle={`K30 CNTT • Đã tích lũy ${earnedCredits}/${totalTargetCredits} TC`}
+          placeholder="Hỏi về môn tiếp theo, điều kiện tiên quyết..."
+          quickReplies={[
+            { label: 'Môn nên học tiếp theo?', text: `Tôi đã tích lũy ${earnedCredits}/${totalTargetCredits} tín chỉ. Học kỳ tới tôi nên ưu tiên đăng ký môn nào?` },
+            { label: 'Điều kiện tiên quyết?', text: 'Các môn học nào có chuỗi tiên quyết dài nhất cần hoàn thành sớm?' },
+            { label: 'Tín chỉ còn thiếu?', text: `Tôi còn thiếu ${remainingCredits} tín chỉ, hãy phân tích khối kiến thức tôi cần học.` }
+          ]}
+          systemContext={`Sinh viên đang xem Lộ trình Khóa 30 CNTT. Đã tích lũy: ${earnedCredits}/${totalTargetCredits} tín chỉ. Các môn đã đánh dấu học xong: ${[...completedCodes].join(', ') || 'Chưa tích lũy môn nào'}. Tín chỉ còn thiếu: ${remainingCredits}.`}
+          initialMessage="Chào bạn! Mình là Trợ lý Lộ trình Học tập K30 (126 tín chỉ). Bạn có thể tích các môn đã học bên trái rồi hỏi mình về môn tiếp theo hoặc điều kiện tiên quyết nhé!"
+        />
       </div>
     </div>
+
+    {/* Nút nổi (FAB) trên Mobile để mở Chatbox ngay mà không cần lướt */}
+    <button
+      onClick={() => setIsMobileChatOpen(true)}
+      className="mobile-floating-chat-btn"
+      title="Mở Chat box Lộ trình"
+    >
+      <Bot size={18} />
+      <span>Chat box lộ trình</span>
+    </button>
+
+    {/* Modal Drawer Chatbox toàn diện trên Mobile khi bấm nút */}
+    {isMobileChatOpen && (
+      <div className="mobile-chat-drawer-overlay" onClick={() => setIsMobileChatOpen(false)}>
+        <div className="mobile-chat-drawer-container" onClick={e => e.stopPropagation()}>
+          <AiChatSidebar
+            mode="roadmap"
+            title="Trợ lý Lộ trình Học tập"
+            subtitle={`K30 CNTT • Đã tích lũy ${earnedCredits}/${totalTargetCredits} TC`}
+            placeholder="Hỏi về môn tiếp theo, điều kiện tiên quyết..."
+            quickReplies={[
+              { label: 'Môn nên học tiếp theo?', text: `Tôi đã tích lũy ${earnedCredits}/${totalTargetCredits} tín chỉ. Học kỳ tới tôi nên ưu tiên đăng ký môn nào?` },
+              { label: 'Điều kiện tiên quyết?', text: 'Các môn học nào có chuỗi tiên quyết dài nhất cần hoàn thành sớm?' },
+              { label: 'Tín chỉ còn thiếu?', text: `Tôi còn thiếu ${remainingCredits} tín chỉ, hãy phân tích khối kiến thức tôi cần học.` }
+            ]}
+            systemContext={`Sinh viên đang xem Lộ trình Khóa 30 CNTT. Đã tích lũy: ${earnedCredits}/${totalTargetCredits} tín chỉ. Các môn đã đánh dấu học xong: ${[...completedCodes].join(', ') || 'Chưa tích lũy môn nào'}. Tín chỉ còn thiếu: ${remainingCredits}.`}
+            initialMessage="Chào bạn! Mình là Trợ lý Lộ trình Học tập K30 (126 tín chỉ). Bạn có thể tích các môn đã học bên trái rồi hỏi mình về môn tiếp theo hoặc điều kiện tiên quyết nhé!"
+            onClose={() => setIsMobileChatOpen(false)}
+          />
+        </div>
+      </div>
+    )}
+    </>
   );
 }

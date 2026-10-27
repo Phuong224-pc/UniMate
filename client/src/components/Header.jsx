@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Menu, 
   Moon, 
@@ -9,17 +9,42 @@ import {
   Calendar, 
   FileText, 
   Edit3,
-  Bot
+  Bot,
+  Database,
+  Sparkles,
+  History
 } from 'lucide-react';
+import { api } from '../services/api';
 
 export default function Header({ 
   onToggleSidebar, 
   darkMode, 
   setDarkMode, 
   onSelectSuggestion,
-  title = "VLU Chatbot"
+  title = "UniMate Chatbot"
 }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [systemStatus, setSystemStatus] = useState(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    api.getStatus()
+      .then(res => {
+        if (isMounted && res) {
+          setSystemStatus(res);
+        }
+      })
+      .catch(() => {
+        // Fallback kiểm tra /health
+        api.checkHealth()
+          .then(res => {
+            if (isMounted && res) setSystemStatus(res);
+          })
+          .catch(() => {});
+      });
+
+    return () => { isMounted = false; };
+  }, []);
 
   const suggestions = [
     { label: "Điều kiện tốt nghiệp", query: "Điều kiện xét tốt nghiệp đại học Văn Lang", icon: GraduationCap },
@@ -43,7 +68,7 @@ export default function Header({
         flexShrink: 0
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
         <button
           onClick={onToggleSidebar}
           style={{
@@ -51,14 +76,17 @@ export default function Header({
             border: 'none',
             color: 'var(--text-main)',
             cursor: 'pointer',
-            padding: '6px',
+            padding: '8px',
             borderRadius: '6px',
             display: 'flex',
-            alignItems: 'center'
+            alignItems: 'center',
+            justifyContent: 'center',
+            minWidth: '40px',
+            minHeight: '40px'
           }}
           title="Đóng / Mở menu"
         >
-          <Menu size={20} />
+          <Menu size={22} />
         </button>
 
         {/* Model Title & Dropdown Suggestions */}
@@ -136,11 +164,89 @@ export default function Header({
       </div>
 
       {/* Right controls */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-        <div className="badge badge-green" style={{ display: 'none', md: 'flex' }}>
-          <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#22c55e' }}></span>
-          Groq Llama 3.3 70B
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        {/* Nút mở lịch sử chat trên mobile */}
+        <button
+          onClick={onToggleSidebar}
+          className="show-on-mobile"
+          style={{
+            background: 'var(--bg-tertiary)',
+            border: '1px solid var(--border-color)',
+            color: 'var(--text-main)',
+            width: '38px',
+            height: '38px',
+            borderRadius: '50%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer'
+          }}
+          title="Lịch sử cuộc trò chuyện"
+        >
+          <History size={18} color="var(--vlu-red)" />
+        </button>
+
+        {/* Nhãn nhận biết Chế độ Demo / MongoDB */}
+        <div 
+          className="hide-on-mobile"
+          title="UniMate sử dụng dữ liệu tham khảo của Đại học Văn Lang để demo tính năng"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '5px',
+            background: 'var(--vlu-red-light)',
+            border: '1px solid rgba(196, 18, 48, 0.2)',
+            color: 'var(--vlu-red)',
+            padding: '4px 10px',
+            borderRadius: '20px',
+            fontSize: '11.5px',
+            fontWeight: 600
+          }}
+        >
+          <span>Dữ liệu demo: VLU</span>
         </div>
+
+        {systemStatus?.isDemo ? (
+          <div 
+            className="hide-on-mobile"
+            title="Đang chạy chế độ DEMO LOCAL: Lưu trữ dữ liệu an toàn trên máy, không cần MongoDB"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              background: 'rgba(234, 179, 8, 0.12)',
+              border: '1px solid rgba(234, 179, 8, 0.35)',
+              color: '#d97706',
+              padding: '4px 10px',
+              borderRadius: '20px',
+              fontSize: '12px',
+              fontWeight: 600
+            }}
+          >
+            <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#f59e0b', animation: 'pulse 2s infinite' }}></span>
+            <span>Chế độ demo — dữ liệu mẫu</span>
+          </div>
+        ) : systemStatus && !systemStatus.isDemo ? (
+          <div 
+            className="hide-on-mobile"
+            title="Đang kết nối cơ sở dữ liệu MongoDB chính thức"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              background: 'rgba(22, 163, 74, 0.12)',
+              border: '1px solid rgba(22, 163, 74, 0.35)',
+              color: '#16a34a',
+              padding: '4px 10px',
+              borderRadius: '20px',
+              fontSize: '12px',
+              fontWeight: 600
+            }}
+          >
+            <Database size={13} color="#16a34a" />
+            <span>MongoDB Connected</span>
+          </div>
+        ) : null}
 
         <button
           onClick={() => setDarkMode(!darkMode)}
@@ -148,8 +254,8 @@ export default function Header({
             background: 'var(--bg-tertiary)',
             border: '1px solid var(--border-color)',
             color: 'var(--text-main)',
-            width: '36px',
-            height: '36px',
+            width: '38px',
+            height: '38px',
             borderRadius: '50%',
             display: 'flex',
             alignItems: 'center',
