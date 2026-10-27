@@ -12,9 +12,11 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { api } from '../services/api';
+import AuthModal from '../components/AuthModal';
 
 export default function AccountSecurity() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
+  const [authModalOpen, setAuthModalOpen] = useState(false);
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -57,6 +59,65 @@ export default function AccountSecurity() {
       setLoading(false);
     }
   };
+
+  if (authLoading) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '320px', gap: '16px' }}>
+        <Loader2 size={32} className="spinner" style={{ color: 'var(--vlu-red)' }} />
+        <p style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>
+          Đang tải thông tin bảo mật tài khoản...
+        </p>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div style={{
+        maxWidth: '540px',
+        margin: '40px auto',
+        background: 'var(--bg-secondary)',
+        border: '1px solid var(--border-color)',
+        borderRadius: '16px',
+        padding: '36px 24px',
+        textAlign: 'center',
+        boxShadow: 'var(--shadow-md)'
+      }}>
+        <div style={{
+          width: '64px',
+          height: '64px',
+          borderRadius: '50%',
+          background: 'var(--vlu-red-light)',
+          color: 'var(--vlu-red)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          margin: '0 auto 18px auto'
+        }}>
+          <ShieldCheck size={32} />
+        </div>
+        
+        <h2 style={{ fontSize: '20px', fontWeight: 800, color: 'var(--text-main)', marginBottom: '8px' }}>
+          Yêu Cầu Đăng Nhập
+        </h2>
+        
+        <p style={{ fontSize: '14px', color: 'var(--text-secondary)', lineHeight: '1.6', marginBottom: '24px' }}>
+          Bạn cần đăng nhập tài khoản sinh viên hoặc quản trị viên để quản lý bảo mật và đổi mật khẩu.
+        </p>
+
+        <button
+          onClick={() => setAuthModalOpen(true)}
+          className="btn-vlu-primary"
+          style={{ padding: '10px 24px', fontSize: '14px', fontWeight: 700, margin: '0 auto' }}
+        >
+          <User size={16} />
+          <span>Đăng nhập ngay</span>
+        </button>
+
+        <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} />
+      </div>
+    );
+  }
 
   return (
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px' }}>

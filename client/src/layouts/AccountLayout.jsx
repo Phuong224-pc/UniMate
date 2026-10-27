@@ -91,7 +91,7 @@ export default function AccountLayout({ children }) {
               </div>
               <div className="hide-on-mobile" style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }}>
                 <span>Trợ lý học tập</span>
-                <span style={{ fontSize: '9px', background: 'var(--vlu-red-light)', color: 'var(--vlu-red)', padding: '0 4px', borderRadius: '3px', fontWeight: 600 }}>Demo: VLU</span>
+                <span style={{ fontSize: '9px', background: 'var(--vlu-red-light)', color: 'var(--vlu-red)', padding: '0 4px', borderRadius: '3px', fontWeight: 600 }}>VLU</span>
               </div>
             </div>
           </div>
@@ -179,7 +179,7 @@ export default function AccountLayout({ children }) {
             {darkMode ? <Sun size={16} /> : <Moon size={16} />}
           </button>
 
-          {user && (
+          {user ? (
             <button
               onClick={logout}
               style={{
@@ -199,6 +199,27 @@ export default function AccountLayout({ children }) {
             >
               <LogOut size={15} />
               <span className="hide-on-mobile">Đăng xuất</span>
+            </button>
+          ) : (
+            <button
+              onClick={() => setAuthModalOpen(true)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '6px 14px',
+                background: 'var(--vlu-red)',
+                border: 'none',
+                borderRadius: '8px',
+                color: '#fff',
+                fontSize: '13px',
+                cursor: 'pointer',
+                fontWeight: 600
+              }}
+              title="Đăng nhập tài khoản"
+            >
+              <User size={15} />
+              <span>Đăng nhập</span>
             </button>
           )}
         </div>

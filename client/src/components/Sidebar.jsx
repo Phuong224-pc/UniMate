@@ -145,9 +145,6 @@ export default function Sidebar({
               <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
                 Trợ lý học tập thông minh
               </div>
-              <div style={{ display: 'inline-block', fontSize: '9.5px', color: 'var(--vlu-red)', background: 'var(--vlu-red-light)', padding: '1px 5px', borderRadius: '4px', fontWeight: 600, marginTop: '2px' }}>
-                Dữ liệu demo: VLU
-              </div>
             </div>
           )}
         </div>

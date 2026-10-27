@@ -10,40 +10,33 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { api } from '../services/api';
+import AuthModal from '../components/AuthModal';
 
 // ───────────────────────────────────────────────
 // Defaults
 // ───────────────────────────────────────────────
 const DEFAULT_PROFILE = {
-  fullName: "Trương Trần Thanh Phương",
-  mssv: "2474802010458",
-  cohort: "2024 - 2028",
-  className: "K30 CNTT",
-  faculty: "Khoa Công Nghệ Thông Tin",
-  major: "Kỹ thuật Phần mềm",
-  status: "Đang học (Chính quy)",
-  email: "phuong.2474802010458@vanlanguni.vn",
-  phone: "0901 234 567",
-  dob: "02/01/2006",
-  gender: "Nam",
-  ethnicity: "Kinh",
+  fullName: "",
+  mssv: "",
+  cohort: "",
+  className: "",
+  faculty: "",
+  major: "",
+  status: "",
+  email: "",
+  phone: "",
+  dob: "",
+  gender: "",
+  ethnicity: "",
   nationality: "Việt Nam",
-  address: "Quận Bình Thạnh, TP. Hồ Chí Minh",
+  address: "",
   idNumber: "",
-  trainingCourse: "K30"
+  trainingCourse: ""
 };
 
-const DEFAULT_ACTIVITIES = [
-  { id: 1, type: 'activity', name: 'CLB Kỹ thuật phần mềm VLU', role: 'Thành viên', year: '2024', icon: '💻' },
-  { id: 2, type: 'skill', name: 'ReactJS / Next.js', level: 'Trung cấp', icon: '⚛️' },
-  { id: 3, type: 'skill', name: 'Python / AI & ML', level: 'Cơ bản', icon: '🐍' },
-];
+const DEFAULT_ACTIVITIES = [];
 
-const DEFAULT_CERTS = [
-  { id: 1, name: 'TOEIC', score: '', issuer: 'IIG Vietnam', date: '', status: 'Chưa có' },
-  { id: 2, name: 'MOS Word/Excel', score: '', issuer: 'Microsoft', date: '', status: 'Chưa có' },
-  { id: 3, name: 'Giáo dục quốc phòng', score: '', issuer: 'VLU', date: '', status: 'Chưa hoàn thành' },
-];
+const DEFAULT_CERTS = [];
 
 const INFO_SUBTABS = [
   { key: 'info', label: 'Thông tin cá nhân', icon: User },
@@ -237,13 +230,14 @@ export default function StudentProfilePage({ defaultTab = 'info' }) {
   };
 
   // ─── 1. PERSONAL INFO STATE ───
+  const [authModalOpen, setAuthModalOpen] = useState(false);
   const [infoSubTab, setInfoSubTab] = useState('info');
   const [profile, setProfile] = useState(() => ({
     ...DEFAULT_PROFILE,
     ...(authProfile || {}),
-    email: authProfile?.email || user?.email || DEFAULT_PROFILE.email,
-    mssv: authProfile?.mssv || user?.mssv || DEFAULT_PROFILE.mssv,
-    fullName: authProfile?.fullName || user?.fullName || DEFAULT_PROFILE.fullName,
+    email: authProfile?.email || user?.email || '',
+    mssv: authProfile?.mssv || user?.mssv || '',
+    fullName: authProfile?.fullName || user?.fullName || '',
   }));
 
   const [avatarUrl, setAvatarUrl] = useState(() => authProfile?.avatar || null);
@@ -397,13 +391,17 @@ export default function StudentProfilePage({ defaultTab = 'info' }) {
   const fileInputRef = useRef(null);
 
   const loadGrades = async () => {
+    if (!user) {
+      setCourses([]);
+      setLoadingGrades(false);
+      return;
+    }
     setLoadingGrades(true);
     try {
       if (authProfile && authProfile.courses && authProfile.courses.length > 0) {
         setCourses(authProfile.courses);
-      } else if (user?.mssv || profile?.mssv) {
-        const mssv = user?.mssv || profile?.mssv;
-        const res = await api.getStudentByMssv(mssv);
+      } else if (user?.mssv) {
+        const res = await api.getStudentByMssv(user.mssv);
         if (res.success && res.data) {
           setCourses(res.data.courses || []);
         }
@@ -416,7 +414,7 @@ export default function StudentProfilePage({ defaultTab = 'info' }) {
   };
 
   useEffect(() => {
-    if (activeMainTab === 'grades') {
+    if (activeMainTab === 'grades' && user) {
       loadGrades();
     }
   }, [activeMainTab, authProfile, user]);
@@ -679,8 +677,76 @@ export default function StudentProfilePage({ defaultTab = 'info' }) {
     transition: 'all 0.15s'
   };
 
-  if (!authLoading && isAdmin) {
+  if (authLoading) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '380px', gap: '16px' }}>
+        <Loader2 size={36} className="spinner" style={{ color: 'var(--vlu-red)' }} />
+        <p style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>
+          Đang đồng bộ dữ liệu sinh viên từ máy chủ MongoDB...
+        </p>
+      </div>
+    );
+  }
+
+  if (isAdmin) {
     return null;
+  }
+
+  if (!user) {
+    return (
+      <div style={{
+        maxWidth: '560px',
+        margin: '40px auto',
+        background: 'var(--bg-secondary)',
+        border: '1px solid var(--border-color)',
+        borderRadius: '16px',
+        padding: '36px 24px',
+        textAlign: 'center',
+        boxShadow: 'var(--shadow-md)'
+      }}>
+        <div style={{
+          width: '64px',
+          height: '64px',
+          borderRadius: '50%',
+          background: 'var(--vlu-red-light)',
+          color: 'var(--vlu-red)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          margin: '0 auto 18px auto'
+        }}>
+          <Shield size={32} />
+        </div>
+        
+        <h2 style={{ fontSize: '20px', fontWeight: 800, color: 'var(--text-main)', marginBottom: '8px' }}>
+          Yêu Cầu Đăng Nhập Tài Khoản Sinh Viên
+        </h2>
+        
+        <p style={{ fontSize: '14px', color: 'var(--text-secondary)', lineHeight: '1.6', marginBottom: '24px' }}>
+          Hồ sơ cá nhân và kết quả học tập được bảo mật và liên kết trực tiếp với cơ sở dữ liệu MongoDB. Vui lòng đăng nhập bằng MSSV hoặc email trường để xem dữ liệu của bạn.
+        </p>
+
+        <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
+          <button
+            onClick={() => setAuthModalOpen(true)}
+            className="btn-vlu-primary"
+            style={{ padding: '10px 24px', fontSize: '14px', fontWeight: 700 }}
+          >
+            <User size={16} />
+            <span>Đăng nhập ngay</span>
+          </button>
+          <button
+            onClick={() => navigate('/')}
+            className="btn-secondary"
+            style={{ padding: '10px 20px', fontSize: '14px' }}
+          >
+            Về trang chủ
+          </button>
+        </div>
+
+        <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} />
+      </div>
+    );
   }
 
   return (

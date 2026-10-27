@@ -18,7 +18,7 @@ import { useAuth } from '../hooks/useAuth';
 
 export default function GpaPage() {
   const { user, profile } = useAuth();
-  const initialMssv = profile?.mssv || user?.mssv || '2474802010458';
+  const initialMssv = profile?.mssv || user?.mssv || '';
   const [mssvInput, setMssvInput] = useState(initialMssv);
   const [student, setStudent] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -58,9 +58,13 @@ export default function GpaPage() {
   };
 
   useEffect(() => {
-    const activeCode = profile?.mssv || user?.mssv || initialMssv;
+    const activeCode = profile?.mssv || user?.mssv || '';
     setMssvInput(activeCode);
-    handleLookup(activeCode);
+    if (activeCode) {
+      handleLookup(activeCode);
+    } else {
+      setStudent(null);
+    }
   }, [profile?.mssv, user?.mssv]);
 
   // Tính toán các học kỳ có trong bảng điểm
