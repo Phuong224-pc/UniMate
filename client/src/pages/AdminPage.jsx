@@ -28,6 +28,7 @@ import {
 } from 'lucide-react';
 import AdminLayout from '../layouts/AdminLayout';
 import AdminImportModal from '../components/AdminImportModal';
+import AccountSecurity from './AccountSecurity';
 import { api } from '../services/api';
 import { useAuth } from '../hooks/useAuth';
 
@@ -1100,6 +1101,13 @@ export default function AdminPage() {
               ))}
             </div>
           )}
+        </div>
+      )}
+
+      {/* ─── 7. SECTION: BẢO MẬT TÀI KHOẢN ─── */}
+      {activeSection === 'security' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          <AccountSecurity />
         </div>
       )}
 

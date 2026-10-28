@@ -135,7 +135,8 @@ export default function AdminLayout({ children, activeSection, onSelectSection }
     { id: 'students', label: 'Hồ sơ & Bảng điểm sinh viên', icon: GraduationCap },
     { id: 'curriculum', label: 'Đào tạo & Môn học K30', icon: BookOpen },
     { id: 'schedules', label: 'Quản lý Thời khóa biểu', icon: Calendar },
-    { id: 'prompts', label: 'Cấu hình Trợ lý AI (Prompts)', icon: Bot }
+    { id: 'prompts', label: 'Cấu hình Trợ lý AI (Prompts)', icon: Bot },
+    { id: 'security', label: 'Bảo mật tài khoản', icon: ShieldCheck }
   ];
 
   return (

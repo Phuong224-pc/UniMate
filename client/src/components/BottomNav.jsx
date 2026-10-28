@@ -4,8 +4,7 @@ import {
   Bot, 
   Map, 
   User,
-  ShieldAlert,
-  ShieldCheck 
+  ShieldAlert
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 
@@ -16,6 +15,7 @@ export default function BottomNav() {
   // Trên Mobile:
   // 1. TKB & Lộ trình gộp thành: "Lộ trình & Học vụ"
   // 2. Bảng điểm & Hồ sơ gộp thành: "Hồ sơ sinh viên"
+  // 3. Bảo mật được đưa vào trong menu Quản trị
   const items = isAdmin ? [
     { to: '/', label: 'Chatbot', icon: Bot, exact: true },
     { 
@@ -24,8 +24,13 @@ export default function BottomNav() {
       icon: Map, 
       matchPaths: ['/roadmap', '/schedule', '/advisor', '/graduation', '/career'] 
     },
-    { to: '/admin', label: 'Quản trị', icon: ShieldAlert, matchPaths: ['/admin'] },
-    { to: '/account/security', label: 'Bảo mật', icon: ShieldCheck, matchPaths: ['/account/security'] }
+    { 
+      to: '/account/profile', 
+      label: 'Hồ sơ sinh viên', 
+      icon: User, 
+      matchPaths: ['/account', '/profile', '/gpa'] 
+    },
+    { to: '/admin', label: 'Quản trị', icon: ShieldAlert, matchPaths: ['/admin'] }
   ] : [
     { to: '/', label: 'Chatbot', icon: Bot, exact: true },
     { 
