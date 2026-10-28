@@ -178,8 +178,8 @@ export default function Sidebar({
         </button>
       </div>
 
-      {/* Collapsible Lộ trình & Học vụ (Menu trên) */}
-      <div style={{ padding: '0 8px', marginBottom: '8px' }}>
+      {/* Collapsible Lộ trình & Học vụ (Chỉ hiện trên desktop, ẩn trên mobile) */}
+      <div className="hide-on-mobile" style={{ padding: '0 8px', marginBottom: '8px' }}>
         {!isCollapsed && (
           <div 
             onClick={() => setAcademicMenuOpen(!academicMenuOpen)}

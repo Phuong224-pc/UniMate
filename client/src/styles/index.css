@@ -359,6 +359,11 @@ body {
     -webkit-tap-highlight-color: transparent;
   }
 
+  .bottom-nav-item span {
+    white-space: nowrap;
+    font-size: 11px;
+  }
+
   .bottom-nav-item.active {
     color: var(--vlu-red);
     font-weight: 700;
@@ -786,9 +791,10 @@ button { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
    ============================================================ */
 
 .hide-on-mobile { display: inline; }
+div.hide-on-mobile, header.hide-on-mobile, section.hide-on-mobile { display: block; }
 .show-on-mobile { display: none; }
 @media (max-width: 768px) {
-  .hide-on-mobile { display: none !important; }
+  .hide-on-mobile, div.hide-on-mobile, header.hide-on-mobile, section.hide-on-mobile { display: none !important; }
   .show-on-mobile { display: block !important; }
   .show-on-mobile-flex { display: flex !important; }
   .show-on-mobile-inline { display: inline !important; }

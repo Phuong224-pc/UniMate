@@ -2,9 +2,7 @@ import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { 
   Bot, 
-  Calendar, 
   Map, 
-  Calculator, 
   User,
   ShieldAlert,
   ShieldCheck 
@@ -15,22 +13,40 @@ export default function BottomNav() {
   const location = useLocation();
   const { isAdmin } = useAuth();
 
+  // Trên Mobile:
+  // 1. TKB & Lộ trình gộp thành: "Lộ trình & Học vụ"
+  // 2. Bảng điểm & Hồ sơ gộp thành: "Hồ sơ sinh viên"
   const items = isAdmin ? [
     { to: '/', label: 'Chatbot', icon: Bot, exact: true },
-    { to: '/schedule', label: 'TKB', icon: Calendar },
-    { to: '/roadmap', label: 'Lộ trình', icon: Map },
-    { to: '/admin', label: 'Quản trị', icon: ShieldAlert },
-    { to: '/account/security', label: 'Bảo mật', icon: ShieldCheck }
+    { 
+      to: '/roadmap', 
+      label: 'Lộ trình & Học vụ', 
+      icon: Map, 
+      matchPaths: ['/roadmap', '/schedule', '/advisor', '/graduation', '/career'] 
+    },
+    { to: '/admin', label: 'Quản trị', icon: ShieldAlert, matchPaths: ['/admin'] },
+    { to: '/account/security', label: 'Bảo mật', icon: ShieldCheck, matchPaths: ['/account/security'] }
   ] : [
     { to: '/', label: 'Chatbot', icon: Bot, exact: true },
-    { to: '/schedule', label: 'TKB', icon: Calendar },
-    { to: '/roadmap', label: 'Lộ trình', icon: Map },
-    { to: '/account/grades', label: 'Bảng điểm', icon: Calculator },
-    { to: '/account/profile', label: 'Hồ sơ', icon: User }
+    { 
+      to: '/roadmap', 
+      label: 'Lộ trình & Học vụ', 
+      icon: Map, 
+      matchPaths: ['/roadmap', '/schedule', '/advisor', '/graduation', '/career'] 
+    },
+    { 
+      to: '/account/profile', 
+      label: 'Hồ sơ sinh viên', 
+      icon: User, 
+      matchPaths: ['/account', '/profile', '/gpa'] 
+    }
   ];
 
   const isItemActive = (item) => {
     if (item.exact) return location.pathname === item.to;
+    if (item.matchPaths) {
+      return item.matchPaths.some(p => location.pathname === p || location.pathname.startsWith(p + '/') || location.pathname.startsWith(p + '?'));
+    }
     return location.pathname.startsWith(item.to);
   };
 
