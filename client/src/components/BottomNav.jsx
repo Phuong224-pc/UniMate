@@ -24,12 +24,6 @@ export default function BottomNav() {
       icon: Map, 
       matchPaths: ['/roadmap', '/schedule', '/advisor', '/graduation', '/career'] 
     },
-    { 
-      to: '/account/profile', 
-      label: 'Hồ sơ sinh viên', 
-      icon: User, 
-      matchPaths: ['/account', '/profile', '/gpa'] 
-    },
     { to: '/admin', label: 'Quản trị', icon: ShieldAlert, matchPaths: ['/admin'] }
   ] : [
     { to: '/', label: 'Chatbot', icon: Bot, exact: true },
