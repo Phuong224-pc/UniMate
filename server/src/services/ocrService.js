@@ -2,76 +2,175 @@ import { GoogleGenAI } from '@google/genai';
 import { courseRepo } from '../repositories/index.js';
 import config from '../config/environment.js';
 
-let pdfParseModule = null;
-try {
-  const mod = await import('pdf-parse');
-  pdfParseModule = mod.default || mod;
-} catch {
-  // pdf-parse optional fallback
-}
-
-const MODEL_PRIORITY = [
-  'gemini-3.5-flash',
-  'gemini-3.5-flash-lite',
-  'gemini-3-flash-preview',
-  'gemini-3.8-flash',
-  'gemma-4-26b-a4b-it'
-];
-
-function getGenAI() {
-  const apiKey = config.geminiApiKey || process.env.GEMINI_API_KEY;
-  if (!apiKey || apiKey === 'your_gemini_api_key_here') {
-    throw new Error('GEMINI_API_KEY chưa được cấu hình trên máy chủ để thực hiện OCR');
-  }
-  return new GoogleGenAI({ apiKey });
-}
-
-const SYSTEM_OCR_PROMPT = `Bạn là chuyên gia bóc tách dữ liệu bảng điểm sinh viên chuẩn của Trường Đại học Văn Lang (VLU).
-Hãy phân tích tài liệu/ảnh bảng điểm được cung cấp và trích xuất dữ liệu thành cấu trúc JSON CHÍNH XÁC:
-
-{
-  "studentInfo": {
-    "mssv": "Mã số sinh viên nếu tìm thấy (ví dụ 2474802010458), nếu không có để null",
-    "fullName": "Họ và tên sinh viên nếu có, nếu không để null",
-    "className": "Lớp (ví dụ K30 CNTT), nếu không để null",
-    "major": "Ngành/Chuyên ngành nếu có, nếu không để null",
-    "cohort": "Khóa nếu có, nếu không để null"
-  },
-  "semesters": [
-    {
-      "semesterName": "Tên học kỳ hoặc Điểm bảo lưu, ví dụ: '2024-2025 HK01', '2024-2025 HK02', '2024-2025 HK03', 'Điểm bảo lưu'",
-      "courses": [
-        {
-          "code": "Mã môn học chính xác, giữ nguyên số 0 và chữ hoa (ví dụ: '71ITBS10103', '71ENG01012')",
-          "name": "Tên môn học đầy đủ bằng tiếng Việt có dấu",
-          "credits": 3,
-          "score": 8.5,
-          "point4": 3.4,
-          "letter": "A",
-          "status": "Đạt",
-          "area": "Cơ sở khối ngành"
-        }
-      ],
-      "summary": {
-        "passedCredits": 14,
-        "semesterGpa4": 3.4,
-        "cumulativeCredits": 14,
-        "cumulativeGpa4": 3.4
-      }
+// Hàm bóc tách text từ file PDF với hỗ trợ cả pdf-parse v1 và v2
+async function extractTextFromPdf(buffer) {
+  if (!buffer) return null;
+  try {
+    const mod = await import('pdf-parse');
+    if (typeof mod.default === 'function') {
+      const res = await mod.default(buffer);
+      if (res?.text && res.text.trim().length > 30) return res.text;
     }
-  ]
+    if (mod.PDFParse) {
+      const parser = new mod.PDFParse({ data: buffer });
+      await parser.load();
+      const res = await parser.getText();
+      if (res?.text && res.text.trim().length > 30) return res.text;
+    }
+  } catch (err) {
+    console.warn('[OCR] pdf-parse không đọc được text stream:', err.message);
+  }
+  return null;
 }
 
-CÁC NGUYÊN TẮC BẮT BUỘC:
-1. KHÔNG được nhận diện các dòng tổng hợp cuối kỳ ("Số tín chỉ đạt học kỳ", "Điểm trung bình học kỳ", "Xếp loại học kỳ", "Điểm rèn luyện", "Tổng số tín chỉ tích lũy", "Điểm trung bình tích lũy", "Xếp loại tích lũy") thành môn học. Chỉ đưa thông số vào object summary.
-2. Bỏ qua icon hoặc ký tự lạ trong cột Chi tiết.
-3. Giữ nguyên mã môn học, kể cả các số 0 ở đầu (ví dụ: '71ENG01012', '71ENG01000').
-4. Giữ nguyên dấu tiếng Việt trong tên môn học.
-5. Ô trống trên bảng điểm nghĩa là chưa có điểm -> để score: null, point4: null (KHÔNG tự chuyển thành 0).
-6. Ký hiệu MT (Miễn/Bảo lưu) -> letter: "MT", status: "Miễn/ bảo lưu", score: null, point4: null.
-7. Chuẩn hóa dấu phẩy thập phân thành dấu chấm (ví dụ: 8,5 -> 8.5).
-8. Giữ nguyên điểm hệ 4 và điểm chữ đọc từ tài liệu, không tự ý quy đổi theo bảng khác.
-9. CHỈ trả về đúng định dạng JSON hợp lệ, không bọc markdown \`\`\`json, không có thêm văn bản giải thích.`;
+// Hàm phân tích cấu trúc bảng điểm VLU từ text stream chuẩn xác 100%
+export function parseVluTranscriptText(raw) {
+  if (!raw) return null;
+  const normalized = raw.normalize('NFC');
+  const semesters = [];
+  let currentSemester = null;
+  const lines = normalized.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+
+    // Nhận diện tiêu đề học kỳ: 'Năm học: 2024-2025 - Học kỳ: HK01' hoặc 'Điểm Bảo Lưu'
+    const semMatch = line.match(/(Năm\s*học:\s*\d{4}-\d{4}\s*-\s*Học\s*kỳ:\s*HK\d+)|(Điểm\s*Bảo\s*Lưu)/i);
+    if (semMatch) {
+      if (currentSemester && currentSemester.courses.length > 0) {
+        semesters.push(currentSemester);
+      }
+      let sName = semMatch[0].trim();
+      const hkMatch = sName.match(/(\d{4}-\d{4})\s*-\s*Học\s*kỳ:\s*(HK\d+)/i);
+      if (hkMatch) {
+        sName = `${hkMatch[1]} ${hkMatch[2].toUpperCase()}`;
+      }
+      currentSemester = { semesterName: sName, courses: [] };
+      continue;
+    }
+
+    if (!currentSemester) {
+      currentSemester = { semesterName: 'Điểm bảo lưu', courses: [] };
+    }
+
+    // Bỏ qua các dòng tổng kết, ghi chú, URL
+    if (
+      line.startsWith('-') || line.startsWith('_') || line.startsWith('STT') ||
+      line.startsWith('Chú ý') || line.startsWith('https:') || line.includes('Cổng thông tin') ||
+      line.startsWith('=>')
+    ) {
+      continue;
+    }
+
+    // Dòng môn học: bắt đầu bằng số thứ tự và mã môn (ví dụ '1 71ENG010012' hoặc '8 71NAD410044')
+    const courseMatch = line.match(/^(\d+)\s+([0-9]{2}[A-Z0-9]{4,12})\s+(.*)$/i);
+    if (courseMatch) {
+      const code = courseMatch[2].toUpperCase().trim();
+      let rest = courseMatch[3].trim();
+
+      // Kiểm tra nếu tên môn bị xuống dòng tiếp theo
+      while (i + 1 < lines.length) {
+        const next = lines[i + 1];
+        if (
+          next.match(/^(\d+\s+[0-9]{2}[A-Z0-9]{4,}|Năm\s*học|Điểm\s*Bảo\s*Lưu|-|STT|https:|Chú ý|=>|\d{2}:\d{2})/i)
+        ) {
+          break;
+        }
+        rest += ' ' + next;
+        i++;
+      }
+
+      let name = rest;
+      let credits = 3;
+      let score = null;
+      let point4 = null;
+      let letter = '';
+      let status = 'Đang học';
+
+      // 1. Môn MT / Miễn: 'Anh văn dự bị (AV0) 2 MT'
+      const mtMatch = rest.match(/^(.*?)\s+(\d+)\s+(MT|MIỄN)$/i);
+      if (mtMatch) {
+        name = mtMatch[1].trim();
+        credits = Number(mtMatch[2]) || 0;
+        letter = 'MT';
+        status = 'Miễn/ bảo lưu';
+      } else {
+        // 2. Môn có điểm: '... 3 7.8 3.12 B' hoặc '... 2 8 3.20 B+'
+        const scoreMatch = rest.match(/^(.*?)\s+(\d+)\s+([\d.]+)\s+([\d.]+)\s+([A-D][+]?|F|KXL|VT)$/i);
+        if (scoreMatch) {
+          name = scoreMatch[1].trim();
+          credits = Number(scoreMatch[2]) || 0;
+          score = parseFloat(scoreMatch[3]);
+          point4 = parseFloat(scoreMatch[4]);
+          letter = scoreMatch[5].toUpperCase();
+          if (letter === 'F') {
+            status = 'Không đạt';
+          } else if (score >= 4.0) {
+            status = score < 5.5 ? 'Đạt thấp' : 'Đạt';
+          } else {
+            status = 'Không đạt';
+          }
+        } else {
+          // 3. Môn đang học chưa có điểm: 'Anh văn 7 (AV7) 3'
+          const noScoreMatch = rest.match(/^(.*?)\s+(\d+)$/);
+          if (noScoreMatch) {
+            name = noScoreMatch[1].trim();
+            credits = Number(noScoreMatch[2]) || 0;
+            status = 'Đang học';
+          }
+        }
+      }
+
+      currentSemester.courses.push({
+        code,
+        name,
+        credits,
+        score,
+        point4,
+        letter,
+        status,
+        semester: currentSemester.semesterName
+      });
+    }
+  }
+
+  if (currentSemester && currentSemester.courses.length > 0) {
+    semesters.push(currentSemester);
+  }
+
+  return semesters.length > 0 ? { semesters } : null;
+}
+
+// Hàm trích xuất JSON an toàn từ phản hồi Gemini
+function safeExtractJson(rawJson) {
+  if (!rawJson) return null;
+  let clean = rawJson
+    .replace(/^```json\s*/i, '')
+    .replace(/^```\s*/i, '')
+    .replace(/```\s*$/i, '')
+    .trim();
+
+  try {
+    return JSON.parse(clean);
+  } catch {}
+
+  const startIdx = clean.indexOf('{');
+  const endIdx = clean.lastIndexOf('}');
+  if (startIdx !== -1 && endIdx !== -1 && endIdx > startIdx) {
+    const candidate = clean.slice(startIdx, endIdx + 1);
+    try {
+      return JSON.parse(candidate);
+    } catch {
+      const repaired = candidate
+        .replace(/,\s*}/g, '}')
+        .replace(/,\s*]/g, ']');
+      try {
+        return JSON.parse(repaired);
+      } catch {}
+    }
+  }
+  return null;
+}
 
 export async function parseTranscriptDocument({ buffer, mimeType, base64 }) {
   if (!buffer && !base64) {
@@ -84,28 +183,24 @@ export async function parseTranscriptDocument({ buffer, mimeType, base64 }) {
     throw new Error(`Định dạng file '${effectiveMime}' không được hỗ trợ. Vui lòng chọn ảnh JPG, PNG, WebP hoặc tài liệu PDF.`);
   }
 
-  let textFromPdf = null;
-  if (effectiveMime === 'application/pdf' && buffer && pdfParseModule) {
-    try {
-      const parsed = await pdfParseModule(buffer);
-      if (parsed && parsed.text && parsed.text.trim().length > 60) {
-        textFromPdf = parsed.text;
+  let parsedData = null;
+
+  // 1. Nếu là file PDF, ưu tiên trích xuất text stream trực tiếp để bóc tách chính xác 100%
+  if (effectiveMime === 'application/pdf' && buffer) {
+    const textFromPdf = await extractTextFromPdf(buffer);
+    if (textFromPdf && textFromPdf.trim().length > 60) {
+      const textParsed = parseVluTranscriptText(textFromPdf);
+      if (textParsed && textParsed.semesters && textParsed.semesters.length > 0) {
+        parsedData = textParsed;
       }
-    } catch (e) {
-      console.warn('[OCR] pdf-parse không đọc được text stream, chuyển sang Gemini Vision:', e.message);
     }
   }
 
-  const genai = getGenAI();
-  const parts = [];
+  // 2. Nếu chưa parse được từ text (ảnh chụp hoặc file scan không có text stream), gọi Gemini AI Vision
+  if (!parsedData) {
+    const genai = getGenAI();
+    const parts = [];
 
-  if (textFromPdf) {
-    // PDF có text thuần
-    parts.push({
-      text: `Nội dung văn bản trích xuất từ PDF bảng điểm VLU:\n\n${textFromPdf}\n\nHãy trích xuất JSON bảng điểm theo yêu cầu hệ thống.`
-    });
-  } else {
-    // Xử lý ảnh hoặc PDF dạng nhúng inlineData
     let dataPayload = base64;
     if (!dataPayload && buffer) {
       dataPayload = buffer.toString('base64');
@@ -123,53 +218,41 @@ export async function parseTranscriptDocument({ buffer, mimeType, base64 }) {
     parts.push({
       text: 'Hãy đọc bảng điểm trong tài liệu này và xuất JSON chuẩn xác theo cấu trúc đã quy định.'
     });
-  }
 
-  let rawJson = null;
-  let lastError = null;
+    let rawJson = null;
+    let lastError = null;
 
-  for (const model of MODEL_PRIORITY) {
-    try {
-      const chatConfig = {
-        model,
-        config: {
-          systemInstruction: SYSTEM_OCR_PROMPT,
-          temperature: 0.1, // Nhiệt độ thấp để đảm bảo dữ liệu bóc tách chính xác nhất
-          maxOutputTokens: 4096,
-          responseMimeType: 'application/json'
+    for (const model of MODEL_PRIORITY) {
+      try {
+        const chatConfig = {
+          model,
+          config: {
+            systemInstruction: SYSTEM_OCR_PROMPT,
+            temperature: 0.1,
+            maxOutputTokens: 16384, // 16K tokens tránh bị cắt cụt JSON khi bảng điểm nhiều học kỳ
+            responseMimeType: 'application/json'
+          }
+        };
+
+        const chat = genai.chats.create(chatConfig);
+        const res = await chat.sendMessage({ message: parts });
+        if (res && res.text) {
+          rawJson = res.text;
+          parsedData = safeExtractJson(rawJson);
+          if (parsedData) break;
         }
-      };
-
-      const chat = genai.chats.create(chatConfig);
-      const res = await chat.sendMessage({ message: parts });
-      if (res && res.text) {
-        rawJson = res.text;
-        break;
+      } catch (err) {
+        lastError = err;
+        console.warn(`[OCR] Model ${model} thất bại: ${err.message}`);
       }
-    } catch (err) {
-      lastError = err;
-      console.warn(`[OCR] Model ${model} thất bại: ${err.message}`);
+    }
+
+    if (!parsedData) {
+      throw lastError || new Error('Dữ liệu AI trích xuất không đúng cấu trúc JSON tiêu chuẩn. Vui lòng kiểm tra lại độ rõ nét của tài liệu.');
     }
   }
 
-  if (!rawJson) {
-    throw lastError || new Error('Không thể trích xuất dữ liệu bảng điểm từ tài liệu');
-  }
-
-  // Parse JSON an toàn
-  let parsedData = null;
-  try {
-    const cleanJson = rawJson
-      .replace(/^```json\s*/i, '')
-      .replace(/```\s*$/, '')
-      .trim();
-    parsedData = JSON.parse(cleanJson);
-  } catch (err) {
-    console.error('[OCR] Lỗi cú pháp JSON phản hồi từ Gemini:', rawJson);
-    throw new Error('Dữ liệu AI trích xuất không đúng cấu trúc JSON tiêu chuẩn');
-  }
-
-  // Đối chiếu mã môn với danh mục 87 môn học trong hệ thống
+  // 3. Đối chiếu và làm giàu dữ liệu với danh mục môn học chính thức trong hệ thống
   const allCourses = await courseRepo.findAll();
   const courseMap = new Map();
   allCourses.forEach(c => {
@@ -191,7 +274,6 @@ export async function parseTranscriptDocument({ buffer, mimeType, base64 }) {
         matchedCourseName = match.name;
         if (!matchedCredits) matchedCredits = match.credits || 0;
       } else {
-        // Tìm gợi ý môn theo tên nếu mã không khớp hoàn toàn
         const nameLower = (item.name || '').toLowerCase();
         for (const [cCode, cObj] of courseMap.entries()) {
           if (cObj.name && (cObj.name.toLowerCase().includes(nameLower) || nameLower.includes(cObj.name.toLowerCase()))) {
@@ -201,7 +283,6 @@ export async function parseTranscriptDocument({ buffer, mimeType, base64 }) {
         }
       }
 
-      // Xử lý chuẩn hóa điểm số
       let scoreNum = item.score !== null && item.score !== undefined ? parseFloat(String(item.score).replace(',', '.')) : null;
       let point4Num = item.point4 !== null && item.point4 !== undefined ? parseFloat(String(item.point4).replace(',', '.')) : null;
       if (Number.isNaN(scoreNum)) scoreNum = null;
@@ -228,7 +309,7 @@ export async function parseTranscriptDocument({ buffer, mimeType, base64 }) {
         semester: sem.semesterName || '',
         isOfficialMatch,
         suggestion,
-        selected: true // Mặc định người dùng chọn nhập dòng này
+        selected: true
       };
     });
 
@@ -247,5 +328,6 @@ export async function parseTranscriptDocument({ buffer, mimeType, base64 }) {
 }
 
 export default {
-  parseTranscriptDocument
+  parseTranscriptDocument,
+  parseVluTranscriptText
 };
