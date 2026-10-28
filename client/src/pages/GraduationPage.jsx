@@ -39,25 +39,25 @@ export default function GraduationPage() {
   const totalCredits = 126;
   const currentCredits = student?.officialCumulativeCredits || 0;
   const progressPercent = Math.min(100, Math.round((currentCredits / totalCredits) * 100));
-  const hasGdqp = student?.courses?.some(c => c.code.startsWith('71NAD') && (c.status === 'Dat' || c.status === '\u0110\u1ea1t'));
-  const hasGdtc = student?.courses?.some(c => c.code.startsWith('71PE') && (c.status === 'Dat' || c.status === '\u0110\u1ea1t'));
-  const hasAvPass = student?.courses?.some(c => (c.code.includes('ENG4') || c.code.includes('ENG5')) && (c.status === 'Dat' || c.status === '\u0110\u1ea1t' || c.status === 'Dat thap'));
+  const hasGdqp = student?.courses?.some(c => c.code.startsWith('71NAD') && (c.status === 'Dat' || c.status === '\u0110\u1ea1t' || c.status === 'Đạt'));
+  const hasGdtc = student?.courses?.some(c => c.code.startsWith('71PE') && (c.status === 'Dat' || c.status === '\u0110\u1ea1t' || c.status === 'Đạt'));
+  const hasAvPass = student?.courses?.some(c => (c.code.includes('ENG4') || c.code.includes('ENG5')) && (c.status === 'Dat' || c.status === '\u0110\u1ea1t' || c.status === 'Đạt' || c.status === 'Dat thap' || c.status === 'Đạt thấp'));
 
   const conditions = [
-    { id: 1, title: 'Tich luy toi thieu 126 Tin chi Khung K30', status: currentCredits >= 126 ? 'passed' : 'in_progress', desc: 'Hien da tich luy ' + currentCredits + '/126 tin chi (' + progressPercent + '%)', icon: Award },
-    { id: 2, title: 'Chung chi Ngoai ngu (TOEIC 500+ / IELTS 5.0+)', status: hasAvPass ? 'passed' : 'pending', desc: hasAvPass ? 'Da hoan thanh Anh van chuyen nganh' : 'Can nop chung chi truoc dot xet tot nghiep', icon: FileCheck },
-    { id: 3, title: 'Chung chi Tin hoc MOS (Word, Excel, PowerPoint)', status: 'in_progress', desc: 'Khoa CNTT xet mien mot so phan hoac nop chung chi chuan', icon: ShieldCheck },
-    { id: 4, title: 'Chung chi Giao duc Quoc phong & An ninh (GDQP 1-4)', status: hasGdqp ? 'passed' : 'pending', desc: hasGdqp ? 'Da hoan thanh GDQP' : 'Can hoan thanh cac hoc phan GDQP', icon: ShieldCheck },
-    { id: 5, title: 'Chung chi Giao duc The chat (GDTC)', status: hasGdtc ? 'passed' : 'pending', desc: hasGdtc ? 'Da hoan thanh GDTC' : 'Can hoan thanh cac hoc phan GDTC', icon: Activity },
+    { id: 1, title: 'Tích lũy tối thiểu 126 Tín chỉ Khung K30', status: currentCredits >= 126 ? 'passed' : 'in_progress', desc: 'Hiện đã tích lũy ' + currentCredits + '/126 tín chỉ (' + progressPercent + '%)', icon: Award },
+    { id: 2, title: 'Chứng chỉ Ngoại ngữ (TOEIC 500+ / IELTS 5.0+)', status: hasAvPass ? 'passed' : 'pending', desc: hasAvPass ? 'Đã hoàn thành Anh văn chuyên ngành' : 'Cần nộp chứng chỉ trước đợt xét tốt nghiệp', icon: FileCheck },
+    { id: 3, title: 'Chứng chỉ Tin học MOS (Word, Excel, PowerPoint)', status: 'in_progress', desc: 'Khoa CNTT xét miễn một số phần hoặc nộp chứng chỉ chuẩn', icon: ShieldCheck },
+    { id: 4, title: 'Chứng chỉ Giáo dục Quốc phòng & An ninh (GDQP 1-4)', status: hasGdqp ? 'passed' : 'pending', desc: hasGdqp ? 'Đã hoàn thành GDQP' : 'Cần hoàn thành các học phần GDQP', icon: ShieldCheck },
+    { id: 5, title: 'Chứng chỉ Giáo dục Thể chất (GDTC)', status: hasGdtc ? 'passed' : 'pending', desc: hasGdtc ? 'Đã hoàn thành GDTC' : 'Cần hoàn thành các học phần GDTC', icon: Activity },
   ];
 
   const gradQuickReplies = [
-    { label: 'Con thieu gi?', text: student ? ('Toi co ' + currentCredits + '/126 tin chi, con thieu ' + (126 - currentCredits) + ' tin chi. Toi can nhung gi de tot nghiep?') : 'Toi can thieu gi de tot nghiep?' },
-    { label: 'Khi nao tot nghiep?', text: student ? ('GPA toi la ' + student.officialCumulativeGpa4 + ', da hoc ' + currentCredits + '/126 TC. Du kien khi nao toi tot nghiep?') : 'Du kien khi nao toi tot nghiep?' },
-    { label: 'Mon can uu tien', text: 'Toi nen hoc mon nao truoc de dam bao tot nghiep dung han?' },
+    { label: 'Còn thiếu gì?', text: student ? ('Tôi có ' + currentCredits + '/126 tín chỉ, còn thiếu ' + (126 - currentCredits) + ' tín chỉ. Tôi cần những gì để tốt nghiệp?') : 'Tôi còn thiếu gì để tốt nghiệp?' },
+    { label: 'Khi nào tốt nghiệp?', text: student ? ('GPA tôi là ' + student.officialCumulativeGpa4 + ', đã học ' + currentCredits + '/126 TC. Dự kiến khi nào tôi tốt nghiệp?') : 'Dự kiến khi nào tôi tốt nghiệp?' },
+    { label: 'Môn cần ưu tiên', text: 'Tôi nên học môn nào trước để đảm bảo tốt nghiệp đúng hạn?' },
   ];
   const gradSystemContext = student
-    ? ('Sinh vien: ' + student.name + ', MSSV: ' + student.mssv + ', GPA: ' + student.officialCumulativeGpa4 + '/4.0, TC: ' + currentCredits + '/126, Con thieu: ' + (126 - currentCredits) + ' TC. Ngoai ngu: ' + (hasAvPass ? 'Da dat' : 'Chua dat') + ', GDQP: ' + (hasGdqp ? 'Da dat' : 'Chua dat') + ', GDTC: ' + (hasGdtc ? 'Da dat' : 'Chua dat'))
+    ? ('Sinh viên: ' + student.name + ', MSSV: ' + student.mssv + ', GPA: ' + student.officialCumulativeGpa4 + '/4.0, TC: ' + currentCredits + '/126, Còn thiếu: ' + (126 - currentCredits) + ' TC. Ngoại ngữ: ' + (hasAvPass ? 'Đã đạt' : 'Chưa đạt') + ', GDQP: ' + (hasGdqp ? 'Đã đạt' : 'Chưa đạt') + ', GDTC: ' + (hasGdtc ? 'Đã đạt' : 'Chưa đạt'))
     : null;
 
   return (
@@ -68,8 +68,8 @@ export default function GraduationPage() {
           <div style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-lg)', padding: '24px', marginBottom: '24px', boxShadow: 'var(--shadow-sm)' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px', marginBottom: '18px' }}>
               <div>
-                <h1 style={{ fontSize: '22px', fontWeight: 800, color: 'var(--text-main)', marginBottom: '4px' }}>Du Bao & Xet Tien Do Tot Nghiep</h1>
-                <p style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Danh gia 5 dieu kien tot nghiep cot loi va du bao thoi gian ra truong Dai hoc Van Lang</p>
+                <h1 style={{ fontSize: '22px', fontWeight: 800, color: 'var(--text-main)', marginBottom: '4px' }}>Dự Báo & Xét Tiến Độ Tốt Nghiệp</h1>
+                <p style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Đánh giá 5 điều kiện tốt nghiệp cốt lõi và dự báo thời gian ra trường Đại học Văn Lang</p>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                 {user?.role === 'student' ? (
@@ -120,18 +120,18 @@ export default function GraduationPage() {
               <div className="vlu-card" style={{ background: 'linear-gradient(135deg, rgba(196,18,48,0.06) 0%, rgba(30,41,59,0.04) 100%)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-lg)', padding: '24px', marginBottom: '24px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px' }}>
                   <div>
-                    <span className="badge badge-red" style={{ marginBottom: '8px' }}>Du bao thoi gian ra truong</span>
+                    <span className="badge badge-red" style={{ marginBottom: '8px' }}>Dự báo thời gian ra trường</span>
                     <h2 style={{ fontSize: '24px', fontWeight: 800, color: 'var(--text-main)', marginTop: '4px' }}>
-                      Du kien Tot nghiep: <span style={{ color: 'var(--vlu-red)' }}>Dot 1 / Nam 2028</span>
+                      Dự kiến Tốt nghiệp: <span style={{ color: 'var(--vlu-red)' }}>Đợt 1 / Năm 2028</span>
                     </h2>
                     <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '4px' }}>
-                      Sinh vien: <strong>{student.name}</strong> - Nien khoa 2024-2028
+                      Sinh viên: <strong>{student.name}</strong> - Niên khóa 2024–2028
                     </p>
                   </div>
                   <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Tien do tich luy tin chi</div>
+                    <div style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Tiến độ tích lũy tín chỉ</div>
                     <div style={{ fontSize: '28px', fontWeight: 800, color: '#16a34a' }}>{currentCredits} / {totalCredits} TC</div>
-                    <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Con thieu: <strong>{totalCredits - currentCredits} tin chi</strong></div>
+                    <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Còn thiếu: <strong>{totalCredits - currentCredits} tín chỉ</strong></div>
                   </div>
                 </div>
                 <div style={{ width: '100%', height: '10px', borderRadius: '9999px', background: 'var(--border-color)', overflow: 'hidden', marginTop: '20px' }}>
@@ -140,7 +140,7 @@ export default function GraduationPage() {
               </div>
 
               <div className="vlu-card" style={{ padding: '24px', marginBottom: '24px' }}>
-                <h3 style={{ fontSize: '16px', fontWeight: 800, color: 'var(--text-main)', marginBottom: '18px' }}>Bang Danh Gia Cac Dieu Kien Tot Nghiep Chuan VLU</h3>
+                <h3 style={{ fontSize: '16px', fontWeight: 800, color: 'var(--text-main)', marginBottom: '18px' }}>Bảng Đánh Giá Các Điều Kiện Tốt Nghiệp Chuẩn VLU</h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                   {conditions.map((item) => {
                     const Icon = item.icon;
@@ -159,10 +159,10 @@ export default function GraduationPage() {
                         </div>
                         <div>
                           {isPassed
-                            ? <span className="badge badge-green" style={{ fontSize: '12px' }}><CheckCircle2 size={14} /> Dat tieu chuan</span>
+                            ? <span className="badge badge-green" style={{ fontSize: '12px' }}><CheckCircle2 size={14} /> Đạt tiêu chuẩn</span>
                             : isInProgress
-                            ? <span className="badge badge-blue" style={{ fontSize: '12px' }}><Clock size={14} /> Dang hoan thien</span>
-                            : <span className="badge badge-orange" style={{ fontSize: '12px' }}><AlertCircle size={14} /> Can bo sung</span>
+                            ? <span className="badge badge-blue" style={{ fontSize: '12px' }}><Clock size={14} /> Đang hoàn thiện</span>
+                            : <span className="badge badge-orange" style={{ fontSize: '12px' }}><AlertCircle size={14} /> Cần bổ sung</span>
                           }
                         </div>
                       </div>
