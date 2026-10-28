@@ -17,6 +17,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
 import AiChatSidebar from '../components/AiChatSidebar';
+import MobileChatDrawer from '../components/MobileChatDrawer';
 
 export default function CareerPage() {
   const navigate = useNavigate();
@@ -365,27 +366,23 @@ export default function CareerPage() {
       <span>Chat box định hướng</span>
     </button>
 
-    {/* Modal Drawer Chatbox trên Mobile khi bấm nút */}
-    {isMobileChatOpen && (
-      <div className="mobile-chat-drawer-overlay" onClick={() => setIsMobileChatOpen(false)}>
-        <div className="mobile-chat-drawer-container" onClick={e => e.stopPropagation()}>
-          <AiChatSidebar
-            mode="advisor"
-            title="Trợ lý Định hướng Nghề nghiệp"
-            subtitle={`Sinh viên Năm ${year} • ${codingLevel.toUpperCase()}`}
-            placeholder="Hỏi về Frontend, Backend, AI/Data, QA, BA..."
-            quickReplies={[
-              { label: 'Nên theo hướng nào?', text: `Dựa trên sở thích (${selectedInterests.join(', ')}) và năm học ${year}, bạn gợi ý tôi nên chuyên sâu theo hướng nào?` },
-              { label: 'Lộ trình 90 ngày?', text: 'Hãy lập cho tôi lộ trình 90 ngày chi tiết để sẵn sàng ứng tuyển thực tập.' },
-              { label: 'Project thực tập?', text: 'Những dự án thực tế nào nên có trong CV để gây ấn tượng với nhà tuyển dụng?' }
-            ]}
-            systemContext={`Sinh viên năm ${year}, trình độ lập trình: ${codingLevel}. Các lĩnh vực đang quan tâm: ${selectedInterests.join(', ')}. Hãy tư vấn hướng đi, lộ trình 90 ngày, kỹ năng còn thiếu và dự án thực tế phù hợp.`}
-            initialMessage="Xin chào! Mình là Trợ lý Định hướng Nghề nghiệp. Bạn hãy chọn sở thích và trình độ bên trái, mình sẽ tư vấn lộ trình 90 ngày, kỹ năng và dự án thực tập phù hợp nhất!"
-            onClose={() => setIsMobileChatOpen(false)}
-          />
-        </div>
-      </div>
-    )}
+    {/* Modal Drawer Chatbox trên Mobile khi bấm nút (Render qua React Portal) */}
+    <MobileChatDrawer isOpen={isMobileChatOpen} onClose={() => setIsMobileChatOpen(false)}>
+      <AiChatSidebar
+        mode="advisor"
+        title="Trợ lý Định hướng Nghề nghiệp"
+        subtitle={`Sinh viên Năm ${year} • ${codingLevel.toUpperCase()}`}
+        placeholder="Hỏi về Frontend, Backend, AI/Data, QA, BA..."
+        quickReplies={[
+          { label: 'Nên theo hướng nào?', text: `Dựa trên sở thích (${selectedInterests.join(', ')}) và năm học ${year}, bạn gợi ý tôi nên chuyên sâu theo hướng nào?` },
+          { label: 'Lộ trình 90 ngày?', text: 'Hãy lập cho tôi lộ trình 90 ngày chi tiết để sẵn sàng ứng tuyển thực tập.' },
+          { label: 'Project thực tập?', text: 'Những dự án thực tế nào nên có trong CV để gây ấn tượng với nhà tuyển dụng?' }
+        ]}
+        systemContext={`Sinh viên năm ${year}, trình độ lập trình: ${codingLevel}. Các lĩnh vực đang quan tâm: ${selectedInterests.join(', ')}. Hãy tư vấn hướng đi, lộ trình 90 ngày, kỹ năng còn thiếu và dự án thực tế phù hợp.`}
+        initialMessage="Xin chào! Mình là Trợ lý Định hướng Nghề nghiệp. Bạn hãy chọn sở thích và trình độ bên trái, mình sẽ tư vấn lộ trình 90 ngày, kỹ năng và dự án thực tập phù hợp nhất!"
+        onClose={() => setIsMobileChatOpen(false)}
+      />
+    </MobileChatDrawer>
     </>
   );
 }

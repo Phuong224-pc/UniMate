@@ -20,6 +20,7 @@ import confetti from 'canvas-confetti';
 import { api } from '../services/api';
 import { useAuth } from '../hooks/useAuth';
 import AiChatSidebar from '../components/AiChatSidebar';
+import MobileChatDrawer from '../components/MobileChatDrawer';
 
 const STORAGE_COMPLETED_KEY = 'vlu_roadmap_completed_courses';
 
@@ -412,27 +413,23 @@ export default function RoadmapPage() {
       <span>Chat box lộ trình</span>
     </button>
 
-    {/* Modal Drawer Chatbox toàn diện trên Mobile khi bấm nút */}
-    {isMobileChatOpen && (
-      <div className="mobile-chat-drawer-overlay" onClick={() => setIsMobileChatOpen(false)}>
-        <div className="mobile-chat-drawer-container" onClick={e => e.stopPropagation()}>
-          <AiChatSidebar
-            mode="roadmap"
-            title="Trợ lý Lộ trình Học tập"
-            subtitle={`K30 CNTT • Đã tích lũy ${earnedCredits}/${totalTargetCredits} TC`}
-            placeholder="Hỏi về môn tiếp theo, điều kiện tiên quyết..."
-            quickReplies={[
-              { label: 'Môn nên học tiếp theo?', text: `Tôi đã tích lũy ${earnedCredits}/${totalTargetCredits} tín chỉ. Học kỳ tới tôi nên ưu tiên đăng ký môn nào?` },
-              { label: 'Điều kiện tiên quyết?', text: 'Các môn học nào có chuỗi tiên quyết dài nhất cần hoàn thành sớm?' },
-              { label: 'Tín chỉ còn thiếu?', text: `Tôi còn thiếu ${remainingCredits} tín chỉ, hãy phân tích khối kiến thức tôi cần học.` }
-            ]}
-            systemContext={`Sinh viên đang xem Lộ trình Khóa 30 CNTT. Đã tích lũy: ${earnedCredits}/${totalTargetCredits} tín chỉ. Các môn đã đánh dấu học xong: ${[...completedCodes].join(', ') || 'Chưa tích lũy môn nào'}. Tín chỉ còn thiếu: ${remainingCredits}.`}
-            initialMessage="Chào bạn! Mình là Trợ lý Lộ trình Học tập K30 (126 tín chỉ). Bạn có thể tích các môn đã học bên trái rồi hỏi mình về môn tiếp theo hoặc điều kiện tiên quyết nhé!"
-            onClose={() => setIsMobileChatOpen(false)}
-          />
-        </div>
-      </div>
-    )}
+    {/* Modal Drawer Chatbox toàn diện trên Mobile khi bấm nút (Render qua React Portal chống che chữ / mất khung nhắn) */}
+    <MobileChatDrawer isOpen={isMobileChatOpen} onClose={() => setIsMobileChatOpen(false)}>
+      <AiChatSidebar
+        mode="roadmap"
+        title="Trợ lý Lộ trình Học tập"
+        subtitle={`K30 CNTT • Đã tích lũy ${earnedCredits}/${totalTargetCredits} TC`}
+        placeholder="Hỏi về môn tiếp theo, điều kiện tiên quyết..."
+        quickReplies={[
+          { label: 'Môn nên học tiếp theo?', text: `Tôi đã tích lũy ${earnedCredits}/${totalTargetCredits} tín chỉ. Học kỳ tới tôi nên ưu tiên đăng ký môn nào?` },
+          { label: 'Điều kiện tiên quyết?', text: 'Các môn học nào có chuỗi tiên quyết dài nhất cần hoàn thành sớm?' },
+          { label: 'Tín chỉ còn thiếu?', text: `Tôi còn thiếu ${remainingCredits} tín chỉ, hãy phân tích khối kiến thức tôi cần học.` }
+        ]}
+        systemContext={`Sinh viên đang xem Lộ trình Khóa 30 CNTT. Đã tích lũy: ${earnedCredits}/${totalTargetCredits} tín chỉ. Các môn đã đánh dấu học xong: ${[...completedCodes].join(', ') || 'Chưa tích lũy môn nào'}. Tín chỉ còn thiếu: ${remainingCredits}.`}
+        initialMessage="Chào bạn! Mình là Trợ lý Lộ trình Học tập K30 (126 tín chỉ). Bạn có thể tích các môn đã học bên trái rồi hỏi mình về môn tiếp theo hoặc điều kiện tiên quyết nhé!"
+        onClose={() => setIsMobileChatOpen(false)}
+      />
+    </MobileChatDrawer>
     </>
   );
 }

@@ -130,14 +130,15 @@ export default function AiChatSidebar({
       display: 'flex',
       flexDirection: 'column',
       height: '100%',
-      minHeight: onClose ? '100%' : '440px',
+      minHeight: 0,
       maxHeight: onClose ? '100%' : '620px',
       background: 'var(--bg-secondary)',
       border: onClose ? 'none' : '1px solid var(--border-color)',
       borderRadius: onClose ? '0' : 'var(--radius-lg)',
       overflow: 'hidden',
       boxShadow: onClose ? 'none' : 'var(--shadow-sm)',
-      position: 'relative'
+      position: 'relative',
+      flex: 1
     }}>
       {/* ── 1. Unified Gradient Header ── */}
       <div style={{
@@ -204,7 +205,10 @@ export default function AiChatSidebar({
           display: 'flex',
           gap: '6px',
           padding: '8px 12px',
-          flexWrap: 'wrap',
+          flexWrap: 'nowrap',
+          overflowX: 'auto',
+          WebkitOverflowScrolling: 'touch',
+          scrollbarWidth: 'none',
           borderBottom: '1px solid var(--border-color)',
           flexShrink: 0,
           background: 'var(--bg-primary)'
@@ -215,8 +219,8 @@ export default function AiChatSidebar({
               onClick={() => send(qr.text)}
               disabled={loading}
               style={{
-                fontSize: '11px',
-                padding: '4px 10px',
+                fontSize: '11.5px',
+                padding: '5px 12px',
                 borderRadius: '20px',
                 border: '1px solid var(--border-color)',
                 background: 'var(--bg-secondary)',
@@ -224,9 +228,7 @@ export default function AiChatSidebar({
                 cursor: loading ? 'not-allowed' : 'pointer',
                 transition: 'all 0.15s ease',
                 whiteSpace: 'nowrap',
-                maxWidth: '100%',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis'
+                flexShrink: 0
               }}
               onMouseEnter={(e) => {
                 if (!loading) {
@@ -365,15 +367,20 @@ export default function AiChatSidebar({
         <div ref={bottomRef} />
       </div>
 
-      {/* ── 4. Bottom Input Bar ── */}
+      {/* ── 4. Bottom Input Bar (Fixed at bottom) ── */}
       <div style={{
-        padding: '10px 12px',
+        padding: '10px 12px max(12px, env(safe-area-inset-bottom, 12px)) 12px',
         borderTop: '1px solid var(--border-color)',
         background: 'var(--bg-primary)',
         flexShrink: 0,
+        position: 'sticky',
+        bottom: 0,
+        zIndex: 10,
         display: 'flex',
         gap: '8px',
-        alignItems: 'center'
+        alignItems: 'center',
+        boxShadow: '0 -2px 10px rgba(0,0,0,0.03)',
+        boxSizing: 'border-box'
       }}>
         <input
           value={input}
@@ -389,7 +396,7 @@ export default function AiChatSidebar({
           style={{
             flex: 1,
             padding: '10px 14px',
-            minHeight: '40px',
+            minHeight: '42px',
             boxSizing: 'border-box',
             fontSize: '14px',
             borderRadius: 'var(--radius-sm)',
@@ -403,8 +410,8 @@ export default function AiChatSidebar({
           onClick={() => send()}
           disabled={loading || !input.trim()}
           style={{
-            width: '40px',
-            height: '40px',
+            width: '42px',
+            height: '42px',
             borderRadius: '10px',
             background: (loading || !input.trim()) ? 'var(--bg-tertiary)' : 'var(--vlu-red)',
             border: 'none',

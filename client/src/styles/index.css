@@ -1003,28 +1003,52 @@ input, textarea, select {
 .mobile-chat-drawer-overlay {
   position: fixed;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  z-index: 9999;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  background-color: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 999999 !important;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
   animation: drawerFadeIn 0.2s ease-out;
+  touch-action: none;
 }
 
 .mobile-chat-drawer-container {
   width: 100%;
-  height: 90vh;
-  max-height: 90vh;
+  max-width: 600px;
+  margin: 0 auto;
+  height: 86vh;
+  height: 86dvh;
+  max-height: 88vh;
+  max-height: 88dvh;
+  min-height: 380px;
   background: var(--bg-secondary);
   border-top-left-radius: 20px;
   border-top-right-radius: 20px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 -8px 36px rgba(0, 0, 0, 0.45);
   animation: drawerSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  touch-action: auto;
+}
+
+.mobile-chat-drawer-handle {
+  width: 38px;
+  height: 4px;
+  background: var(--border-color);
+  border-radius: 2px;
+  margin: 8px auto 4px auto;
+  flex-shrink: 0;
 }
 
 @keyframes drawerFadeIn {

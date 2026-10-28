@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { GraduationCap, Search, CheckCircle2, Clock, Award, AlertCircle, FileCheck, ShieldCheck, Activity, Bot } from 'lucide-react';
 import AiChatSidebar from '../components/AiChatSidebar';
+import MobileChatDrawer from '../components/MobileChatDrawer';
 import { api } from '../services/api';
 import { useAuth } from '../hooks/useAuth';
 
@@ -196,22 +197,18 @@ export default function GraduationPage() {
         <span>Chat box tốt nghiệp</span>
       </button>
 
-      {/* Modal Drawer Chatbox trên Mobile khi bấm nút */}
-      {isMobileChatOpen && (
-        <div className="mobile-chat-drawer-overlay" onClick={() => setIsMobileChatOpen(false)}>
-          <div className="mobile-chat-drawer-container" onClick={e => e.stopPropagation()}>
-            <AiChatSidebar
-              mode="graduation"
-              title="Trợ lý xét tốt nghiệp"
-              subtitle="Dự báo & kiểm tra điều kiện"
-              placeholder="Hỏi về điều kiện tốt nghiệp, tín chỉ còn thiếu..."
-              quickReplies={gradQuickReplies}
-              systemContext={gradSystemContext}
-              onClose={() => setIsMobileChatOpen(false)}
-            />
-          </div>
-        </div>
-      )}
+      {/* Modal Drawer Chatbox trên Mobile khi bấm nút (Render qua React Portal) */}
+      <MobileChatDrawer isOpen={isMobileChatOpen} onClose={() => setIsMobileChatOpen(false)}>
+        <AiChatSidebar
+          mode="graduation"
+          title="Trợ lý xét tốt nghiệp"
+          subtitle="Dự báo & kiểm tra điều kiện"
+          placeholder="Hỏi về điều kiện tốt nghiệp, tín chỉ còn thiếu..."
+          quickReplies={gradQuickReplies}
+          systemContext={gradSystemContext}
+          onClose={() => setIsMobileChatOpen(false)}
+        />
+      </MobileChatDrawer>
     </div>
   );
 }

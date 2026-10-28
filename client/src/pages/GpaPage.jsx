@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import AiChatSidebar from '../components/AiChatSidebar';
+import MobileChatDrawer from '../components/MobileChatDrawer';
 import { 
   Calculator, 
   Search, 
@@ -502,22 +503,18 @@ export default function GpaPage() {
         <span>Chat box GPA</span>
       </button>
 
-      {/* Modal Drawer Chatbox trên Mobile khi bấm nút */}
-      {isMobileChatOpen && (
-        <div className="mobile-chat-drawer-overlay" onClick={() => setIsMobileChatOpen(false)}>
-          <div className="mobile-chat-drawer-container" onClick={e => e.stopPropagation()}>
-            <AiChatSidebar
-              mode="results"
-              title="Trợ lý Bảng điểm & GPA"
-              subtitle="Phân tích kết quả học tập & cải thiện"
-              placeholder="Hỏi về GPA, điểm chữ, môn cần cải thiện..."
-              quickReplies={gpaQuickReplies}
-              systemContext={gpaSystemContext}
-              onClose={() => setIsMobileChatOpen(false)}
-            />
-          </div>
-        </div>
-      )}
+      {/* Modal Drawer Chatbox trên Mobile khi bấm nút (Render qua React Portal) */}
+      <MobileChatDrawer isOpen={isMobileChatOpen} onClose={() => setIsMobileChatOpen(false)}>
+        <AiChatSidebar
+          mode="results"
+          title="Trợ lý Bảng điểm & GPA"
+          subtitle="Phân tích kết quả học tập & cải thiện"
+          placeholder="Hỏi về GPA, điểm chữ, môn cần cải thiện..."
+          quickReplies={gpaQuickReplies}
+          systemContext={gpaSystemContext}
+          onClose={() => setIsMobileChatOpen(false)}
+        />
+      </MobileChatDrawer>
     </div>
   );
 }
