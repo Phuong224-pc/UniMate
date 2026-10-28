@@ -11,8 +11,7 @@ import {
   Edit3,
   Bot,
   Database,
-  Sparkles,
-  History
+  Sparkles
 } from 'lucide-react';
 import { api } from '../services/api';
 
@@ -165,26 +164,6 @@ export default function Header({
 
       {/* Right controls */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-        {/* Nút mở lịch sử chat trên mobile */}
-        <button
-          onClick={onToggleSidebar}
-          className="show-on-mobile"
-          style={{
-            background: 'var(--bg-tertiary)',
-            border: '1px solid var(--border-color)',
-            color: 'var(--text-main)',
-            width: '38px',
-            height: '38px',
-            borderRadius: '50%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer'
-          }}
-          title="Lịch sử cuộc trò chuyện"
-        >
-          <History size={18} color="var(--vlu-red)" />
-        </button>
 
 
         {systemStatus?.isDemo ? (
