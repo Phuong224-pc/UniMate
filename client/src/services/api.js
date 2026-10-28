@@ -121,6 +121,13 @@ export const api = {
 
   // ─── OCR & BẢNG ĐIỂM THÔNG MINH ───
   async ocrTranscript(fileOrPayload) {
+    if (fileOrPayload instanceof FormData) {
+      return request('/students/ocr-transcript', {
+        method: 'POST',
+        body: fileOrPayload
+      });
+    }
+
     if (fileOrPayload instanceof File || fileOrPayload instanceof Blob) {
       const formData = new FormData();
       formData.append('file', fileOrPayload);
@@ -136,11 +143,29 @@ export const api = {
     });
   },
 
-  async confirmTranscript({ mssv, courses, source }) {
+  async scanTranscriptPdf(formDataOrFile) {
+    return this.ocrTranscript(formDataOrFile);
+  },
+
+  async scanTranscript(payloadOrFile) {
+    return this.ocrTranscript(payloadOrFile);
+  },
+
+  async scanStudentIdCard(payload) {
+    const data = payload?.data || payload;
+    const mimeType = payload?.mimeType || 'image/jpeg';
+    return this.extractProfileFromImage(data, mimeType);
+  },
+
+  async confirmTranscript({ mssv, courses, source } = {}) {
     return request('/students/confirm-transcript', {
       method: 'POST',
       body: JSON.stringify({ mssv, courses, source })
     });
+  },
+
+  async updateMyCourses(courses) {
+    return this.confirmTranscript({ courses });
   },
 
   // ─── THỜI KHÓA BIỂU (MONGODB / DEMO) ───

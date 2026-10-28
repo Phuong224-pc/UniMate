@@ -398,16 +398,21 @@ export default function StudentProfilePage({ defaultTab = 'info' }) {
     }
     setLoadingGrades(true);
     try {
+      if (user?.mssv) {
+        const res = await api.getStudentByMssv(user.mssv);
+        if (res.success && res.data && Array.isArray(res.data.courses)) {
+          setCourses(res.data.courses);
+          return;
+        }
+      }
       if (authProfile && authProfile.courses && authProfile.courses.length > 0) {
         setCourses(authProfile.courses);
-      } else if (user?.mssv) {
-        const res = await api.getStudentByMssv(user.mssv);
-        if (res.success && res.data) {
-          setCourses(res.data.courses || []);
-        }
       }
     } catch (err) {
       console.error('Lỗi tải bảng điểm:', err);
+      if (authProfile?.courses) {
+        setCourses(authProfile.courses);
+      }
     } finally {
       setLoadingGrades(false);
     }

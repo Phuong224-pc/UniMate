@@ -165,9 +165,20 @@ export async function deleteStudent(mssv, { forceHardDelete = false } = {}) {
 
 export async function confirmTranscriptCourses(mssv, incomingCourses = [], source = 'student_ocr_import') {
   const cleanMssv = mssv.trim();
-  const student = await studentRepo.findByMssv(cleanMssv);
+  let student = await studentRepo.findByMssv(cleanMssv);
   if (!student) {
-    throw new Error(`Không tìm thấy sinh viên có MSSV: ${cleanMssv}`);
+    const user = await userRepo.findByMssv(cleanMssv);
+    if (user) {
+      student = await studentRepo.create({
+        userId: user._id,
+        mssv: cleanMssv,
+        fullName: user.fullName || 'Sinh viên VLU',
+        email: user.email || '',
+        courses: []
+      });
+    } else {
+      throw new Error(`Không tìm thấy sinh viên có MSSV: ${cleanMssv}`);
+    }
   }
 
   const existingCourses = Array.isArray(student.courses) ? [...student.courses] : [];
