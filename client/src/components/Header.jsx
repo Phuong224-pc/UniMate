@@ -10,7 +10,6 @@ import {
   FileText, 
   Edit3,
   Bot,
-  Database,
   Sparkles
 } from 'lucide-react';
 import { api } from '../services/api';
@@ -164,50 +163,6 @@ export default function Header({
 
       {/* Right controls */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-
-
-        {systemStatus?.isDemo ? (
-          <div 
-            className="hide-on-mobile"
-            title="Đang chạy chế độ DEMO LOCAL: Lưu trữ dữ liệu an toàn trên máy, không cần MongoDB"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              background: 'rgba(234, 179, 8, 0.12)',
-              border: '1px solid rgba(234, 179, 8, 0.35)',
-              color: '#d97706',
-              padding: '4px 10px',
-              borderRadius: '20px',
-              fontSize: '12px',
-              fontWeight: 600
-            }}
-          >
-            <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#f59e0b', animation: 'pulse 2s infinite' }}></span>
-            <span>Chế độ demo — dữ liệu mẫu</span>
-          </div>
-        ) : systemStatus && !systemStatus.isDemo ? (
-          <div 
-            className="hide-on-mobile"
-            title="Đang kết nối cơ sở dữ liệu MongoDB chính thức"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              background: 'rgba(22, 163, 74, 0.12)',
-              border: '1px solid rgba(22, 163, 74, 0.35)',
-              color: '#16a34a',
-              padding: '4px 10px',
-              borderRadius: '20px',
-              fontSize: '12px',
-              fontWeight: 600
-            }}
-          >
-            <Database size={13} color="#16a34a" />
-            <span>MongoDB Connected</span>
-          </div>
-        ) : null}
-
         <button
           onClick={() => setDarkMode(!darkMode)}
           style={{

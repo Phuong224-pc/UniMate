@@ -8,7 +8,6 @@ import {
   ShieldCheck, 
   ShieldAlert,
   LogOut, 
-  Database, 
   Sun, 
   Moon,
   IdCard,
@@ -24,8 +23,6 @@ export default function AccountLayout({ children }) {
   const location = useLocation();
   const { user, profile, logout, isAuthenticated, isAdmin, loading } = useAuth();
   const [authModalOpen, setAuthModalOpen] = useState(false);
-  const [dataStatus, setDataStatus] = useState({ isDemo: false, dataMode: 'mongodb' });
-
   // Tự động chuyển hướng Admin sang /admin nếu truy cập vào hồ sơ sinh viên hoặc bảng điểm
   useEffect(() => {
     if (!loading && isAdmin && (location.pathname === '/account/profile' || location.pathname === '/account/grades' || location.pathname === '/account')) {
@@ -42,16 +39,6 @@ export default function AccountLayout({ children }) {
     document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
     localStorage.setItem('vlu_theme_dark', darkMode);
   }, [darkMode]);
-
-  useEffect(() => {
-    api.getStatus()
-      .then(res => {
-        if (res && res.status === 'ok') {
-          setDataStatus({ isDemo: res.isDemo, dataMode: res.dataMode });
-        }
-      })
-      .catch(() => {});
-  }, []);
 
   const handleBack = () => {
     if (window.history.length > 1) {
@@ -89,9 +76,8 @@ export default function AccountLayout({ children }) {
               <div style={{ fontWeight: 800, fontSize: '16px', color: 'var(--vlu-red)', lineHeight: '1.2', letterSpacing: '0.3px', whiteSpace: 'nowrap' }}>
                 UNIMATE
               </div>
-              <div className="hide-on-mobile" style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }}>
+              <div className="hide-on-mobile" style={{ fontSize: '11px', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
                 <span>Trợ lý học tập</span>
-                <span style={{ fontSize: '9px', background: 'var(--vlu-red-light)', color: 'var(--vlu-red)', padding: '0 4px', borderRadius: '3px', fontWeight: 600 }}>VLU</span>
               </div>
             </div>
           </div>
@@ -123,48 +109,8 @@ export default function AccountLayout({ children }) {
           </button>
         </div>
 
-        {/* Right: Data Mode, Theme, Logout */}
+        {/* Right: Theme, Logout */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          {dataStatus.isDemo ? (
-            <div 
-              className="hide-on-mobile"
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '5px',
-                padding: '4px 10px',
-                background: '#fef3c7',
-                border: '1px solid #f59e0b',
-                color: '#b45309',
-                borderRadius: '20px',
-                fontSize: '11px',
-                fontWeight: 600
-              }}
-            >
-              <Database size={12} />
-              <span>Chế độ demo — dữ liệu mẫu</span>
-            </div>
-          ) : (
-            <div 
-              className="hide-on-mobile"
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '5px',
-                padding: '4px 9px',
-                background: '#dcfce7',
-                border: '1px solid #22c55e',
-                color: '#15803d',
-                borderRadius: '20px',
-                fontSize: '11px',
-                fontWeight: 600
-              }}
-            >
-              <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#22c55e' }} />
-              <span>MongoDB</span>
-            </div>
-          )}
-
           <button
             onClick={() => setDarkMode(!darkMode)}
             style={{

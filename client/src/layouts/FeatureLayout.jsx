@@ -12,7 +12,6 @@ import {
   Moon, 
   ShieldAlert, 
   LogOut, 
-  Database,
   UserCheck,
   Route
 } from 'lucide-react';
@@ -27,8 +26,6 @@ export default function FeatureLayout({ children }) {
   const location = useLocation();
   const { user, profile, logout, isAdmin } = useAuth();
   const [authModalOpen, setAuthModalOpen] = useState(false);
-  const [dataStatus, setDataStatus] = useState({ isDemo: false, dataMode: 'mongodb' });
-
   // Dark mode
   const [darkMode, setDarkMode] = useState(() => {
     return localStorage.getItem('vlu_theme_dark') === 'true';
@@ -39,15 +36,7 @@ export default function FeatureLayout({ children }) {
     localStorage.setItem('vlu_theme_dark', darkMode);
   }, [darkMode]);
 
-  useEffect(() => {
-    api.getStatus()
-      .then(res => {
-        if (res && res.status === 'ok') {
-          setDataStatus({ isDemo: res.isDemo, dataMode: res.dataMode });
-        }
-      })
-      .catch(() => {});
-  }, []);
+
 
   const handleBack = () => {
     if (window.history.length > 1) {
@@ -85,9 +74,8 @@ export default function FeatureLayout({ children }) {
               <div style={{ fontWeight: 800, fontSize: '16px', color: 'var(--vlu-red)', lineHeight: '1.2', letterSpacing: '0.3px', whiteSpace: 'nowrap' }}>
                 UNIMATE
               </div>
-              <div className="hide-on-mobile" style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }}>
+              <div className="hide-on-mobile" style={{ fontSize: '11px', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
                 <span>Trợ lý học tập</span>
-                <span style={{ fontSize: '9px', background: 'var(--vlu-red-light)', color: 'var(--vlu-red)', padding: '0 4px', borderRadius: '3px', fontWeight: 600 }}>VLU</span>
               </div>
             </div>
           </div>
@@ -120,51 +108,8 @@ export default function FeatureLayout({ children }) {
           </button>
         </div>
 
-        {/* Right: Status badge + Dark mode + User Account */}
+        {/* Right: Dark mode + User Account */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          {/* Data Mode Indicator */}
-          {dataStatus.isDemo ? (
-            <div 
-              className="hide-on-mobile"
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '5px',
-                padding: '4px 10px',
-                background: '#fef3c7',
-                border: '1px solid #f59e0b',
-                color: '#b45309',
-                borderRadius: '20px',
-                fontSize: '11px',
-                fontWeight: 600
-              }}
-              title="Hệ thống đang hoạt động trên kho lưu trữ Demo Local không cần MongoDB"
-            >
-              <Database size={12} />
-              <span>Chế độ demo — dữ liệu mẫu</span>
-            </div>
-          ) : (
-            <div 
-              className="hide-on-mobile"
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '5px',
-                padding: '4px 9px',
-                background: '#dcfce7',
-                border: '1px solid #22c55e',
-                color: '#15803d',
-                borderRadius: '20px',
-                fontSize: '11px',
-                fontWeight: 600
-              }}
-              title="Đang lưu trữ trực tiếp trên MongoDB"
-            >
-              <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#22c55e' }} />
-              <span>MongoDB</span>
-            </div>
-          )}
-
           {/* Theme toggle */}
           <button
             onClick={() => setDarkMode(!darkMode)}
