@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, useNavigate } from 'react-router-dom';
 import AppRoutes from './routes/AppRoutes';
 import { AuthProvider } from './context/AuthContext';
+import ErrorBoundary from './components/ErrorBoundary';
 
 const SESSIONS_STORAGE_KEY = 'vlu_chatbot_sessions';
 const DARK_MODE_KEY = 'vlu_theme_dark';
@@ -103,24 +104,26 @@ function AppContent() {
   };
 
   return (
-    <AppRoutes
-      isSidebarCollapsed={isSidebarCollapsed}
-      setIsSidebarCollapsed={setIsSidebarCollapsed}
-      chatSessions={chatSessions}
-      activeChatId={activeChatId}
-      onSelectChat={handleSelectChat}
-      onNewChat={handleNewChat}
-      onDeleteChat={handleDeleteChat}
-      authModalOpen={authModalOpen}
-      setAuthModalOpen={setAuthModalOpen}
-      helpModalOpen={helpModalOpen}
-      setHelpModalOpen={setHelpModalOpen}
-      darkMode={darkMode}
-      setDarkMode={setDarkMode}
-      onSelectSuggestion={handleSelectSuggestion}
-      activeChat={activeChat}
-      onUpdateChat={handleUpdateChat}
-    />
+    <ErrorBoundary>
+      <AppRoutes
+        isSidebarCollapsed={isSidebarCollapsed}
+        setIsSidebarCollapsed={setIsSidebarCollapsed}
+        chatSessions={chatSessions}
+        activeChatId={activeChatId}
+        onSelectChat={handleSelectChat}
+        onNewChat={handleNewChat}
+        onDeleteChat={handleDeleteChat}
+        authModalOpen={authModalOpen}
+        setAuthModalOpen={setAuthModalOpen}
+        helpModalOpen={helpModalOpen}
+        setHelpModalOpen={setHelpModalOpen}
+        darkMode={darkMode}
+        setDarkMode={setDarkMode}
+        onSelectSuggestion={handleSelectSuggestion}
+        activeChat={activeChat}
+        onUpdateChat={handleUpdateChat}
+      />
+    </ErrorBoundary>
   );
 }
 

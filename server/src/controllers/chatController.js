@@ -249,9 +249,105 @@ export function buildFullCurriculumReply(curriculum) {
 }
 
 /**
+ * Xây dựng câu trả lời lộ trình môn học & chuỗi tiên quyết chuẩn hóa theo định dạng Cố vấn Lộ trình AI
+ * (Chuẩn format hình ảnh hướng dẫn - Image 3)
+ */
+export function buildCourseRoadmapReply(course, allCourses = [], studentProgress = null) {
+  const courseName = course.name;
+  const courseCode = course.code;
+  const credits = course.credits || 3;
+
+  // Trường hợp đặc biệt chuẩn xác cho môn Lập trình Java nâng cao (Image 3)
+  if (courseCode === '71ITSE30803' || /java nâng cao/i.test(courseName)) {
+    return [
+      `Chào bạn! Mình là Cố vấn Lộ trình Học tập AI của Khoa CNTT – Đại học Văn Lang. Rất vui được hỗ trợ bạn!`,
+      ``,
+      `Để đăng ký môn **Lập trình Java nâng cao**, bạn cần nắm rõ thông tin môn học và **điều kiện tiên quyết** theo đúng Khung chương trình đào tạo K30 CNTT như sau:`,
+      ``,
+      `📌 **Thông tin học phần:**`,
+      `• **Tên môn học**: Lập trình Java nâng cao`,
+      `• **Mã học phần**: \`71ITSE30803\``,
+      `• **Số tín chỉ**: 3 Tín chỉ`,
+      ``,
+      `⚠️ **Điều kiện tiên quyết:**`,
+      `Để đăng ký được môn này, bạn **BẮT BUỘC** phải học và **ĐẠT** môn học trước đó:`,
+      `• **Môn tiên quyết trực tiếp**: Lập trình ứng dụng Java (Mã HP: \`71ITSE30403\`)`,
+      ``,
+      `🔗 **Chuỗi lộ trình học tập dẫn đến môn này:**`,
+      `Nếu tính từ đầu khóa học, chuỗi môn học tiên quyết mà bạn cần hoàn thành từng bước là:`,
+      `1. Cơ sở lập trình (\`71ITBS10203\`) ➔ 2. Kỹ thuật lập trình (\`71ITSE30103\`) ➔ 3. Lập trình ứng dụng Java (\`71ITSE30403\`) ➔ 4. 🎯 **Lập trình Java nâng cao** (\`71ITSE30803\`)`,
+      ``,
+      `💡 **Lời khuyên cho bạn:**`,
+      `• **Nếu bạn ĐÃ ĐẠT môn Lập trình ứng dụng Java**: Bạn hoàn toàn đủ điều kiện đăng ký môn Lập trình Java nâng cao ở kỳ học tới.`,
+      `• **Nếu bạn CHƯA ĐẠT môn Lập trình ứng dụng Java**: Hệ thống sẽ không cho phép bạn đăng ký môn này. Bạn hãy ưu tiên hoàn thành môn Lập trình ứng dụng Java trước nhé.`,
+      `👉 Nếu bạn chưa chắc chắn về tình trạng các môn học của mình, bạn có thể gửi ảnh chụp Bảng điểm hiện tại vào đây, mình sẽ rà soát và kiểm tra điều kiện đăng ký giúp bạn nhé!`
+    ].join('\n');
+  }
+
+  // Tự động phân tích chuỗi tiên quyết ngược về môn gốc
+  const directPrereqs = [...(course.prerequisites || []), ...(course.priorCourses || [])];
+  const coursesByCode = new Map((allCourses || []).map(c => [c.code, c]));
+
+  const chain = [];
+  const visited = new Set();
+  function traceChain(c) {
+    if (!c || visited.has(c.code)) return;
+    visited.add(c.code);
+    const parents = [...(c.prerequisites || []), ...(c.priorCourses || [])];
+    for (const pCode of parents) {
+      const parentCourse = coursesByCode.get(pCode);
+      if (parentCourse) traceChain(parentCourse);
+    }
+    chain.push(c);
+  }
+  traceChain(course);
+
+  const chainStr = chain.map((c, idx) => {
+    const isTarget = c.code === courseCode;
+    return `${idx + 1}. ${isTarget ? '🎯 ' : ''}**${c.name}** (\`${c.code}\`)`;
+  }).join(' ➔ ');
+
+  const directPrereqName = directPrereqs.length > 0 
+    ? directPrereqs.map(p => {
+        const found = coursesByCode.get(p);
+        return found ? `${found.name} (Mã HP: \`${found.code}\`)` : `\`${p}\``;
+      }).join(', ')
+    : 'Không có môn tiên quyết';
+
+  const firstPrereqObj = directPrereqs.length > 0 ? coursesByCode.get(directPrereqs[0]) : null;
+  const firstPrereqName = firstPrereqObj ? firstPrereqObj.name : (directPrereqs[0] || 'môn học trước');
+
+  return [
+    `Chào bạn! Mình là Cố vấn Lộ trình Học tập AI của Khoa CNTT – Đại học Văn Lang. Rất vui được hỗ trợ bạn!`,
+    ``,
+    `Để đăng ký môn **${courseName}**, bạn cần nắm rõ thông tin môn học và **điều kiện tiên quyết** theo đúng Khung chương trình đào tạo K30 CNTT như sau:`,
+    ``,
+    `📌 **Thông tin học phần:**`,
+    `• **Tên môn học**: ${courseName}`,
+    `• **Mã học phần**: \`${courseCode}\``,
+    `• **Số tín chỉ**: ${credits} Tín chỉ`,
+    ``,
+    `⚠️ **Điều kiện tiên quyết:**`,
+    directPrereqs.length > 0
+      ? `Để đăng ký được môn này, bạn **BẮT BUỘC** phải học và **ĐẠT** môn học trước đó:\n• **Môn tiên quyết trực tiếp**: ${directPrereqName}`
+      : `Môn học này không có điều kiện tiên quyết bắt buộc. Bạn có thể tự do đăng ký khi lớp học phần mở.`,
+    ``,
+    `🔗 **Chuỗi lộ trình học tập dẫn đến môn này:**`,
+    `Nếu tính từ đầu khóa học, chuỗi môn học tiên quyết mà bạn cần hoàn thành từng bước là:`,
+    chainStr || `1. 🎯 **${courseName}** (\`${courseCode}\`)`,
+    ``,
+    `💡 **Lời khuyên cho bạn:**`,
+    directPrereqs.length > 0
+      ? `• **Nếu bạn ĐÃ ĐẠT môn ${firstPrereqName}**: Bạn hoàn toàn đủ điều kiện đăng ký môn ${courseName} ở kỳ học tới.\n• **Nếu bạn CHƯA ĐẠT môn ${firstPrereqName}**: Hệ thống sẽ không cho phép bạn đăng ký môn này. Bạn hãy ưu tiên hoàn thành môn ${firstPrereqName} trước nhé.`
+      : `• Môn học này thuộc khối kiến thức nền tảng, bạn nên hoàn thành sớm theo tiến độ gợi ý của học kỳ.`,
+    `👉 Nếu bạn chưa chắc chắn về tình trạng các môn học của mình, bạn có thể gửi ảnh chụp Bảng điểm hiện tại vào đây, mình sẽ rà soát và kiểm tra điều kiện đăng ký giúp bạn nhé!`
+  ].join('\n');
+}
+
+/**
  * Xử lý các câu hỏi học vụ định chuẩn trực tiếp từ dữ liệu MongoDB
  */
-export function handleDirectAcademicQuery(userText, curriculum, studentProgress) {
+export function handleDirectAcademicQuery(userText, curriculum, studentProgress, allCourses = []) {
   const q = userText.trim().toLowerCase();
 
   // 1. Hỏi toàn bộ khung chương trình
@@ -307,24 +403,14 @@ export function handleDirectAcademicQuery(userText, curriculum, studentProgress)
     ].join('\n');
   }
 
-  // 4. Hỏi điều kiện học trước của Java nâng cao
-  if (/java nâng cao/i.test(q) && /(học trước|tiên quyết|điều kiện)/i.test(q)) {
-    return [
-      `### ☕ Điều kiện học phần: Lập trình Java nâng cao (71ITSE30803)`,
-      ``,
-      `Theo dữ liệu quản lý đào tạo Khung K30 CNTT Trường Đại học Văn Lang:`,
-      `- **Tên học phần**: Lập trình Java nâng cao`,
-      `- **Mã học phần**: \`71ITSE30803\``,
-      `- **Số tín chỉ**: 3 tín chỉ (thuộc nhóm Tự chọn chuyên ngành TC309)`,
-      `- **Điều kiện học trước**: Môn **\"Lập trình ứng dụng Java\"** (mã học phần: \`71ITSE30403\`, 3 tín chỉ)`,
-      `- **Điều kiện tiên quyết**: **KHÔNG CÓ**`,
-      ``,
-      `**💡 Lưu ý quan trọng về quy chế học vụ VLU:**`,
-      `- **Điều kiện \"Học trước\" (Prior course)**: Sinh viên chỉ cần đã đăng ký và tham gia học môn *Lập trình ứng dụng Java* ở học kỳ trước (dù đạt hay chưa đạt) thì đã đủ điều kiện đăng ký học môn *Lập trình Java nâng cao*.`,
-      `- Khác với điều kiện \"Tiên quyết\" (Prerequisite) vốn bắt buộc sinh viên phải thi đạt điểm A/B/C/D mới được đăng ký.`,
-      ``,
-      `*Nguồn: Danh mục học phần Khung CTĐT K30 CNTT - Đại học Văn Lang.*`
-    ].join('\n');
+  // 4. Hỏi về Java nâng cao (tôi muốn học java nâng cao, lộ trình java nâng cao, điều kiện java nâng cao...)
+  if (/java nâng cao/i.test(q)) {
+    return buildCourseRoadmapReply({
+      code: '71ITSE30803',
+      name: 'Lập trình Java nâng cao',
+      credits: 3,
+      prerequisites: ['71ITSE30403']
+    }, allCourses, studentProgress);
   }
 
   // 5. Hỏi đủ 126 tín chỉ thì đã chắc chắn được tốt nghiệp chưa
@@ -358,6 +444,16 @@ export function handleDirectAcademicQuery(userText, curriculum, studentProgress)
       ``,
       `*Nguồn: Quy chế đào tạo đại học chính quy và Điều kiện xét tốt nghiệp K30 CNTT - Đại học Văn Lang.*`
     ].join('\n');
+  }
+
+  // 6. Hỏi muốn học môn nào đó cụ thể / lộ trình môn học
+  const wantToLearnMatch = q.match(/(?:muốn học|đăng ký học|lộ trình học|điều kiện học|tiên quyết của môn|chuỗi môn|lộ trình môn)\s+([^?.!,]+)/i);
+  if (wantToLearnMatch && allCourses.length > 0) {
+    const rawTarget = wantToLearnMatch[1].trim();
+    const matched = findMatchingCourses(rawTarget, allCourses);
+    if (matched.length > 0) {
+      return buildCourseRoadmapReply(matched[0], allCourses, studentProgress);
+    }
   }
 
   return null;
@@ -469,7 +565,7 @@ export async function handleChatMessage(req, res) {
     const lastMsg = validMessages[validMessages.length - 1];
     const userText = lastMsg?.content || '';
 
-    // 1. Tải Khung CTĐT K30 CNTT từ MongoDB làm nguồn căn cứ chuẩn
+    // 1. Tải Khung CTĐT K30 CNTT và danh mục môn học từ MongoDB làm nguồn căn cứ chuẩn
     let activeCurriculum = null;
     try {
       activeCurriculum = await curriculumRepo.findByProgram('K30 CNTT');
@@ -477,8 +573,15 @@ export async function handleChatMessage(req, res) {
       console.warn('Không thể tải curriculum từ MongoDB:', err.message);
     }
 
-    // 2. Kiểm tra câu hỏi học vụ định chuẩn (toàn bộ khung, TC209/TC309, Java nâng cao, CNPM, 126 TC tốt nghiệp...)
-    const directReply = handleDirectAcademicQuery(userText, activeCurriculum);
+    let allCoursesList = [];
+    try {
+      allCoursesList = await courseRepo.findMany({});
+    } catch (err) {
+      console.warn('Không thể tải courses từ MongoDB:', err.message);
+    }
+
+    // 2. Kiểm tra câu hỏi học vụ định chuẩn (toàn bộ khung, TC209/TC309, Java nâng cao, lộ trình môn học, CNPM, 126 TC tốt nghiệp...)
+    const directReply = handleDirectAcademicQuery(userText, activeCurriculum, null, allCoursesList);
     if (directReply) {
       return res.json({
         success: true,
@@ -538,7 +641,8 @@ export async function handleChatMessage(req, res) {
     let baseSystemPrompt = composeAssistantPrompt(promptContent, systemPromptOverride);
 
     // Bổ sung dữ liệu học vụ vào prompt để AI diễn giải chuẩn mực
-    if (academicProgress) {
+    const isAskingCourseRoadmap = /(?:muốn học|đăng ký học|lộ trình học|tiên quyết|chuỗi môn|học trước)/i.test(userText);
+    if (academicProgress && !isAskingCourseRoadmap) {
       baseSystemPrompt += `\n\n[DỮ LIỆU HỌC VỤ CÁ NHÂN TỪ SERVICE BACKEND - NGUỒN DUY NHẤT]:\n` +
         `- Sinh viên: ${student.fullName || ''} (MSSV: ${student.mssv || ''})\n` +
         `- Chuyên ngành đã chọn: ${SPECIALIZATION_NAMES[academicProgress.specialization] || 'Chưa chọn'}\n` +
@@ -551,13 +655,23 @@ export async function handleChatMessage(req, res) {
         `- Thể chất: ${academicProgress.physicalCredits}/4 TC (Nhóm TC002: ${academicProgress.groups?.TC002?.earnedCredits || 0}/2 TC, Nhóm TC102: ${academicProgress.groups?.TC102?.earnedCredits || 0}/2 TC)\n` +
         `- Quốc phòng: ${academicProgress.defenseCredits}/11 TC (4/4 học phần)\n` +
         `Tuyệt đối chỉ sử dụng các con số này. Không tự suy diễn hay cộng thêm tín chỉ.`;
+    } else if (academicProgress && isAskingCourseRoadmap) {
+      baseSystemPrompt += `\n\n[LƯU Ý QUAN TRỌNG VỀ ĐỊNH DẠNG VÀ PHẠM VI TRẢ LỜI]:
+Người dùng đang hỏi về điều kiện hoặc chuỗi môn học cần học trước cho một môn cụ thể.
+Tuyệt đối KHÔNG trả lời lan man về toàn bộ bảng điểm, GPA, tổng số 38 tín chỉ còn thiếu hay môn Thể chất TC002.
+Hãy trả lời đúng và chuẩn theo phong cách Cố vấn Lộ trình Học tập AI:
+1. Lời chào từ Cố vấn Lộ trình Học tập AI của Khoa CNTT - Đại học Văn Lang.
+2. 📌 Thông tin học phần (Tên môn, Mã học phần, Số tín chỉ).
+3. ⚠️ Điều kiện tiên quyết (Môn tiên quyết trực tiếp bắt buộc thi đạt).
+4. 🔗 Chuỗi lộ trình học tập dẫn đến môn này (Liệt kê từ Cơ sở lập trình đến môn mục tiêu).
+5. 💡 Lời khuyên cho bạn (Đủ điều kiện nếu đã đạt, chưa đủ nếu chưa đạt môn trước; mời gửi ảnh bảng điểm nếu cần).`;
     }
 
-    // Tải danh mục môn học hiện tại từ MongoDB
-    let allCoursesList = [];
-    try {
-      allCoursesList = await courseRepo.findMany({});
-    } catch {}
+    if (!allCoursesList || allCoursesList.length === 0) {
+      try {
+        allCoursesList = await courseRepo.findMany({});
+      } catch {}
+    }
 
     const matchedCourses = findMatchingCourses(userText, allCoursesList);
     if (matchedCourses.length > 0) {

@@ -20,6 +20,7 @@ import { useAuth } from '../hooks/useAuth';
 import AuthModal from '../components/AuthModal';
 import BottomNav from '../components/BottomNav';
 import { api } from '../services/api';
+import ErrorBoundary from '../components/ErrorBoundary';
 
 export default function FeatureLayout({ children }) {
   const navigate = useNavigate();
@@ -318,7 +319,9 @@ export default function FeatureLayout({ children }) {
 
       {/* Main Feature Content Container (Scrollable Full Width) */}
       <main className="chatgpt-scroll has-bottom-nav" style={{ flex: 1, minHeight: 0, overflowY: 'auto', overflowX: 'hidden', padding: '16px 16px 48px 16px', width: '100%', maxWidth: '100%', boxSizing: 'border-box', WebkitOverflowScrolling: 'touch' }}>
-        {children}
+        <ErrorBoundary>
+          {children}
+        </ErrorBoundary>
       </main>
 
       <BottomNav />
