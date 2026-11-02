@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
-  Map, 
+  Map as MapIcon, 
   Square, 
   Search, 
   RotateCcw, 
@@ -200,7 +200,7 @@ export default function RoadmapPage() {
               alignItems: 'center',
               justifyContent: 'center'
             }}>
-            <Map size={24} />
+            <MapIcon size={24} />
           </div>
           <div>
             <h1 style={{ fontSize: '20px', fontWeight: 800, color: 'var(--text-main)' }}>
