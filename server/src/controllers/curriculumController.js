@@ -3,8 +3,9 @@ import { successResponse } from '../utils/responseUtils.js';
 
 export async function getCurriculum(req, res, next) {
   try {
-    const { program } = req.query;
-    const data = await curriculumService.getCurriculum(program || 'K30 CNTT');
+    const { program, curriculumId, id, schoolId, majorCode, cohort, version } = req.query;
+    const scope = schoolId && majorCode && cohort && version ? { schoolId, majorCode, cohort, version } : null;
+    const data = await curriculumService.getCurriculum(program || 'K30 CNTT', { scope, curriculumId: curriculumId || id });
     return successResponse(res, data);
   } catch (error) {
     next(error);

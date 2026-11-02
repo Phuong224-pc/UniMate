@@ -11,7 +11,6 @@ import { Course } from '../src/models/Course.js';
 import { Schedule } from '../src/models/Schedule.js';
 import { SystemPrompt } from '../src/models/SystemPrompt.js';
 import { hashPassword } from '../src/utils/passwordUtils.js';
-import { calculateAcademicStats } from '../src/utils/gradeUtils.js';
 import { config } from '../src/config/environment.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -50,13 +49,20 @@ async function runMigration() {
     const programName = k30Data.program || 'K30 CNTT';
 
     if (!isDryRun) {
+      // Replace the obsolete program-only uniqueness constraint with scoped version identity.
+      // No documents or identifiers are removed by this index migration.
+      const indexes = await Curriculum.collection.indexes().catch(error => error.codeName === 'NamespaceNotFound' ? [] : Promise.reject(error));
+      const obsolete = indexes.find(index => index.unique && Object.keys(index.key).length === 1 && index.key.program === 1);
+      if (obsolete) await Curriculum.collection.dropIndex(obsolete.name);
+      await Curriculum.createIndexes();
+      const scopedFilter = { program: programName, ...Object.fromEntries(Object.entries(k30Data.scope || {}).map(([key, value]) => [`scope.${key}`, value])) };
+      const legacy = await Curriculum.findOne({ program: programName, scope: { $exists: false } }).lean();
+      // Adopt the existing document in place so old profile references retain the same ID.
+      if (legacy) await Curriculum.updateOne({ _id: legacy._id }, { $set: { scope: k30Data.scope } });
       await Curriculum.findOneAndUpdate(
-        { program: programName },
+        scopedFilter,
         {
-          program: programName,
-          major: 'Công nghệ thông tin',
-          totalCredits: 126,
-          sections: k30Data.sections || []
+          $setOnInsert: { ...k30Data, program: programName }
         },
         { upsert: true, new: true }
       );
@@ -70,13 +76,16 @@ async function runMigration() {
             await Course.findOneAndUpdate(
               { code: c.code.toUpperCase() },
               {
+                $setOnInsert: {
+                ...c,
                 code: c.code.toUpperCase(),
                 name: c.name,
                 credits: c.credits,
                 prerequisites: c.prerequisites || [],
                 sectionName: section.name,
                 program: programName,
-                required: true
+                required: c.required
+                }
               },
               { upsert: true, new: true }
             );
@@ -152,8 +161,7 @@ async function runMigration() {
         );
       }
 
-      // Tính toán lại thống kê GPA & Tín chỉ chuẩn hóa
-      const stats = calculateAcademicStats(s.courses || []);
+      // Keep source observations intact; derived progress is calculated on reads.
       const completed = (s.courses || [])
         .filter(c => c.status === 'Đạt' || (c.letter && c.letter !== 'F'))
         .map(c => c.code);
@@ -162,24 +170,23 @@ async function runMigration() {
         await StudentProfile.findOneAndUpdate(
           { mssv },
           {
-            $set: {
+            $setOnInsert: {
               userId: user?._id || null,
               mssv,
               fullName: s.name,
               email,
               className: s.className || 'K30 CNTT',
               faculty: 'Khoa Công Nghệ Thông Tin',
-              major: s.major || 'Kỹ thuật Phần mềm',
+              major: s.major || 'Công nghệ thông tin',
               cohort: s.cohort || '2024 - 2028',
               trainingCourse: 'K30',
-              officialCumulativeGpa4: stats.cumulativeGpa4 || s.officialCumulativeGpa4 || 0,
-              officialCumulativeCredits: stats.cumulativeCredits || s.officialCumulativeCredits || 0,
-              officialRating: stats.rating || s.officialRating || 'Khá',
+              officialCumulativeGpa4: s.officialCumulativeGpa4 ?? null,
+              officialCumulativeCredits: s.officialCumulativeCredits ?? null,
+              officialRating: s.officialRating || 'Chưa xếp loại',
               source: s.source || 'Bảng điểm sinh viên cung cấp',
               courses: s.courses || [],
-              completedCourses: completed
-            },
-            $setOnInsert: {
+              completedCourses: completed,
+              specialization: null,
               activities: [
                 { id: 1, type: 'activity', name: 'CLB Tin học Văn Lang IT Club', role: 'Thành viên', year: '2024', icon: '💻' },
                 { id: 2, type: 'skill', name: 'Phát triển Web React & Node.js', level: 'Trung cấp', icon: '⚛️' }
@@ -222,7 +229,7 @@ async function runMigration() {
     await StudentProfile.findOneAndUpdate(
       { email: adminEmail },
       {
-        $set: {
+        $setOnInsert: {
           userId: adminUser._id,
           mssv: 'ADMIN001',
           fullName: 'Quản Trị Viên Hệ Thống VLU',

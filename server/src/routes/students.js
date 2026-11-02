@@ -1,7 +1,7 @@
 import express from 'express';
 import multer from 'multer';
 import * as studentController from '../controllers/studentController.js';
-import { authenticate, optionalAuth } from '../middlewares/authMiddleware.js';
+import { authenticate } from '../middlewares/authMiddleware.js';
 import { requireAdmin, requireSelfOrAdmin } from '../middlewares/roleMiddleware.js';
 import { validateStudentProfileUpdate, validateStudentCreate } from '../validators/studentValidator.js';
 
@@ -28,16 +28,17 @@ router.post('/ocr-transcript', authenticate, upload.single('file'), studentContr
 router.post('/confirm-transcript', authenticate, studentController.confirmTranscript);
 
 // Lấy danh sách tóm tắt sinh viên (có tìm kiếm & phân trang)
-router.get('/', optionalAuth, studentController.getStudents);
+router.get('/', authenticate, requireAdmin, studentController.getStudents);
 
 // Tra cứu chi tiết hồ sơ & bảng điểm theo MSSV
-router.get('/:mssv', optionalAuth, studentController.getStudentByMssv);
+router.get('/:mssv', authenticate, requireSelfOrAdmin('mssv'), studentController.getStudentByMssv);
 
 // Thêm sinh viên mới (chỉ Admin)
 router.post('/', authenticate, requireAdmin, validateStudentCreate, studentController.createStudent);
 
 // Cập nhật thông tin sinh viên (Sinh viên chỉ cập nhật thông tin của mình, Admin cập nhật tất cả)
 router.put('/:mssv', authenticate, requireSelfOrAdmin('mssv'), validateStudentProfileUpdate, studentController.updateStudent);
+router.put('/:mssv/specialization', authenticate, requireAdmin, studentController.selectStudentSpecialization);
 
 // Xóa hoặc vô hiệu hóa sinh viên (chỉ Admin, ưu tiên soft-delete nếu có lịch sử học tập)
 router.delete('/:mssv', authenticate, requireAdmin, studentController.deleteStudent);

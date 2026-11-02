@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { GraduationCap, Search, CheckCircle2, Clock, Award, AlertCircle, FileCheck, ShieldCheck, Activity, Bot } from 'lucide-react';
+import { Search, CheckCircle2, Clock, Award, AlertCircle, FileCheck, ShieldCheck, Activity, Bot } from 'lucide-react';
 import AiChatSidebar from '../components/AiChatSidebar';
 import MobileChatDrawer from '../components/MobileChatDrawer';
 import { api } from '../services/api';
 import { useAuth } from '../hooks/useAuth';
+import AcademicProgress from '../components/AcademicProgress';
+import { useAcademicProgress } from '../hooks/useAcademicProgress';
 
 export default function GraduationPage() {
   const { user, profile } = useAuth();
+  const { progress: ownProgress, error: progressError } = useAcademicProgress();
   const initialMssv = profile?.mssv || user?.mssv || '';
   const [mssvInput, setMssvInput] = useState(initialMssv);
   const [student, setStudent] = useState(null);
@@ -36,29 +39,27 @@ export default function GraduationPage() {
     }
   }, [profile?.mssv, user?.mssv]);
 
-  const totalCredits = 126;
-  const currentCredits = student?.officialCumulativeCredits || 0;
-  const progressPercent = Math.min(100, Math.round((currentCredits / totalCredits) * 100));
-  const hasGdqp = student?.courses?.some(c => c.code.startsWith('71NAD') && (c.status === 'Dat' || c.status === '\u0110\u1ea1t' || c.status === 'Đạt'));
-  const hasGdtc = student?.courses?.some(c => c.code.startsWith('71PE') && (c.status === 'Dat' || c.status === '\u0110\u1ea1t' || c.status === 'Đạt'));
-  const hasAvPass = student?.courses?.some(c => (c.code.includes('ENG4') || c.code.includes('ENG5')) && (c.status === 'Dat' || c.status === '\u0110\u1ea1t' || c.status === 'Đạt' || c.status === 'Dat thap' || c.status === 'Đạt thấp'));
+  const academic = user?.role === 'student' ? ownProgress : student?.academicProgress;
+  const totalCredits = academic?.totalCredits ?? 0;
+  const currentCredits = academic?.earnedCredits ?? 0;
+  const remainingCredits = academic?.remainingCredits ?? 0;
+  const progressPercent = totalCredits > 0 ? Math.min(100, Math.round((currentCredits / totalCredits) * 100)) : 0;
+  const degreeGroups = Object.values(academic?.groups || {}).filter(group => group.active !== false && group.countsTowardDegree);
 
   const conditions = [
-    { id: 1, title: 'Tích lũy tối thiểu 126 Tín chỉ Khung K30', status: currentCredits >= 126 ? 'passed' : 'in_progress', desc: 'Hiện đã tích lũy ' + currentCredits + '/126 tín chỉ (' + progressPercent + '%)', icon: Award },
-    { id: 2, title: 'Chứng chỉ Ngoại ngữ (TOEIC 500+ / IELTS 5.0+)', status: hasAvPass ? 'passed' : 'pending', desc: hasAvPass ? 'Đã hoàn thành Anh văn chuyên ngành' : 'Cần nộp chứng chỉ trước đợt xét tốt nghiệp', icon: FileCheck },
-    { id: 3, title: 'Chứng chỉ Tin học MOS (Word, Excel, PowerPoint)', status: 'in_progress', desc: 'Khoa CNTT xét miễn một số phần hoặc nộp chứng chỉ chuẩn', icon: ShieldCheck },
-    { id: 4, title: 'Chứng chỉ Giáo dục Quốc phòng & An ninh (GDQP 1-4)', status: hasGdqp ? 'passed' : 'pending', desc: hasGdqp ? 'Đã hoàn thành GDQP' : 'Cần hoàn thành các học phần GDQP', icon: ShieldCheck },
-    { id: 5, title: 'Chứng chỉ Giáo dục Thể chất (GDTC)', status: hasGdtc ? 'passed' : 'pending', desc: hasGdtc ? 'Đã hoàn thành GDTC' : 'Cần hoàn thành các học phần GDTC', icon: Activity },
-  ];
+    { id: 1, title: 'Tín chỉ và các nhóm thuộc chương trình', status: totalCredits > 0 && remainingCredits === 0 && degreeGroups.length > 0 && degreeGroups.every(group => group.complete) ? 'passed' : 'in_progress', desc: `${currentCredits}/${totalCredits || '—'} TC; còn ${remainingCredits} TC. Cần hoàn thành riêng từng nhóm.`, icon: Award },
+    { id: 2, title: 'GPA tối thiểu và chuẩn đầu ra ngoại ngữ', status: 'unknown', desc: 'Chưa đủ dữ liệu để kiểm tra', icon: FileCheck },
+    { id: 3, title: 'Chuẩn tin học và các điều kiện khác', status: 'unknown', desc: 'Chưa đủ dữ liệu để kiểm tra', icon: ShieldCheck },
+    { id: 4, active: Boolean(academic?.groups?.defense) && academic.groups.defense.active !== false, title: 'Giáo dục Quốc phòng & An ninh', status: academic?.groups?.defense?.complete ? 'passed' : 'in_progress', desc: 'Theo dõi đủ các học phần theo quy tắc của khung, tách khỏi tín chỉ chương trình.', icon: ShieldCheck },
+    { id: 5, active: Boolean(academic?.groups?.TC002) && academic.groups.TC002.active !== false || Boolean(academic?.groups?.TC102) && academic.groups.TC102.active !== false, title: 'Giáo dục Thể chất', status: academic?.groups?.TC002?.complete && academic?.groups?.TC102?.complete ? 'passed' : 'in_progress', desc: 'Cần hoàn thành riêng cả hai nhóm TC002 và TC102.', icon: Activity },
+  ].filter(condition => condition.active !== false);
 
   const gradQuickReplies = [
-    { label: 'Còn thiếu gì?', text: student ? ('Tôi có ' + currentCredits + '/126 tín chỉ, còn thiếu ' + (126 - currentCredits) + ' tín chỉ. Tôi cần những gì để tốt nghiệp?') : 'Tôi còn thiếu gì để tốt nghiệp?' },
-    { label: 'Khi nào tốt nghiệp?', text: student ? ('GPA tôi là ' + student.officialCumulativeGpa4 + ', đã học ' + currentCredits + '/126 TC. Dự kiến khi nào tôi tốt nghiệp?') : 'Dự kiến khi nào tôi tốt nghiệp?' },
+    { label: 'Còn thiếu gì?', text: 'Dựa trên kết quả học tập đã xác minh, tôi còn thiếu những nhóm và điều kiện nào?' },
+    { label: 'Khi nào tốt nghiệp?', text: 'Dữ liệu hiện tại đã đủ để dự báo thời điểm tốt nghiệp chưa? Cần xác minh thêm điều gì?' },
     { label: 'Môn cần ưu tiên', text: 'Tôi nên học môn nào trước để đảm bảo tốt nghiệp đúng hạn?' },
   ];
-  const gradSystemContext = student
-    ? ('Sinh viên: ' + student.name + ', MSSV: ' + student.mssv + ', GPA: ' + student.officialCumulativeGpa4 + '/4.0, TC: ' + currentCredits + '/126, Còn thiếu: ' + (126 - currentCredits) + ' TC. Ngoại ngữ: ' + (hasAvPass ? 'Đã đạt' : 'Chưa đạt') + ', GDQP: ' + (hasGdqp ? 'Đã đạt' : 'Chưa đạt') + ', GDTC: ' + (hasGdtc ? 'Đã đạt' : 'Chưa đạt'))
-    : null;
+  const gradSystemContext = academic ? `Kết quả do máy chủ tính: ${JSON.stringify(academic)}. Không tự tính lại hoặc kết luận đủ điều kiện tốt nghiệp khi còn quy tắc chưa xác minh.` : null;
 
   return (
     <div style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}>
@@ -69,7 +70,7 @@ export default function GraduationPage() {
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px', marginBottom: '18px' }}>
               <div>
                 <h1 style={{ fontSize: '22px', fontWeight: 800, color: 'var(--text-main)', marginBottom: '4px' }}>Dự Báo & Xét Tiến Độ Tốt Nghiệp</h1>
-                <p style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Đánh giá 5 điều kiện tốt nghiệp cốt lõi và dự báo thời gian ra trường Đại học Văn Lang</p>
+                <p style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Đối chiếu tín chỉ, nhóm môn và các điều kiện tốt nghiệp có dữ liệu xác minh</p>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                 {user?.role === 'student' ? (
@@ -117,21 +118,22 @@ export default function GraduationPage() {
 
           {student && (
             <>
+              <AcademicProgress progress={academic} error={progressError} />
               <div className="vlu-card" style={{ background: 'linear-gradient(135deg, rgba(196,18,48,0.06) 0%, rgba(30,41,59,0.04) 100%)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-lg)', padding: '24px', marginBottom: '24px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px' }}>
                   <div>
                     <span className="badge badge-red" style={{ marginBottom: '8px' }}>Dự báo thời gian ra trường</span>
                     <h2 style={{ fontSize: '24px', fontWeight: 800, color: 'var(--text-main)', marginTop: '4px' }}>
-                      Dự kiến Tốt nghiệp: <span style={{ color: 'var(--vlu-red)' }}>Đợt 1 / Năm 2028</span>
+                      <span style={{ color: 'var(--vlu-red)' }}>{academic?.graduation?.message || 'Chưa đủ dữ liệu để kiểm tra'}</span>
                     </h2>
                     <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '4px' }}>
-                      Sinh viên: <strong>{student.name}</strong> - Niên khóa 2024–2028
+                      Sinh viên: <strong>{student.fullName || student.name}</strong> · Niên khóa {student.cohort || 'chưa cập nhật'}
                     </p>
                   </div>
                   <div style={{ textAlign: 'right' }}>
                     <div style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Tiến độ tích lũy tín chỉ</div>
                     <div style={{ fontSize: '28px', fontWeight: 800, color: '#16a34a' }}>{currentCredits} / {totalCredits} TC</div>
-                    <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Còn thiếu: <strong>{totalCredits - currentCredits} tín chỉ</strong></div>
+                    <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Còn thiếu: <strong>{remainingCredits} tín chỉ</strong></div>
                   </div>
                 </div>
                 <div style={{ width: '100%', height: '10px', borderRadius: '9999px', background: 'var(--border-color)', overflow: 'hidden', marginTop: '20px' }}>
@@ -162,7 +164,7 @@ export default function GraduationPage() {
                             ? <span className="badge badge-green" style={{ fontSize: '12px' }}><CheckCircle2 size={14} /> Đạt tiêu chuẩn</span>
                             : isInProgress
                             ? <span className="badge badge-blue" style={{ fontSize: '12px' }}><Clock size={14} /> Đang hoàn thiện</span>
-                            : <span className="badge badge-orange" style={{ fontSize: '12px' }}><AlertCircle size={14} /> Cần bổ sung</span>
+                            : <span className="badge badge-orange" style={{ fontSize: '12px' }}><AlertCircle size={14} /> {item.status === 'unknown' ? 'Chưa đủ dữ liệu để kiểm tra' : 'Cần bổ sung'}</span>
                           }
                         </div>
                       </div>

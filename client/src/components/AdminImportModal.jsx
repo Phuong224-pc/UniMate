@@ -5,10 +5,11 @@ import {
   Check, AlertCircle, HelpCircle, Eye, Settings2, Database
 } from 'lucide-react';
 import { api } from '../services/api';
+import { notifyAcademicUpdated } from '../hooks/useAcademicProgress';
 
 const DATA_TYPES = [
   { id: 'courses', label: 'Danh mục môn học', desc: 'Mã môn, tên học phần, số tín chỉ, tiên quyết' },
-  { id: 'curriculum', label: 'Chương trình đào tạo', desc: 'Khung 126 tín chỉ K30 CNTT theo khối kiến thức' },
+  { id: 'curriculum', label: 'Chương trình đào tạo', desc: 'Khung theo ngành, khóa và phiên bản chương trình' },
   { id: 'schedules', label: 'Thời khóa biểu', desc: 'Lịch học theo học kỳ, phòng, thứ, tiết, giảng viên' },
   { id: 'students', label: 'Danh sách sinh viên', desc: 'MSSV, họ tên, email, lớp, chuyên ngành' },
   { id: 'grades', label: 'Bảng điểm sinh viên', desc: 'Điểm hệ 10, điểm hệ 4, điểm chữ theo môn học' }
@@ -25,6 +26,10 @@ export default function AdminImportModal({
   const [file, setFile] = useState(null);
   const [conflictMode, setConflictMode] = useState('skip'); // 'skip' | 'update'
   const [defaultProgram, setDefaultProgram] = useState('K30 CNTT');
+  const [curricula, setCurricula] = useState([]);
+  const [curriculumId, setCurriculumId] = useState('');
+  const [resolutions, setResolutions] = useState({});
+  const [targetMssv, setTargetMssv] = useState('');
 
   // Loading states
   const [loadingPreview, setLoadingPreview] = useState(false);
@@ -50,6 +55,18 @@ export default function AdminImportModal({
     }
   }, [initialDataType, isOpen]);
 
+  useEffect(() => {
+    if (!isOpen || dataType !== 'curriculum') return;
+    api.getAdminCurricula().then(res => {
+      const list = Array.isArray(res.data) ? res.data : res.data?.curricula || [];
+      setCurricula(list);
+      if (list.length && !curriculumId) {
+        setCurriculumId(list[0]._id);
+        setDefaultProgram(list[0].program);
+      }
+    }).catch(error => setErrorMsg(error.message));
+  }, [isOpen, dataType]);
+
   // Reset when closing or opening
   useEffect(() => {
     if (!isOpen) {
@@ -60,6 +77,10 @@ export default function AdminImportModal({
       setImportResult(null);
       setErrorMsg('');
       setShowMappingConfig(false);
+      setResolutions({});
+      setSelectedSheet('');
+      setCustomMapping({});
+      setTargetMssv('');
     }
   }, [isOpen]);
 
@@ -108,6 +129,9 @@ export default function AdminImportModal({
       const formData = new FormData();
       formData.append('file', file);
       formData.append('dataType', dataType);
+      formData.append('defaultProgram', defaultProgram);
+      if (dataType === 'curriculum' && curriculumId) formData.append('curriculumId', curriculumId);
+      if (dataType === 'grades' && targetMssv.trim()) formData.append('targetMssv', targetMssv.trim());
       if (sheetToRead) formData.append('sheetName', sheetToRead);
       if (mappingToUse) formData.append('customMapping', JSON.stringify(mappingToUse));
 
@@ -120,6 +144,7 @@ export default function AdminImportModal({
       setSelectedSheet(res.data.activeSheetName || '');
       setCustomMapping(res.data.detectedMapping || {});
       setPreviewRows(res.data.rows || []);
+      setResolutions({});
 
       if (res.data.isScanned) {
         setErrorMsg(res.data.message || 'Tài liệu PDF là dạng scan, không có văn bản.');
@@ -192,9 +217,17 @@ export default function AdminImportModal({
   // Step 2 -> Step 3: Confirm and save to DB
   const handleConfirm = async () => {
     const selectedRows = previewRows.filter(r => r.selected);
-    if (selectedRows.length === 0) {
+    if (selectedRows.length === 0 && !(dataType === 'curriculum' && previewData?.missingRules?.length)) {
       setErrorMsg('Vui lòng tích chọn ít nhất 1 dòng hợp lệ để nhập vào hệ thống');
       return;
+    }
+    if (dataType === 'curriculum') {
+      const unresolved = selectedRows.filter(row => row.conflicts?.some(conflict => resolutions[row.rowIndex]?.[conflict.field] === undefined));
+      if (unresolved.length) {
+        setErrorMsg(`Cần xác nhận mâu thuẫn hoặc bỏ chọn các dòng: ${unresolved.map(row => row.rowIndex).join(', ')}`);
+        return;
+      }
+      if (!window.confirm(`Xác nhận áp dụng ${selectedRows.length} dòng đã kiểm tra vào ${previewData?.target?.program || defaultProgram}? Các môn vắng trong file và bảng điểm cũ sẽ được giữ nguyên.`)) return;
     }
 
     setLoadingConfirm(true);
@@ -205,7 +238,12 @@ export default function AdminImportModal({
         dataType,
         rows: selectedRows,
         conflictMode,
-        defaultProgram
+        defaultProgram,
+        curriculumId,
+        targetMssv: targetMssv.trim(),
+        previewToken: previewData?.previewToken,
+        selectedRowIndices: selectedRows.map(row => row.rowIndex),
+        resolutions
       });
 
       if (!res.success) {
@@ -213,6 +251,7 @@ export default function AdminImportModal({
       }
 
       setImportResult(res.data);
+      notifyAcademicUpdated();
       setStep(3);
       if (typeof onImportSuccess === 'function') {
         onImportSuccess(res.data);
@@ -225,6 +264,7 @@ export default function AdminImportModal({
   };
 
   const selectedCount = previewRows.filter(r => r.selected).length;
+  const canConfirm = selectedCount > 0 || (dataType === 'curriculum' && previewData?.missingRules?.length > 0);
   const validCount = previewRows.filter(r => r.status === 'valid').length;
   const duplicateCount = previewRows.filter(r => r.status === 'duplicate').length;
   const invalidCount = previewRows.filter(r => r.status === 'invalid').length;
@@ -372,6 +412,19 @@ export default function AdminImportModal({
               </button>
             </div>
 
+            {dataType === 'curriculum' && <div style={{ padding: '14px', background: 'var(--bg-tertiary)', borderRadius: '10px' }}>
+              <label htmlFor="curriculum-target" style={{ display: 'block', fontWeight: 700, fontSize: '13px', marginBottom: '8px' }}>Khung hiện có cần đối chiếu và bổ sung</label>
+              <select id="curriculum-target" value={curriculumId} onChange={event => { const target = curricula.find(item => item._id === event.target.value); setCurriculumId(event.target.value); if (target) setDefaultProgram(target.program); }} style={{ width: '100%', padding: '9px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '6px', color: 'var(--text-main)' }}>
+                <option value="">Chọn khung chương trình</option>
+                {curricula.map(item => <option key={item._id} value={item._id}>{item.program} · {item.scope?.version || item.version || 'phiên bản hiện tại'} · lần cập nhật {item.revision || 0}</option>)}
+              </select>
+              <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: 0 }}>Đối chiếu theo mã môn trong khung đã chọn. Các môn vắng trong file được giữ lại; bảng điểm và lịch sử liên kết được bảo toàn.</p>
+            </div>}
+            {dataType === 'grades' && <div style={{ padding: '14px', background: 'var(--bg-tertiary)', borderRadius: '10px' }}>
+              <label htmlFor="transcript-target" style={{ display: 'block', fontWeight: 700, fontSize: '13px', marginBottom: '8px' }}>MSSV đích khi bảng điểm không có mã sinh viên</label>
+              <input id="transcript-target" value={targetMssv} onChange={event => setTargetMssv(event.target.value)} placeholder="Nhập MSSV của tài khoản cần cập nhật" style={{ width: '100%', padding: '9px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '6px', color: 'var(--text-main)' }} />
+              <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: 0 }}>Kiểm tra đúng sinh viên trước khi xác nhận. Nếu file đã ghi MSSV, hệ thống sẽ đối chiếu để tránh nhập nhầm tài khoản.</p>
+            </div>}
             {/* 3. Drag & Drop Upload Zone */}
             <div>
               <label style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-main)', marginBottom: '8px', display: 'block' }}>
@@ -478,7 +531,7 @@ export default function AdminImportModal({
               <button
                 type="button"
                 onClick={() => handlePreview()}
-                disabled={!file || loadingPreview}
+                disabled={!file || loadingPreview || (dataType === 'curriculum' && !curriculumId)}
                 style={{
                   display: 'flex', alignItems: 'center', gap: '8px',
                   padding: '9px 24px', borderRadius: '8px',
@@ -499,6 +552,16 @@ export default function AdminImportModal({
         {/* ─── STEP 2: PREVIEW, MAPPING & EDITING TABLE ─── */}
         {step === 2 && previewData && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', flex: 1, minHeight: 0 }}>
+            {dataType === 'curriculum' && <div style={{ padding: '14px', borderRadius: '10px', background: 'var(--bg-tertiary)', fontSize: '12px' }}>
+              <strong>Đối chiếu {previewData.target?.program || defaultProgram} · lần cập nhật {previewData.target?.revision || 0}</strong>
+              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginTop: '8px' }}>
+                {[['added', 'Mới'], ['changed', 'Thay đổi'], ['unchanged', 'Không đổi'], ['conflicts', 'Mâu thuẫn'], ['absent', 'Vắng trong file']].map(([key, label]) => <span key={key}>{label}: <strong>{previewData.summary?.[key] ?? 0}</strong></span>)}
+              </div>
+              {previewData.missingRules?.length > 0 && <p>Quy tắc còn thiếu: {previewData.missingRules.map(rule => typeof rule === 'string' ? rule : rule.message || rule.code || JSON.stringify(rule)).join('; ')}</p>}
+              {(previewData.warnings || []).map((warning, index) => <p key={index} style={{ color: '#b45309' }}>{typeof warning === 'string' ? warning : warning.message || JSON.stringify(warning)}</p>)}
+              {previewData.absentCourses?.length > 0 && <details style={{ marginTop: '8px' }}><summary>Môn vắng trong file mới (sẽ giữ nguyên)</summary><p style={{ overflowWrap: 'anywhere' }}>{previewData.absentCourses.map(course => typeof course === 'string' ? course : course.code).join(', ')}</p></details>}
+              <p style={{ marginBottom: 0 }}>Kiểm tra thay đổi tín chỉ, nhóm và điều kiện học ở từng dòng. Dòng mâu thuẫn cần chọn giá trị xác nhận hoặc bỏ chọn trước khi lưu.</p>
+            </div>}
             {/* Top Toolbar: Sheet selector & Mapping button & Conflict Option */}
             <div style={{
               display: 'flex', justifyContent: 'space-between', alignItems: 'center',
@@ -679,6 +742,7 @@ export default function AdminImportModal({
                           {row.rowIndex}
                         </td>
                         <td style={{ padding: '6px 10px' }}>
+                          {dataType === 'curriculum' && <div style={{ marginBottom: '6px', fontWeight: 700, fontSize: '11px' }}>{{ added: 'Mới', changed: 'Thay đổi', unchanged: 'Không đổi', conflict: 'Cần xác nhận' }[row.changeType] || row.changeType}</div>}
                           {isInvalid ? (
                             <span style={{ color: '#dc2626', fontWeight: 700, fontSize: '11px', display: 'flex', alignItems: 'center', gap: '3px' }} title={row.errors?.join('\n')}>
                               <AlertCircle size={12} /> Lỗi
@@ -692,15 +756,26 @@ export default function AdminImportModal({
                               <CheckCircle2 size={12} /> Hợp lệ
                             </span>
                           )}
+                          {dataType === 'curriculum' && row.changes?.length > 0 && <details style={{ marginTop: '6px', minWidth: '170px', fontSize: '11px' }}><summary>Xem thay đổi ({row.changes.length})</summary>{row.changes.map((change, index) => <div key={index} style={{ marginTop: '5px', overflowWrap: 'anywhere' }}><strong>{change.field}</strong>: {JSON.stringify(change.before) ?? 'trống'} → {JSON.stringify(change.after) ?? 'trống'}</div>)}</details>}
+                          {dataType === 'curriculum' && row.conflicts?.map((conflict, index) => <label key={index} style={{ display: 'block', marginTop: '9px', minWidth: '190px', fontSize: '11px' }}>
+                            <strong style={{ color: '#b45309' }}>{conflict.message || `Xác nhận ${conflict.field}`}</strong>
+                            <select aria-label={`Dòng ${row.rowIndex}: ${conflict.field}`} value={resolutions[row.rowIndex]?.[conflict.field] === undefined ? '' : JSON.stringify(resolutions[row.rowIndex][conflict.field])} onChange={event => { const selected = event.target.value; setResolutions(previous => { const fields = { ...previous[row.rowIndex] }; if (!selected) delete fields[conflict.field]; else fields[conflict.field] = JSON.parse(selected); return { ...previous, [row.rowIndex]: fields }; }); }} style={{ display: 'block', marginTop: '5px', width: '100%', padding: '5px', borderRadius: '5px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-main)' }}>
+                              <option value="">Chưa xác nhận</option>
+                              {(conflict.values || []).map((value, optionIndex) => <option key={optionIndex} value={JSON.stringify(value)}>{Array.isArray(value) ? value.join(', ') : String(value)}{conflict.sources?.[optionIndex]?.sheet ? ` · ${conflict.sources[optionIndex].sheet}` : ''}</option>)}
+                            </select>
+                            {(conflict.sources || []).map((source, sourceIndex) => <span key={sourceIndex} style={{ display: 'block', color: 'var(--text-muted)', marginTop: '3px', overflowWrap: 'anywhere' }}>{source.sheet} · dòng {source.row} · {Array.isArray(source.value) ? source.value.join(', ') : String(source.value ?? '')}</span>)}
+                          </label>)}
+                          {dataType === 'curriculum' && row.source && <div style={{ fontSize: '10px', marginTop: '5px', color: 'var(--text-muted)' }}>{row.source.sheet || row.source.sheetName} · dòng {row.source.row || row.source.rowIndex || row.rowIndex}</div>}
                         </td>
 
                         {previewData.fields?.map(f => {
-                          const val = row.data?.[f.key] ?? '';
+                          const val = resolutions[row.rowIndex]?.[f.key] ?? row.data?.[f.key] ?? '';
                           return (
                             <td key={f.key} style={{ padding: '4px 6px' }}>
                               <input
                                 type="text"
                                 value={val}
+                                readOnly={dataType === 'curriculum'}
                                 onChange={(e) => handleCellChange(rIdx, f.key, e.target.value)}
                                 style={{
                                   width: '100%',
@@ -761,15 +836,15 @@ export default function AdminImportModal({
                 <button
                   type="button"
                   onClick={handleConfirm}
-                  disabled={loadingConfirm || selectedCount === 0}
+                  disabled={loadingConfirm || !canConfirm}
                   style={{
                     display: 'flex', alignItems: 'center', gap: '8px',
                     padding: '9px 24px', borderRadius: '8px',
-                    background: (loadingConfirm || selectedCount === 0) ? 'var(--bg-tertiary)' : '#10b981',
-                    color: (loadingConfirm || selectedCount === 0) ? 'var(--text-muted)' : 'white',
+                    background: (loadingConfirm || !canConfirm) ? 'var(--bg-tertiary)' : '#10b981',
+                    color: (loadingConfirm || !canConfirm) ? 'var(--text-muted)' : 'white',
                     border: 'none', fontSize: '13px', fontWeight: 700,
-                    cursor: (loadingConfirm || selectedCount === 0) ? 'not-allowed' : 'pointer',
-                    boxShadow: (loadingConfirm || selectedCount === 0) ? 'none' : '0 2px 8px rgba(16, 185, 129, 0.3)'
+                    cursor: (loadingConfirm || !canConfirm) ? 'not-allowed' : 'pointer',
+                    boxShadow: (loadingConfirm || !canConfirm) ? 'none' : '0 2px 8px rgba(16, 185, 129, 0.3)'
                   }}
                 >
                   {loadingConfirm ? <Loader2 size={16} className="spin" /> : <Save size={16} />}

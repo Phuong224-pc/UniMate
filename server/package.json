@@ -5,6 +5,8 @@
   "main": "src/index.js",
   "type": "module",
   "scripts": {
+    "test": "node --test tests/*.test.js",
+    "test:integration": "node scripts/testDataModes.js && node scripts/testNewFeatures.js",
     "start": "node src/index.js",
     "dev": "node --watch src/index.js",
     "dev:demo": "node --watch -e \"process.env.DATA_MODE='demo'; import('./src/index.js');\"",

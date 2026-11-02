@@ -1,8 +1,15 @@
 import 'dotenv/config';
-import { initDataProvider } from '../src/repositories/index.js';
-import * as adminService from '../src/services/adminService.js';
-import * as studentService from '../src/services/studentService.js';
-import * as ocrService from '../src/services/ocrService.js';
+import assert from 'node:assert/strict';
+import { mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
+const testDirectory = mkdtempSync(path.join(tmpdir(), 'unimate-admin-ocr-'));
+process.env.DATA_MODE = 'demo';
+process.env.DEMO_DATA_PATH = path.join(testDirectory, 'store.json');
+const { initDataProvider, studentRepo, curriculumRepo } = await import('../src/repositories/index.js');
+const adminService = await import('../src/services/adminService.js');
+const studentService = await import('../src/services/studentService.js');
+const ocrService = await import('../src/services/ocrService.js');
 
 async function runTests() {
   console.log('========================================================');
@@ -44,7 +51,7 @@ async function runTests() {
 
   // Xóa tài khoản
   await adminService.deleteUser(newUser.id);
-  console.log('   - Đã xóa user thành công');
+  console.log('   - Đã khóa tài khoản an toàn và giữ hồ sơ sinh viên');
   console.log('✅ TEST 2 PASSED: Admin User Management hoạt động chính xác.\n');
 
   // TEST 3: Admin Course Catalog (CRUD)
@@ -69,11 +76,20 @@ async function runTests() {
 
   // TEST 4: Student Transcript Confirmation & Calculation
   console.log('[TEST 4] Kiểm tra Lưu Bảng Điểm & Tính Toán GPA/Tín chỉ...');
-  const testStudentMssv = '2474802010458';
+  const testStudentMssv = 'TEST_TRANSCRIPT_IMPORT';
+  const testCurriculum = await curriculumRepo.upsert({
+    program: 'Admin OCR integration test', scope: { schoolId: 'test', majorCode: 'test', cohort: 'test', version: 'v1' }, totalCredits: 6,
+    rules: { policies: { passScore10: 4, retake: 'highest' }, groups: { commonRequired: { requiredCredits: 6, requiredCourses: 2 } } },
+    sections: [{ name: 'Required', courses: [
+      { code: 'TEST_PASS', name: 'Môn có kết quả', credits: 3, groupCode: 'BB', required: true },
+      { code: 'TEST_PENDING', name: 'Môn chưa có kết quả', credits: 3, groupCode: 'BB', required: true }
+    ] }]
+  });
+  await studentRepo.create({ mssv: testStudentMssv, fullName: 'Transcript integration', email: 'transcript-test@example.com', curriculumId: String(testCurriculum._id), courses: [], officialCumulativeCredits: null, officialCumulativeGpa4: null });
   const sampleTranscriptCourses = [
     {
-      code: '71ITBS10103',
-      name: 'Nhập môn ngành Công nghệ thông tin',
+      code: 'TEST_PASS',
+      name: 'Môn có kết quả',
       credits: 3,
       score: 8.5,
       point4: 3.5,
@@ -82,18 +98,18 @@ async function runTests() {
       status: 'Đạt'
     },
     {
-      code: '71ENG01012', // Có số 0 đầu
-      name: 'Tiếng Anh 1',
-      credits: 2,
-      score: 9.0,
-      point4: 4.0,
-      letter: 'A',
+      code: 'TEST_PENDING',
+      name: 'Môn chưa có kết quả',
+      credits: 3,
+      score: null,
+      point4: null,
+      letter: '',
       semester: 'HK01 - 2024-2025',
-      status: 'Đạt'
+      status: 'Đang học'
     },
     {
-      code: '71GEGD10101',
-      name: 'Giáo dục quốc phòng 1',
+      code: 'TEST_UNMAPPED',
+      name: 'Môn chưa thuộc khung',
       credits: 0,
       score: null,
       point4: null,
@@ -110,11 +126,29 @@ async function runTests() {
   );
   console.log('   - Đã lưu:', confirmResult.message);
   console.log('   - Tổng số môn:', confirmResult.totalCourses);
-  console.log('   - GPA cập nhật:', confirmResult.stats);
+  console.log('   - Tín chỉ đã đạt/chưa có kết quả:', confirmResult.stats.earnedCredits, '/', confirmResult.stats.inProgressCredits);
 
-  if (!confirmResult.totalCourses || confirmResult.totalCourses < 3) {
-    throw new Error('Số môn lưu không khớp');
-  }
+  assert.equal(confirmResult.totalCourses, sampleTranscriptCourses.length);
+  assert.equal(confirmResult.stats.earnedCredits, 3);
+  assert.equal(confirmResult.stats.inProgressCredits, 3);
+  assert.equal(confirmResult.stats.unmappedCourses.length, 1);
+  assert.equal(confirmResult.student.officialCumulativeCredits, null);
+  const repeated = await studentService.confirmTranscriptCourses(testStudentMssv, sampleTranscriptCourses, 'ocr');
+  assert.equal(repeated.addedCount, 0);
+  assert.equal(repeated.totalCourses, confirmResult.totalCourses);
+  assert.equal(repeated.stats.earnedCredits, confirmResult.stats.earnedCredits);
+  const parsed = ocrService.parseVluTranscriptText([
+    'Năm học: 2024-2025 - Học kỳ: HK01',
+    '1 71TEST00001 Môn có kết quả 3 8.5 3.5 B+',
+    '2 71TEST00002 Môn chưa có kết quả 3',
+    '- Số tín chỉ đạt học kỳ: 3',
+    '- Tổng số tín chỉ tích lũy: 3',
+    '- Điểm TB tích lũy (Hệ 4): 3.5'
+  ].join('\n'));
+  assert.equal(parsed.semesters[0].courses.length, 2);
+  assert.equal(parsed.semesters[0].courses[1].score, null);
+  assert.equal(parsed.sourceTotals.cumulativeCredits, 3);
+  assert.equal(parsed.sourceTotals.cumulativeGpa4, 3.5);
   console.log('✅ TEST 4 PASSED: Lưu bảng điểm và tính toán GPA thành công.\n');
 
   console.log('========================================================');
@@ -124,5 +158,5 @@ async function runTests() {
 
 runTests().catch(err => {
   console.error('❌ Lỗi kiểm thử:', err);
-  process.exit(1);
-});
+  process.exitCode = 1;
+}).finally(() => rmSync(testDirectory, { recursive: true, force: true }));

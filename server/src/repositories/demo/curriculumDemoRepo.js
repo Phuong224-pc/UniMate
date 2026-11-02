@@ -1,45 +1,26 @@
-import { demoStorage } from './demoStorage.js';
+﻿import { demoStorage } from './demoStorage.js';
+
+const sameScope = (left = {}, right = {}) => ['schoolId', 'majorCode', 'cohort', 'version'].every(key => (left?.[key] || '') === (right?.[key] || ''));
+const copy = value => value ? structuredClone(value) : value;
 
 export const curriculumDemoRepo = {
-  async findByProgram(programName = 'K30 CNTT') {
+  async findByProgram(programName = 'K30 CNTT', scope = null) {
     const clean = programName.trim().toLowerCase();
-    const curr = demoStorage.findOne('curriculum', c => (c.program || '').toLowerCase() === clean);
-    if (curr) return curr;
-
-    // Fallback: build from courses if curriculum entry is missing
-    const courses = demoStorage.find('courses', c => (c.program || '').toLowerCase() === clean);
-    if (courses.length > 0) {
-      const sectionMap = {};
-      courses.forEach(c => {
-        const sec = c.sectionName || 'Môn học chung';
-        if (!sectionMap[sec]) sectionMap[sec] = [];
-        sectionMap[sec].push({
-          code: c.code,
-          name: c.name,
-          credits: c.credits,
-          prerequisites: c.prerequisites,
-          required: c.required,
-          semesterRecommended: c.semesterRecommended
-        });
-      });
-      const sections = Object.entries(sectionMap).map(([name, cs]) => ({ name, courses: cs }));
-      return { program: programName, major: 'Công nghệ thông tin', totalCredits: 126, sections };
-    }
-
-    return { program: programName, major: 'Công nghệ thông tin', totalCredits: 126, sections: [] };
+    const items = demoStorage.find('curriculum', c => (c.program || '').toLowerCase() === clean);
+    const match = scope ? items.find(c => sameScope(c.scope, scope)) : items.find(c => !c.scope) || (items.length === 1 ? items[0] : null);
+    return copy(match || { program: programName, sections: [], verificationStatus: items.length > 1 ? 'ambiguous_version' : 'missing_curriculum' });
   },
-
-  async upsert(data) {
-    const existing = demoStorage.findOne('curriculum', c => c.program === data.program);
+  async findById(id) { return copy(demoStorage.findOne('curriculum', c => String(c._id) === String(id))); },
+  async findMany() { return copy(demoStorage.find('curriculum')); },
+  async upsert(data, { expectedRevision } = {}) {
+    const existing = data._id ? demoStorage.findOne('curriculum', c => String(c._id) === String(data._id)) : demoStorage.findOne('curriculum', c => c.program === data.program && sameScope(c.scope, data.scope));
     if (existing) {
-      return demoStorage.updateOne('curriculum', c => c._id === existing._id, data);
+      if ((data.program && data.program !== existing.program) || (existing.scope && data.scope && !sameScope(existing.scope, data.scope))) { const error = new Error('Tạo khung riêng để lưu phiên bản/phạm vi mới; không đổi phạm vi khung đang được sử dụng.'); error.statusCode = 400; throw error; }
+      if (expectedRevision !== undefined && (existing.revision || 1) !== expectedRevision) { const error = new Error('Khung đã thay đổi; tải lại bản xem trước.'); error.statusCode = 409; throw error; }
+      return copy(await demoStorage.updateOne('curriculum', c => c._id === existing._id, { ...copy(data), revision: data.revision ?? (existing.revision || 1) + 1 }));
     }
-    return demoStorage.insertOne('curriculum', data);
+    return copy(await demoStorage.insertOne('curriculum', { revision: 1, ...copy(data) }));
   },
-
-  async count() {
-    return demoStorage.count('curriculum');
-  }
+  async count() { return demoStorage.count('curriculum'); }
 };
-
 export default curriculumDemoRepo;

@@ -4,13 +4,16 @@ import {
   IdCard, User, Mail, Phone, MapPin, Calendar, Award, Camera,
   UploadCloud, CheckCircle2, FileText, Edit3, Save, X, Plus,
   Trash2, Download, BookOpen, Star, Shield, Loader2, Sparkles,
-  GraduationCap, Briefcase, Image as ImageIcon, AlertCircle,
-  ChevronRight, Globe, Users, Clock, BadgeCheck, FileSpreadsheet,
-  Calculator, Search, Filter, RefreshCw, TrendingUp, HelpCircle
+  GraduationCap, AlertCircle,
+  Globe, Users, FileSpreadsheet,
+  Search, Filter
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { api } from '../services/api';
 import AuthModal from '../components/AuthModal';
+import AcademicProgress from '../components/AcademicProgress';
+import SpecializationPicker from '../components/SpecializationPicker';
+import { useAcademicProgress, notifyAcademicUpdated } from '../hooks/useAcademicProgress';
 
 // ───────────────────────────────────────────────
 // Defaults
@@ -195,6 +198,7 @@ export default function StudentProfilePage({ defaultTab = 'info' }) {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, profile: authProfile, refreshUser, isAdmin, loading: authLoading } = useAuth();
+  const { progress, error: progressError, reload: reloadProgress } = useAcademicProgress();
 
   // Chuyển hướng Quản trị viên sang trang Quản trị (Admin không có hồ sơ sinh viên và bảng điểm cá nhân)
   useEffect(() => {
@@ -454,35 +458,7 @@ export default function StudentProfilePage({ defaultTab = 'info' }) {
     });
   }, [courses, selectedSemester, filterQuery]);
 
-  // GPA Stats
-  const stats = useMemo(() => {
-    let totalCredits = 0;
-    let earnedCredits = 0;
-    let totalScore10 = 0;
-    let totalScore4 = 0;
-    let countScore = 0;
-    let passedCount = 0;
-
-    courses.forEach(c => {
-      const cr = Number(c.credits) || 0;
-      totalCredits += cr;
-      const isPassed = c.status === 'Đạt' || c.status === 'Đạt thấp' || c.status === 'Miễn/ bảo lưu' || (c.score !== null && c.score >= 4.0);
-      if (isPassed) {
-        earnedCredits += cr;
-        passedCount++;
-      }
-      if (c.score !== null && c.score !== undefined && !isNaN(c.score)) {
-        totalScore10 += Number(c.score) * cr;
-        totalScore4 += Number(c.point4 || 0) * cr;
-        countScore += cr;
-      }
-    });
-
-    const gpa10 = countScore > 0 ? (totalScore10 / countScore).toFixed(2) : '0.00';
-    const gpa4 = countScore > 0 ? (totalScore4 / countScore).toFixed(2) : '0.00';
-
-    return { totalCredits, earnedCredits, gpa10, gpa4, passedCount, totalCount: courses.length };
-  }, [courses]);
+  const courseStates = new Map((progress?.courseStates || []).map(course => [course.code, course]));
 
   // Camera Handlers
   const startCamera = async () => {
@@ -629,6 +605,12 @@ export default function StudentProfilePage({ defaultTab = 'info' }) {
       next.semesters[sIdx].courses.splice(cIdx, 1);
       return next;
     });
+    setSelectedDraftRows(previous => new Set([...previous].flatMap(key => {
+      const [semesterIndex, courseIndex] = key.split('_').map(Number);
+      if (semesterIndex !== sIdx || courseIndex < cIdx) return [key];
+      if (courseIndex === cIdx) return [];
+      return [`${semesterIndex}_${courseIndex - 1}`];
+    })));
   };
 
   const handleConfirmSave = async () => {
@@ -643,23 +625,26 @@ export default function StudentProfilePage({ defaultTab = 'info' }) {
               code: c.code,
               name: c.name,
               credits: Number(c.credits) || 0,
-              score: c.score !== null ? Number(c.score) : null,
-              point4: c.point4 !== null ? Number(c.point4) : null,
+              score: c.score != null && c.score !== '' ? Number(c.score) : null,
+              point4: c.point4 != null && c.point4 !== '' ? Number(c.point4) : null,
               letter: c.letter || '',
-              status: c.status || 'Đạt',
+              status: c.status || 'Đang học',
+              source: c.source,
               semester: sem.semesterName
             });
           }
         });
       });
 
-      const res = await api.updateMyCourses(selectedCourses);
+      const res = await api.confirmTranscript({ courses: selectedCourses, source: draftResult.source, sourceTotals: draftResult.sourceTotals });
       if (res.success) {
         setActionMsg({ text: `Đã lưu thành công ${selectedCourses.length} môn học vào hồ sơ sinh viên!`, type: 'success' });
         setDraftResult(null);
         setHasUnsavedDraft(false);
         if (refreshUser) await refreshUser();
         await loadGrades();
+        await reloadProgress();
+        notifyAcademicUpdated();
       }
     } catch (err) {
       setActionMsg({ text: err.message || 'Lỗi khi lưu bảng điểm vào cơ sở dữ liệu.', type: 'error' });
@@ -852,6 +837,8 @@ export default function StudentProfilePage({ defaultTab = 'info' }) {
           ───────────────────────────────────────────────────────────── */}
       {activeMainTab === 'info' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          <SpecializationPicker progress={progress} />
+          <AcademicProgress progress={progress} error={progressError} compact />
           {/* OCR Banner */}
           {ocrResult && (
             <OcrBanner fields={ocrResult} onApply={applyOcrResult} onDismiss={() => setOcrResult(null)} />
@@ -1092,44 +1079,7 @@ export default function StudentProfilePage({ defaultTab = 'info' }) {
             </div>
           )}
 
-          {/* GPA Summary KPI Cards */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 150px), 1fr))', gap: '12px' }}>
-            <div style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '14px', padding: '18px 20px', boxShadow: 'var(--shadow-sm)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-                <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>GPA Hệ 10</span>
-                <Calculator size={18} color="var(--vlu-red)" />
-              </div>
-              <div style={{ fontSize: '28px', fontWeight: 800, color: 'var(--vlu-red)' }}>{stats.gpa10}</div>
-              <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '4px' }}>Điểm trung bình hệ 10</div>
-            </div>
-
-            <div style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '14px', padding: '18px 20px', boxShadow: 'var(--shadow-sm)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-                <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>GPA Hệ 4.0</span>
-                <TrendingUp size={18} color="#10b981" />
-              </div>
-              <div style={{ fontSize: '28px', fontWeight: 800, color: '#10b981' }}>{stats.gpa4}</div>
-              <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '4px' }}>Quy đổi hệ 4 chuẩn xét tốt nghiệp</div>
-            </div>
-
-            <div style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '14px', padding: '18px 20px', boxShadow: 'var(--shadow-sm)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-                <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Tín chỉ tích lũy</span>
-                <Award size={18} color="#3b82f6" />
-              </div>
-              <div style={{ fontSize: '28px', fontWeight: 800, color: '#3b82f6' }}>{stats.earnedCredits} / 126</div>
-              <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '4px' }}>Khóa 30 - Kỹ thuật phần mềm</div>
-            </div>
-
-            <div style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '14px', padding: '18px 20px', boxShadow: 'var(--shadow-sm)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-                <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Học phần đạt</span>
-                <CheckCircle2 size={18} color="#f59e0b" />
-              </div>
-              <div style={{ fontSize: '28px', fontWeight: 800, color: '#f59e0b' }}>{stats.passedCount} / {stats.totalCount}</div>
-              <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '4px' }}>Số môn đã vượt qua</div>
-            </div>
-          </div>
+          <AcademicProgress progress={progress} error={progressError} />
 
           {/* Action Header: OCR & Upload options */}
           <div style={{
@@ -1317,14 +1267,14 @@ export default function StudentProfilePage({ defaultTab = 'info' }) {
                                 </td>
                                 <td style={{ padding: '6px 8px' }}>
                                   <input
-                                    type="number" step="0.1" value={c.score !== null ? c.score : ''} placeholder="--"
+                                    type="number" step="0.1" value={c.score != null ? c.score : ''} placeholder="--"
                                     onChange={(e) => handleDraftCellChange(sIdx, cIdx, 'score', e.target.value === '' ? null : e.target.value)}
                                     style={{ width: '55px', padding: '4px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '4px', textAlign: 'center', fontWeight: 600, fontSize: '11px', color: 'var(--text-main)' }}
                                   />
                                 </td>
                                 <td style={{ padding: '6px 8px' }}>
                                   <input
-                                    type="number" step="0.01" value={c.point4 !== null ? c.point4 : ''} placeholder="--"
+                                    type="number" step="0.01" value={c.point4 != null ? c.point4 : ''} placeholder="--"
                                     onChange={(e) => handleDraftCellChange(sIdx, cIdx, 'point4', e.target.value === '' ? null : e.target.value)}
                                     style={{ width: '55px', padding: '4px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '4px', textAlign: 'center', fontSize: '11px', color: 'var(--text-main)' }}
                                   />
@@ -1432,7 +1382,9 @@ export default function StudentProfilePage({ defaultTab = 'info' }) {
                   </thead>
                   <tbody>
                     {filteredCourses.map((c, idx) => {
-                      const isPassed = c.status === 'Đạt' || c.status === 'Đạt thấp' || c.status === 'Miễn/ bảo lưu' || (c.score !== null && c.score >= 4.0);
+                      const state = courseStates.get(c.code);
+                      const isPassed = state?.status === 'passed' || state?.status === 'recognized';
+                      const isPending = state?.status === 'in_progress' || (c.score == null && c.point4 == null && !c.letter);
                       return (
                         <tr
                           key={idx}
@@ -1445,7 +1397,7 @@ export default function StudentProfilePage({ defaultTab = 'info' }) {
                           <td style={{ padding: '12px 14px', fontWeight: 500, color: 'var(--text-main)' }}>{c.name}</td>
                           <td style={{ padding: '12px 14px', color: 'var(--text-secondary)' }}>{c.semester || 'Điểm bảo lưu'}</td>
                           <td style={{ padding: '12px 14px', textAlign: 'center', fontWeight: 600 }}>{c.credits || 0}</td>
-                          <td style={{ padding: '12px 14px', textAlign: 'center', fontWeight: 700, color: c.score !== null ? (c.score >= 8.0 ? '#10b981' : (c.score >= 5.0 ? 'var(--text-main)' : '#ef4444')) : 'var(--text-muted)' }}>
+                          <td style={{ padding: '12px 14px', textAlign: 'center', fontWeight: 700, color: c.score != null ? (c.score >= 8.0 ? '#10b981' : (c.score >= 5.0 ? 'var(--text-main)' : '#ef4444')) : 'var(--text-muted)' }}>
                             {c.score !== null && c.score !== undefined ? c.score : '--'}
                           </td>
                           <td style={{ padding: '12px 14px', textAlign: 'center', fontWeight: 600 }}>
@@ -1455,9 +1407,9 @@ export default function StudentProfilePage({ defaultTab = 'info' }) {
                           <td style={{ padding: '12px 14px', textAlign: 'center' }}>
                             <span style={{
                               display: 'inline-block', padding: '3px 8px', borderRadius: '12px', fontSize: '11px', fontWeight: 600,
-                              background: isPassed ? '#dcfce7' : '#fee2e2', color: isPassed ? '#15803d' : '#dc2626'
+                              background: isPassed ? '#dcfce7' : isPending ? '#eff6ff' : '#fee2e2', color: isPassed ? '#15803d' : isPending ? '#1d4ed8' : '#dc2626'
                             }}>
-                              {c.status || (isPassed ? 'Đạt' : 'Chưa đạt')}
+                              {c.status || (isPending ? 'Chưa có điểm' : isPassed ? 'Đạt' : 'Chưa xác minh')}
                             </span>
                           </td>
                         </tr>

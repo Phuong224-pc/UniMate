@@ -23,13 +23,20 @@ const courseSchema = new mongoose.Schema(
       type: [String],
       default: []
     },
+    priorCourses: { type: [String], default: undefined },
+    groupCode: String,
+    requirementGroup: String,
+    specialization: { type: String, default: null },
+    countsTowardDegree: Boolean,
+    source: mongoose.Schema.Types.Mixed,
+    verificationStatus: String,
     sectionName: {
       type: String,
       default: ''
     },
     program: {
       type: String,
-      default: 'K30 CNTT',
+      default: '',
       index: true
     },
     semesterRecommended: {

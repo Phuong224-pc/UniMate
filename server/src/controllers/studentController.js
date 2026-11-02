@@ -50,6 +50,17 @@ export async function updateStudent(req, res, next) {
   }
 }
 
+export async function selectStudentSpecialization(req, res, next) {
+  try {
+    const updated = await studentService.selectSpecialization(req.params.mssv, req.body, {
+      isUserAdmin: req.user.role === 'admin', actorId: String(req.user._id)
+    });
+    return successResponse(res, updated, 'Đã lưu chuyên ngành và giữ nguyên lịch sử bảng điểm.');
+  } catch (error) {
+    next(error);
+  }
+}
+
 export async function createStudent(req, res, next) {
   try {
     const student = await studentService.createStudent(req.body);
@@ -90,9 +101,12 @@ export async function ocrTranscript(req, res, next) {
 
 export async function confirmTranscript(req, res, next) {
   try {
-    const { mssv, courses, source } = req.body;
+    const { mssv, courses, source, sourceTotals } = req.body;
     const isUserAdmin = req.user?.role === 'admin';
-    const targetMssv = isUserAdmin ? (mssv || req.user?.mssv) : (req.user?.mssv || mssv);
+    const targetMssv = isUserAdmin ? (mssv || req.user?.mssv) : req.user?.mssv;
+    if (!isUserAdmin && mssv && mssv !== req.user?.mssv) {
+      return errorResponse(res, 'Bạn chỉ có quyền nhập bảng điểm của chính mình', 403);
+    }
 
     if (!targetMssv) {
       return errorResponse(res, 'Không xác định được MSSV của sinh viên', 400);
@@ -103,7 +117,7 @@ export async function confirmTranscript(req, res, next) {
     }
 
     const importSource = isUserAdmin ? 'admin_confirmed' : (source || 'student_ocr_import');
-    const result = await studentService.confirmTranscriptCourses(targetMssv, courses, importSource);
+    const result = await studentService.confirmTranscriptCourses(targetMssv, courses, importSource, sourceTotals, { allowRecognitionApproval: isUserAdmin });
     return successResponse(res, result, result.message);
   } catch (error) {
     next(error);
@@ -114,6 +128,7 @@ export default {
   getStudents,
   getStudentByMssv,
   updateStudent,
+  selectStudentSpecialization,
   createStudent,
   deleteStudent,
   ocrTranscript,

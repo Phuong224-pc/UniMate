@@ -1,6 +1,11 @@
 import * as adminService from '../services/adminService.js';
 import { adminImportService } from '../services/adminImportService.js';
 import { successResponse, errorResponse } from '../utils/responseUtils.js';
+import { curriculumRepo } from '../repositories/index.js';
+
+export async function getCurricula(req, res, next) {
+  try { return successResponse(res, await curriculumRepo.findMany()); } catch (error) { next(error); }
+}
 
 export async function getDashboardStats(req, res, next) {
   try {
@@ -191,7 +196,7 @@ export async function previewImport(req, res, next) {
     if (!req.file) {
       return errorResponse(res, 'Vui lòng tải lên file Excel (.xlsx, .xls) hoặc PDF', 400);
     }
-    const { dataType, sheetName, customMapping } = req.body;
+    const { dataType, sheetName, customMapping, defaultProgram, curriculumId, targetMssv } = req.body;
     let parsedMapping = null;
     if (customMapping) {
       try {
@@ -204,6 +209,9 @@ export async function previewImport(req, res, next) {
       filename: req.file.originalname,
       mimetype: req.file.mimetype,
       dataType: dataType || 'courses',
+      defaultProgram: defaultProgram || 'K30 CNTT',
+      curriculumId: curriculumId || null,
+      targetMssv: targetMssv || null,
       sheetName,
       customMapping: parsedMapping
     });
@@ -216,8 +224,8 @@ export async function previewImport(req, res, next) {
 
 export async function confirmImport(req, res, next) {
   try {
-    const { dataType, rows, conflictMode, defaultProgram } = req.body;
-    if (!dataType || !Array.isArray(rows)) {
+    const { dataType, rows, conflictMode, defaultProgram, previewToken, selectedRowIndices, resolutions } = req.body;
+    if (!dataType || (dataType !== 'curriculum' && !Array.isArray(rows))) {
       return errorResponse(res, 'Dữ liệu xác nhận không hợp lệ', 400);
     }
 
@@ -226,6 +234,7 @@ export async function confirmImport(req, res, next) {
       rows,
       conflictMode: conflictMode || 'skip',
       defaultProgram: defaultProgram || 'K30 CNTT'
+      ,previewToken, selectedRowIndices, resolutions
     });
 
     return successResponse(res, result, result.message);

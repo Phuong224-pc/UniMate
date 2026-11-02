@@ -11,3 +11,5 @@ frontend/.env
 dist/
 server/data/demo/demo_store.json
 *.tmp
+server/data/mongo-repair/
+server/data/sample_transcript.pdf

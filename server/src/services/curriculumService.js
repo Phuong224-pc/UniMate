@@ -1,7 +1,7 @@
 import { curriculumRepo, courseRepo } from '../repositories/index.js';
 
-export async function getCurriculum(programName = 'K30 CNTT') {
-  return curriculumRepo.findByProgram(programName);
+export async function getCurriculum(programName = 'K30 CNTT', { scope = null, curriculumId = null } = {}) {
+  return curriculumId ? curriculumRepo.findById(curriculumId) : curriculumRepo.findByProgram(programName, scope);
 }
 
 export async function searchCourses(query = '') {

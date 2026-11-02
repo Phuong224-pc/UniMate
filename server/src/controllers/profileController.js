@@ -17,27 +17,54 @@ export async function getMyProfile(req, res, next) {
       return errorResponse(res, 'Chưa đăng nhập', 401);
     }
 
-    let profile = await studentRepo.findOne({
-      $or: [
-        { userId: req.user._id },
-        { mssv: req.user.mssv },
-        { email: req.user.email }
-      ]
-    });
+    let profile = await findAuthenticatedProfile(req.user);
 
     if (!profile) {
       // Nếu chưa có, tạo profile mặc định cho tài khoản
+      if (!req.user.mssv) return errorResponse(res, 'Tài khoản chưa được liên kết với hồ sơ sinh viên', 404);
       profile = await studentRepo.create({
         userId: req.user._id,
-        mssv: req.user.mssv || '2474802010458',
+        mssv: req.user.mssv,
         fullName: req.user.email.split('@')[0],
         email: req.user.email,
         className: 'K30 CNTT',
-        major: 'Kỹ thuật Phần mềm'
+        major: 'Công nghệ thông tin',
+        specialization: null
       });
     }
 
-    return successResponse(res, profile);
+    return successResponse(res, await studentService.withAcademicProgress(profile));
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function findAuthenticatedProfile(user) {
+  const identities = [{ userId: user._id }];
+  if (user.mssv) identities.push({ mssv: user.mssv });
+  if (user.email) identities.push({ email: user.email });
+  return studentRepo.findOne({ $or: identities });
+}
+
+export async function getMyAcademicProgress(req, res, next) {
+  try {
+    const profile = await findAuthenticatedProfile(req.user);
+    if (!profile) return errorResponse(res, 'Không tìm thấy hồ sơ sinh viên', 404);
+    const enriched = await studentService.withAcademicProgress(profile);
+    return successResponse(res, enriched.academicProgress);
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function selectMySpecialization(req, res, next) {
+  try {
+    const profile = await findAuthenticatedProfile(req.user);
+    if (!profile) return errorResponse(res, 'Không tìm thấy hồ sơ sinh viên', 404);
+    const updated = await studentService.selectSpecialization(profile.mssv, req.body, {
+      isUserAdmin: req.user.role === 'admin', actorId: String(req.user._id)
+    });
+    return successResponse(res, updated, 'Đã lưu lựa chọn chuyên ngành.');
   } catch (error) {
     next(error);
   }
@@ -51,9 +78,7 @@ export async function updateMyProfile(req, res, next) {
 
     let targetMssv = req.user.mssv;
     if (!targetMssv) {
-      const existing = await studentRepo.findOne({
-        $or: [{ userId: req.user._id }, { email: req.user.email }]
-      });
+      const existing = await findAuthenticatedProfile(req.user);
       if (existing) targetMssv = existing.mssv;
     }
 
@@ -172,6 +197,8 @@ Rules:
 
 export default {
   getMyProfile,
+  getMyAcademicProgress,
+  selectMySpecialization,
   updateMyProfile,
   extractProfileFromImage
 };

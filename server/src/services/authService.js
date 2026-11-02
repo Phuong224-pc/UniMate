@@ -1,6 +1,14 @@
 import { userRepo, studentRepo } from '../repositories/index.js';
 import { hashPassword, comparePassword } from '../utils/passwordUtils.js';
 import { generateToken } from '../utils/tokenUtils.js';
+import { withAcademicProgress } from './studentService.js';
+
+function profileIdentityQuery(user) {
+  const identities = [{ userId: user._id }];
+  if (user.mssv) identities.push({ mssv: user.mssv });
+  if (user.email) identities.push({ email: user.email });
+  return { $or: identities };
+}
 
 export async function registerStudent({ fullName, email, password, mssv }) {
   const cleanEmail = email.trim().toLowerCase();
@@ -57,11 +65,12 @@ export async function registerStudent({ fullName, email, password, mssv }) {
     email: cleanEmail,
     className: 'K30 CNTT',
     faculty: 'Khoa Công Nghệ Thông Tin',
-    major: 'Kỹ thuật Phần mềm',
+    major: 'Công nghệ thông tin',
+    specialization: null,
     cohort: '2024 - 2028',
     trainingCourse: 'K30',
-    officialCumulativeGpa4: 0,
-    officialCumulativeCredits: 0,
+    officialCumulativeGpa4: null,
+    officialCumulativeCredits: null,
     officialRating: 'Chưa xếp loại',
     courses: [],
     activities: [
@@ -82,7 +91,7 @@ export async function registerStudent({ fullName, email, password, mssv }) {
   return {
     token,
     user: safeUser,
-    profile
+    profile: await withAcademicProgress(profile)
   };
 }
 
@@ -115,13 +124,7 @@ export async function loginUser({ identifier, password }) {
   await userRepo.updateById(user._id, { lastLogin: new Date().toISOString() });
 
   // Tìm StudentProfile tương ứng
-  let profile = await studentRepo.findOne({
-    $or: [
-      { userId: user._id },
-      { mssv: user.mssv },
-      { email: user.email }
-    ]
-  });
+  let profile = await studentRepo.findOne(profileIdentityQuery(user));
 
   // Nếu là admin và chưa có profile, tạo profile mặc định
   if (!profile && user.role === 'admin') {
@@ -146,7 +149,7 @@ export async function loginUser({ identifier, password }) {
   return {
     token,
     user: safeUser,
-    profile
+    profile: profile && user.role === 'student' ? await withAcademicProgress(profile) : profile
   };
 }
 
@@ -154,20 +157,14 @@ export async function getCurrentUser(userId) {
   const user = await userRepo.findById(userId);
   if (!user) throw new Error('Không tìm thấy thông tin tài khoản');
 
-  const profile = await studentRepo.findOne({
-    $or: [
-      { userId: user._id },
-      { mssv: user.mssv },
-      { email: user.email }
-    ]
-  });
+  const profile = await studentRepo.findOne(profileIdentityQuery(user));
 
   const safeUser = { ...user };
   delete safeUser.passwordHash;
 
   return {
     user: safeUser,
-    profile
+    profile: profile && user.role === 'student' ? await withAcademicProgress(profile) : profile
   };
 }
 

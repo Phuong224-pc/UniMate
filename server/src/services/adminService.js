@@ -172,7 +172,7 @@ export async function createUser(data) {
         fullName: fullName ? fullName.trim() : cleanEmail.split('@')[0],
         email: cleanEmail,
         className: className || 'K30 CNTT',
-        major: major || 'Kỹ thuật Phần mềm',
+        major: major || 'Công nghệ thông tin',
         cohort: cohort || '2024 - 2028',
         trainingCourse: 'K30',
         officialCumulativeGpa4: 0,

@@ -5,7 +5,10 @@ async function getPdfParse() {
   if (!pdfParseModule) {
     try {
       const mod = await import('pdf-parse');
-      pdfParseModule = mod.default || mod;
+      pdfParseModule = typeof mod.default === 'function' ? mod.default : mod.PDFParse ? async buffer => {
+        const instance = new mod.PDFParse({ data: new Uint8Array(buffer) });
+        try { return await instance.getText(); } finally { await instance.destroy(); }
+      } : null;
     } catch (err) {
       console.warn('pdf-parse fallback:', err.message);
     }
@@ -51,6 +54,10 @@ export const FIELD_DEFINITIONS = {
       { key: 'name', label: 'Tên Môn Học', required: true, aliases: ['tên môn', 'ten mon', 'tên học phần', 'course name', 'name'] },
       { key: 'credits', label: 'Số Tín Chỉ', required: true, aliases: ['số tc', 'so tc', 'tín chỉ', 'tin chi', 'credits', 'tc'] },
       { key: 'prerequisites', label: 'Môn Tiên Quyết', required: false, aliases: ['tiên quyết', 'tien quyet', 'prerequisites'] }
+      ,{ key: 'priorCourses', label: 'Môn Học Trước', required: false, aliases: ['học trước', 'hoc truoc', 'priorcourses'] }
+      ,{ key: 'groupCode', label: 'Mã Nhóm', required: false, aliases: ['bb/tc', 'bắt buộc/tự chọn', 'mã nhóm', 'groupcode'] }
+      ,{ key: 'specialization', label: 'Chuyên Ngành', required: false, aliases: ['tên chuyên ngành', 'specialization'] }
+      ,{ key: 'semesterRecommended', label: 'Học Kỳ Đề Xuất', required: false, aliases: ['học kỳ', 'hoc ky', 'semesterrecommended'] }
     ]
   },
   schedules: {
@@ -112,13 +119,13 @@ export function generateExcelTemplate(dataType) {
   const sampleRows = {
     courses: [
       ['71ITSE30503', 'Lập trình ứng dụng Web', '3', 'Chuyên ngành', '71ITBS10103', 'HK03', '1'],
-      ['71ITBS10103', 'Cơ sở lập trình', '3', 'Cơ sở ngành', '', 'HK01', '1'],
-      ['71ITBS10203', 'Kỹ thuật lập trình', '3', 'Cơ sở ngành', '71ITBS10103', 'HK02', '1']
+      ['71ITBS10103', 'Nhập môn công nghệ thông tin', '3', 'Cơ sở khối ngành', '', 'HK01', '1'],
+      ['71ITBS10203', 'Cơ sở lập trình', '3', 'Cơ sở khối ngành', '', 'HK01', '1']
     ],
     curriculum: [
-      ['K30 CNTT', 'Cơ sở ngành', '71ITBS10103', 'Cơ sở lập trình', '3', ''],
-      ['K30 CNTT', 'Cơ sở ngành', '71ITBS10203', 'Kỹ thuật lập trình', '3', '71ITBS10103'],
-      ['K30 CNTT', 'Chuyên ngành', '71ITSE30503', 'Lập trình ứng dụng Web', '3', '71ITBS10203']
+      ['K30 CNTT', 'Cơ sở khối ngành', '71ITBS10103', 'Nhập môn công nghệ thông tin', '3', '', '', 'BB', '', '1'],
+      ['K30 CNTT', 'Cơ sở khối ngành', '71ITBS10203', 'Cơ sở lập trình', '3', '', '', 'BB', '', '1'],
+      ['K30 CNTT', 'Cơ sở khối ngành', '71ITSE30103', 'Kỹ thuật lập trình', '3', '', '71ITBS10203', 'BB', '', '2']
     ],
     schedules: [
       ['2025-2026 HK01', '71ITSE30503', 'Lập trình ứng dụng Web', 'K30 CNTT 01', '2', '1', '3', 'F5.01 - Đặng Thùy Trâm', 'TS. Nguyễn Văn A', '08/09/2025 - 27/12/2025'],
@@ -168,7 +175,7 @@ export function autoMapColumns(rawHeaders, dataType) {
     // 3. Check aliases
     if (matchIdx === -1 && field.aliases) {
       for (const alias of field.aliases) {
-        matchIdx = normalizedRaw.findIndex(h => h.includes(alias) || alias.includes(h));
+        matchIdx = normalizedRaw.findIndex(h => h && (h === alias || h.includes(alias)));
         if (matchIdx !== -1) break;
       }
     }
@@ -211,6 +218,7 @@ export function parseExcelBuffer(buffer, sheetName = null) {
   // Convert to 2D array of strings preserving leading zeros
   const rawRows = XLSX.utils.sheet_to_json(ws, {
     header: 1,
+    range: 0,
     defval: '',
     raw: false
   });
@@ -219,8 +227,9 @@ export function parseExcelBuffer(buffer, sheetName = null) {
     return { availableSheets, activeSheetName, headers: [], rows: [] };
   }
 
-  // Identify first non-empty row as headers
-  let headerRowIndex = 0;
+  // Search past report titles/merged headings for the actual tabular header.
+  let headerRowIndex = rawRows.findIndex(row => row.filter(cell => typeof cell === 'string' && /mã|tên|tín chỉ|code|credits|mssv|email/i.test(cell)).length >= 2);
+  if (headerRowIndex < 0) headerRowIndex = 0;
   while (headerRowIndex < rawRows.length && (!rawRows[headerRowIndex] || rawRows[headerRowIndex].filter(Boolean).length === 0)) {
     headerRowIndex++;
   }
@@ -229,7 +238,14 @@ export function parseExcelBuffer(buffer, sheetName = null) {
     return { availableSheets, activeSheetName, headers: [], rows: [] };
   }
 
-  const rawHeaders = (rawRows[headerRowIndex] || []).map(h => String(h || '').trim()).filter(Boolean);
+  // Keep column positions even when merged header cells are blank or duplicated.
+  const usedHeaders = new Set();
+  const rawHeaders = (rawRows[headerRowIndex] || []).map((h, i) => {
+    let header = String(h ?? '').trim() || `Cột ${i + 1}`;
+    if (usedHeaders.has(header)) header = `${header} (${i + 1})`;
+    usedHeaders.add(header);
+    return header;
+  });
 
   const dataRows = [];
   for (let r = headerRowIndex + 1; r < rawRows.length; r++) {
@@ -239,6 +255,7 @@ export function parseExcelBuffer(buffer, sheetName = null) {
     }
 
     const rowObj = {};
+    Object.defineProperty(rowObj, '__sourceRow', { value: r + 1, enumerable: false });
     rawHeaders.forEach((header, colIdx) => {
       // Force cell string representation
       const cellVal = row[colIdx];
@@ -281,7 +298,22 @@ export async function parsePdfBuffer(buffer, dataType) {
       };
     }
 
-    // Split text lines
+    if (dataType === 'grades') {
+      const { parseVluTranscriptText } = await import('../services/ocrService.js');
+      const transcript = parseVluTranscriptText(text);
+      if (transcript) {
+        const def = FIELD_DEFINITIONS.grades;
+        const headers = def.fields.map(field => field.label);
+        const rows = transcript.semesters.flatMap(semester => semester.courses.map(course => {
+          const values = { mssv: transcript.studentInfo?.mssv || '', courseCode: course.code, courseName: course.name,
+            credits: course.credits, score: course.score, point4: course.point4, letter: course.letter, semester: semester.semesterName };
+          return Object.fromEntries(def.fields.map(field => [field.label, values[field.key] ?? '']));
+        }));
+        return { isScanned: false, availableSheets: ['Bảng điểm PDF'], activeSheetName: 'Bảng điểm PDF', headers, rows,
+          sourceTotals: transcript.sourceTotals, warnings: transcript.warnings };
+      }
+    }
+    // Split text lines for the remaining tabular document formats.
     const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
     const def = FIELD_DEFINITIONS[dataType];
     const headers = def ? def.fields.map(f => f.label) : ['Dòng dữ liệu'];

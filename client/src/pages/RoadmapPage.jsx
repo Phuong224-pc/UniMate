@@ -1,99 +1,79 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { 
   Map, 
-  CheckSquare, 
   Square, 
   Search, 
   RotateCcw, 
   Sparkles, 
-  AlertCircle, 
   CheckCircle, 
-  Layers,
-  ChevronRight,
-  Bot,
-  Send,
-  Loader2,
-  FileSpreadsheet
+  Bot
 } from 'lucide-react';
-import confetti from 'canvas-confetti';
 import { api } from '../services/api';
 import { useAuth } from '../hooks/useAuth';
 import AiChatSidebar from '../components/AiChatSidebar';
 import MobileChatDrawer from '../components/MobileChatDrawer';
-
-const STORAGE_COMPLETED_KEY = 'vlu_roadmap_completed_courses';
+import AcademicProgress from '../components/AcademicProgress';
+import { useAcademicProgress, notifyAcademicUpdated } from '../hooks/useAcademicProgress';
 
 export default function RoadmapPage() {
-  const navigate = useNavigate();
-  const { user, profile } = useAuth();
+  const { user, profile, refreshUser } = useAuth();
+  const { progress, error: progressError } = useAcademicProgress();
+  const [actionError, setActionError] = useState('');
+  const [savingPlan, setSavingPlan] = useState(false);
+  const [plannedCodes, setPlannedCodes] = useState(new Set());
+  const completedCodes = new Set((progress?.courseStates || []).filter(c => ['passed', 'recognized'].includes(c.status)).map(c => c.code));
+  const statesByCode = new Map((progress?.courseStates || []).map(c => [c.code, c]));
   const [curriculum, setCurriculum] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isMobileChatOpen, setIsMobileChatOpen] = useState(false);
-  const [completedCodes, setCompletedCodes] = useState(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_COMPLETED_KEY);
-      return saved ? new Set(JSON.parse(saved)) : new Set();
-    } catch {
-      return new Set();
-    }
-  });
-
-  // Đồng bộ với completedCourses từ MongoDB profile nếu có
   useEffect(() => {
-    if (profile && Array.isArray(profile.completedCourses) && profile.completedCourses.length > 0) {
-      setCompletedCodes(new Set(profile.completedCourses));
-    }
+    setPlannedCodes(new Set(profile?.plannedCourses || []));
   }, [profile]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSection, setSelectedSection] = useState('all');
 
   useEffect(() => {
-    api.getCurriculum()
+    if (user?.role === 'student' && !progress) return;
+    if (user?.role === 'student' && !progress?.curriculum) {
+      setCurriculum(null);
+      setLoading(false);
+      setActionError('Chưa xác định được khung đào tạo áp dụng. Vui lòng liên hệ quản trị viên.');
+      return;
+    }
+    let active = true;
+    setLoading(true);
+    api.getCurriculum(progress?.curriculum?.program || profile?.curriculumProgram || profile?.program || 'K30 CNTT', progress?.curriculum?.id || profile?.curriculumId)
       .then(res => {
-        if (res.success) {
+        if (res.success && active) {
           setCurriculum(res.data);
         }
       })
-      .catch(err => console.error("Lỗi nạp khung đào tạo:", err))
-      .finally(() => setLoading(false));
-  }, []);
+      .catch(err => { if (active) setActionError(err.message || 'Không thể tải khung đào tạo đang áp dụng.'); })
+      .finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
+  }, [profile?.curriculumProgram, profile?.program, profile?.curriculumId, progress?.curriculum?.id, progress?.curriculum?.program, progress?.curriculum?.revision, Boolean(progress), user?.role]);
 
-  const handleToggleCourse = (code) => {
-    setCompletedCodes(prev => {
-      const isCurrentlyCompleted = prev.has(code);
-      
-      // Tính năng ràng buộc môn tiên quyết (nếu đang muốn đánh dấu là Đã học)
-      if (!isCurrentlyCompleted) {
-        const course = allCourses.find(c => c.code === code);
-        if (course && course.prerequisites && course.prerequisites.length > 0) {
-          const unmetPrereqs = course.prerequisites.filter(p => !prev.has(p));
-          if (unmetPrereqs.length > 0) {
-            const ok = window.confirm(`Môn này có học phần trước là ${unmetPrereqs.join(', ')}.\nBạn vẫn muốn đánh dấu là đã học?`);
-            if (!ok) return prev; // Hủy thao tác nếu người dùng chọn Cancel
-          }
-        }
-      }
-
-      const next = new Set(prev);
-      if (isCurrentlyCompleted) {
-        next.delete(code);
-      } else {
-        next.add(code);
-      }
-      localStorage.setItem(STORAGE_COMPLETED_KEY, JSON.stringify([...next]));
-      if (user) {
-        api.updateMyProfile({ completedCourses: [...next] }).catch(() => {});
-      }
-      return next;
-    });
+  const savePlan = async next => {
+    if (!user) { setActionError('Vui lòng đăng nhập để lưu kế hoạch học tập.'); return; }
+    setSavingPlan(true); setActionError('');
+    try {
+      await api.updateMyProfile({ plannedCourses: [...next] });
+      setPlannedCodes(next);
+      await refreshUser();
+      notifyAcademicUpdated();
+    } catch (error) { setActionError(error.message); }
+    finally { setSavingPlan(false); }
   };
-
+  const handleToggleCourse = code => {
+    const state = statesByCode.get(code);
+    if (completedCodes.has(code)) return;
+    if (state?.locked) { setActionError(state.reason || 'Không thuộc chuyên ngành bạn đã chọn'); return; }
+    const next = new Set(plannedCodes);
+    if (next.has(code)) next.delete(code); else next.add(code);
+    savePlan(next);
+  };
   const handleClearAll = () => {
-    if (window.confirm("Bạn có chắc chắn muốn bỏ chọn tất cả các môn đã tích?")) {
-      setCompletedCodes(new Set());
-      localStorage.removeItem(STORAGE_COMPLETED_KEY);
-    }
+    if (window.confirm('Bỏ tất cả môn khỏi kế hoạch? Lịch sử điểm được giữ nguyên.')) savePlan(new Set());
   };
 
   // Tính toán tất cả môn học
@@ -111,27 +91,10 @@ export default function RoadmapPage() {
     return list;
   }, [curriculum]);
 
-  // Tính toán tổng số tín chỉ tích lũy
-  const totalTargetCredits = 126;
-  const earnedCredits = useMemo(() => {
-    return allCourses
-      .filter(c => completedCodes.has(c.code))
-      .reduce((sum, c) => sum + (Number(c.credits) || 0), 0);
-  }, [allCourses, completedCodes]);
-
-  const remainingCredits = Math.max(0, totalTargetCredits - earnedCredits);
-  const percent = Math.min(100, Math.round((earnedCredits / totalTargetCredits) * 100));
-
-  // Kích hoạt pháo giấy confetti khi đạt 100%
-  useEffect(() => {
-    if (percent === 100 && earnedCredits > 0) {
-      confetti({
-        particleCount: 100,
-        spread: 70,
-        origin: { y: 0.6 }
-      });
-    }
-  }, [percent, earnedCredits]);
+  const totalTargetCredits = progress?.totalCredits ?? curriculum?.totalCredits ?? 0;
+  const earnedCredits = progress?.earnedCredits ?? 0;
+  const remainingCredits = progress?.remainingCredits ?? 0;
+  const percent = totalTargetCredits > 0 ? Math.min(100, Math.round(earnedCredits / totalTargetCredits * 100)) : 0;
 
   // Bộ lọc tìm kiếm
   const filteredCourses = useMemo(() => {
@@ -186,14 +149,14 @@ export default function RoadmapPage() {
               Lộ Trình Học Tập Cá Nhân Hóa
             </h1>
             <p style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
-              Tích chọn các môn bạn đã học để hệ thống tính toán tín chỉ và đề xuất lộ trình tối ưu
+              Xem kết quả đã xác minh và chọn môn vào kế hoạch. Tín chỉ tích lũy lấy từ bảng điểm.
             </p>
           </div>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <button onClick={handleClearAll} className="btn-secondary" style={{ fontSize: '13px' }}>
-            <RotateCcw size={15} /> Bỏ chọn tất cả
+          <button disabled={savingPlan} onClick={handleClearAll} className="btn-secondary" style={{ fontSize: '13px' }}>
+            <RotateCcw size={15} /> Xóa kế hoạch
           </button>
           <button
             onClick={() => setIsMobileChatOpen(true)}
@@ -206,6 +169,9 @@ export default function RoadmapPage() {
         </div>
       </div>
 
+      <AcademicProgress progress={progress} error={progressError} />
+      {actionError && <div role="alert" style={{ color: '#dc2626', padding: '12px', marginBottom: '12px', fontSize: '13px' }}>{actionError}</div>}
+      {savingPlan && <p role="status" style={{ fontSize: '12px' }}>Đang kiểm tra điều kiện và lưu kế hoạch…</p>}
       {/* Progress Card */}
       <div className="vlu-card" style={{ marginBottom: '24px', padding: '24px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '12px' }}>
@@ -304,27 +270,34 @@ export default function RoadmapPage() {
       {/* Courses List Grid */}
       {loading ? (
         <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
-          Đang nạp Khung chương trình đào tạo K30 CNTT...
+          Đang nạp khung chương trình đào tạo đang áp dụng…
         </div>
       ) : (
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 290px), 1fr))',
           gap: '14px',
           marginBottom: '30px'
         }}>
           {filteredCourses.map(course => {
             const isCompleted = completedCodes.has(course.code);
+            const state = statesByCode.get(course.code);
+            const isLocked = state?.locked;
+            const isPlanned = plannedCodes.has(course.code);
             return (
               <div 
                 key={course.code}
-                onClick={() => handleToggleCourse(course.code)}
+                onClick={() => !savingPlan && !isLocked && handleToggleCourse(course.code)}
+                role="button" tabIndex={isLocked || savingPlan ? -1 : 0}
+                aria-disabled={isLocked || savingPlan || isCompleted}
+                onKeyDown={event => { if (!savingPlan && !isLocked && ['Enter', ' '].includes(event.key)) { event.preventDefault(); handleToggleCourse(course.code); } }}
                 style={{
                   background: isCompleted ? 'rgba(34, 197, 94, 0.05)' : 'var(--bg-card)',
                   border: isCompleted ? '1px solid #22c55e' : '1px solid var(--border-color)',
                   borderRadius: 'var(--radius-md)',
                   padding: '16px',
-                  cursor: 'pointer',
+                  cursor: isLocked || isCompleted ? 'default' : 'pointer',
+                  opacity: isLocked ? 0.65 : 1,
                   transition: 'var(--transition)',
                   display: 'flex',
                   flexDirection: 'column',
@@ -358,6 +331,7 @@ export default function RoadmapPage() {
                       <span>{course.prerequisites.join(', ')}</span>
                     </div>
                   )}
+                  {course.priorCourses?.length > 0 && <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '6px' }}><strong>Học trước: </strong>{course.priorCourses.join(', ')}</div>}
                 </div>
 
                 <div style={{
@@ -370,7 +344,7 @@ export default function RoadmapPage() {
                   fontSize: '12px'
                 }}>
                   <span style={{ color: isCompleted ? '#16a34a' : 'var(--text-muted)' }}>
-                    {isCompleted ? '✓ Đã tích lũy' : 'Chưa học'}
+                    {isLocked ? state.reason || 'Không thuộc chuyên ngành bạn đã chọn' : isCompleted ? '✓ Đã tích lũy' : isPlanned ? 'Đã thêm vào kế hoạch' : state?.status === 'in_progress' ? 'Đang học / chưa có điểm' : 'Chọn vào kế hoạch'}
                   </span>
                   {isCompleted ? (
                     <CheckCircle size={18} color="#22c55e" />
@@ -397,8 +371,8 @@ export default function RoadmapPage() {
             { label: 'Điều kiện tiên quyết?', text: 'Các môn học nào có chuỗi tiên quyết dài nhất cần hoàn thành sớm?' },
             { label: 'Tín chỉ còn thiếu?', text: `Tôi còn thiếu ${remainingCredits} tín chỉ, hãy phân tích khối kiến thức tôi cần học.` }
           ]}
-          systemContext={`Sinh viên đang xem Lộ trình Khóa 30 CNTT. Đã tích lũy: ${earnedCredits}/${totalTargetCredits} tín chỉ. Các môn đã đánh dấu học xong: ${[...completedCodes].join(', ') || 'Chưa tích lũy môn nào'}. Tín chỉ còn thiếu: ${remainingCredits}.`}
-          initialMessage="Chào bạn! Mình là Trợ lý Lộ trình Học tập K30 (126 tín chỉ). Bạn có thể tích các môn đã học bên trái rồi hỏi mình về môn tiếp theo hoặc điều kiện tiên quyết nhé!"
+          systemContext={progress ? JSON.stringify(progress) : null}
+          initialMessage="Chào bạn! Bạn có thể chọn môn vào kế hoạch bên trái. Tín chỉ hoàn thành được tính từ bảng điểm đã lưu và quy tắc của khung đang áp dụng."
         />
       </div>
     </div>
@@ -425,8 +399,8 @@ export default function RoadmapPage() {
           { label: 'Điều kiện tiên quyết?', text: 'Các môn học nào có chuỗi tiên quyết dài nhất cần hoàn thành sớm?' },
           { label: 'Tín chỉ còn thiếu?', text: `Tôi còn thiếu ${remainingCredits} tín chỉ, hãy phân tích khối kiến thức tôi cần học.` }
         ]}
-        systemContext={`Sinh viên đang xem Lộ trình Khóa 30 CNTT. Đã tích lũy: ${earnedCredits}/${totalTargetCredits} tín chỉ. Các môn đã đánh dấu học xong: ${[...completedCodes].join(', ') || 'Chưa tích lũy môn nào'}. Tín chỉ còn thiếu: ${remainingCredits}.`}
-        initialMessage="Chào bạn! Mình là Trợ lý Lộ trình Học tập K30 (126 tín chỉ). Bạn có thể tích các môn đã học bên trái rồi hỏi mình về môn tiếp theo hoặc điều kiện tiên quyết nhé!"
+        systemContext={progress ? JSON.stringify(progress) : null}
+        initialMessage="Chào bạn! Bạn có thể chọn môn vào kế hoạch bên trái. Tín chỉ hoàn thành được tính từ bảng điểm đã lưu và quy tắc của khung đang áp dụng."
         onClose={() => setIsMobileChatOpen(false)}
       />
     </MobileChatDrawer>

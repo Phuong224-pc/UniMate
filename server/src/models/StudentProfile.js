@@ -5,14 +5,19 @@ const courseGradeSchema = new mongoose.Schema(
     code: { type: String, required: true },
     name: { type: String, required: true },
     credits: { type: Number, default: 0 },
-    score: { type: Number, default: 0 },
-    point4: { type: Number, default: 0 },
+    score: { type: Number, default: null },
+    point4: { type: Number, default: null },
     letter: { type: String, default: '' },
     semester: { type: String, default: '' },
     area: { type: String, default: '' },
     status: { type: String, default: 'Đang học' },
     countCredit: { type: Boolean, default: true },
-    countGpa: { type: Boolean, default: true }
+    countGpa: { type: Boolean, default: true },
+    source: { type: mongoose.Schema.Types.Mixed, default: null },
+    sourceRows: { type: [mongoose.Schema.Types.Mixed], default: [] },
+    recognition: { type: mongoose.Schema.Types.Mixed, default: null },
+    recognitionApproved: { type: Boolean, default: false },
+    registrationSource: { type: mongoose.Schema.Types.Mixed, default: null }
   },
   { _id: false }
 );
@@ -104,8 +109,16 @@ const studentProfileSchema = new mongoose.Schema(
     },
     major: {
       type: String,
-      default: 'Kỹ thuật Phần mềm'
+      default: 'Công nghệ thông tin'
     },
+    specialization: { type: String, enum: ['software', 'data', 'ai', null], default: null },
+    specializationSelectedAt: { type: Date, default: null },
+    specializationHistory: { type: [mongoose.Schema.Types.Mixed], default: [] },
+    program: { type: String, default: '' },
+    curriculumId: { type: String, default: null },
+    curriculumVersion: { type: String, default: '' },
+    schoolId: { type: String, default: '' },
+    majorCode: { type: String, default: '' },
     cohort: {
       type: String,
       default: '2024 - 2028'
@@ -132,11 +145,11 @@ const studentProfileSchema = new mongoose.Schema(
     },
     officialCumulativeGpa4: {
       type: Number,
-      default: 0
+      default: null
     },
     officialCumulativeCredits: {
       type: Number,
-      default: 0
+      default: null
     },
     officialRating: {
       type: String,
@@ -166,6 +179,9 @@ const studentProfileSchema = new mongoose.Schema(
       type: [String],
       default: []
     },
+    plannedCourses: { type: [String], default: [] },
+    transcriptSourceTotals: { type: mongoose.Schema.Types.Mixed, default: null },
+    transcriptImportHistory: { type: [mongoose.Schema.Types.Mixed], default: [] },
     courses: {
       type: [courseGradeSchema],
       default: []

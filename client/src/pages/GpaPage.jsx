@@ -16,9 +16,12 @@ import {
 } from 'lucide-react';
 import { api } from '../services/api';
 import { useAuth } from '../hooks/useAuth';
+import AcademicProgress, { formatAcademicNumber } from '../components/AcademicProgress';
+import { useAcademicProgress } from '../hooks/useAcademicProgress';
 
 export default function GpaPage() {
   const { user, profile } = useAuth();
+  const { progress: ownProgress } = useAcademicProgress();
   const initialMssv = profile?.mssv || user?.mssv || '';
   const [mssvInput, setMssvInput] = useState(initialMssv);
   const [student, setStudent] = useState(null);
@@ -31,6 +34,7 @@ export default function GpaPage() {
   const [targetGpa, setTargetGpa] = useState(3.5);
   const [futureCredits, setFutureCredits] = useState(15);
   const [requiredScore, setRequiredScore] = useState(null);
+  const academic = user?.role === 'student' ? ownProgress : student?.academicProgress;
 
   const demoMssvs = [
     { mssv: '2474802010458', name: 'Trương Trần Thanh Phương (K30)' },
@@ -89,8 +93,12 @@ export default function GpaPage() {
   // Tính toán GPA Simulator
   const calculateTarget = () => {
     if (!student) return;
-    const currentCredits = Number(student.officialCumulativeCredits) || 0;
-    const currentGpa = Number(student.officialCumulativeGpa4) || 0;
+    if (academic?.calculatedGpa4 == null || academic?.gpaCredits == null || academic?.gpaQualityPoints == null) {
+      setRequiredScore('Chưa đủ dữ liệu GPA và quy tắc học lại để giả lập.');
+      return;
+    }
+    const currentCredits = academic.gpaCredits;
+    const currentQualityPoints = academic.gpaQualityPoints;
     const nextCreds = Number(futureCredits) || 0;
     const target = Number(targetGpa) || 0;
 
@@ -100,7 +108,7 @@ export default function GpaPage() {
     }
 
     // Công thức: ((currentGpa * currentCredits) + (required * nextCreds)) / (currentCredits + nextCreds) = target
-    const required = ((target * (currentCredits + nextCreds)) - (currentGpa * currentCredits)) / nextCreds;
+    const required = ((target * (currentCredits + nextCreds)) - currentQualityPoints) / nextCreds;
 
     if (required > 4.0) {
       setRequiredScore(`Không khả thi (Cần đạt GPA ${required.toFixed(2)}/4.0 vượt quá mức tối đa 4.0)`);
@@ -113,33 +121,14 @@ export default function GpaPage() {
 
   // AI Sidebar computed props
   const gpaQuickReplies = [
-    { label: 'GPA hiện tại', text: student ? ('GPA tích lũy của tôi là ' + student.officialCumulativeGpa4 + ', phân tích giúp tôi') : 'Phân tích GPA của tôi' },
+    { label: 'GPA hiện tại', text: 'Phân tích GPA tự tính và đối chiếu với GPA được nguồn bảng điểm ghi.' },
     { label: 'Môn cần cải thiện', text: 'Môn nào tôi cần cải thiện điểm nhất?' },
-    { label: 'Tín chỉ còn thiếu', text: student ? ('Tôi đã tích lũy ' + student.officialCumulativeCredits + ' tín chỉ, cần bao nhiêu nữa để tốt nghiệp?') : 'Còn thiếu bao nhiêu tín chỉ?' }
+    { label: 'Tín chỉ còn thiếu', text: 'Theo khung đang áp dụng, tôi còn thiếu nhóm môn và bao nhiêu tín chỉ?' }
   ];
-  const gpaSystemContext = student ? (() => {
-    const rank = student.officialCumulativeGpa4 >= 3.6 ? 'Xuất sắc' : student.officialCumulativeGpa4 >= 3.2 ? 'Giỏi' : student.officialCumulativeGpa4 >= 2.5 ? 'Khá' : student.officialCumulativeGpa4 >= 2.0 ? 'Trung bình' : 'Yếu';
-    const courses = student.courses || [];
-    const passed = courses.filter(c => c.letter && c.letter !== 'F' && c.credits > 0);
-    const failed = courses.filter(c => c.letter === 'F');
-    const courseList = courses.map(c =>
-      c.code + '|' + c.name + '|' + c.credits + 'TC|diem10=' + c.score + '|diem4=' + c.gpa4 + '|chu=' + (c.letter||'?') + '|' + (c.status||'')
-    ).join('; ');
-    return 'THÔNG TIN SINH VIÊN:\n' +
-      'Tên: ' + student.name + '\n' +
-      'MSSV: ' + student.mssv + '\n' +
-      'Ngành: ' + (student.major || 'CNTT') + '\n' +
-      'GPA tích lũy (thang 4): ' + student.officialCumulativeGpa4 + '\n' +
-      'Tín chỉ tích lũy: ' + student.officialCumulativeCredits + '/126\n' +
-      'Xếp loại: ' + rank + '\n' +
-      'Số môn đã học: ' + courses.length + ' môn\n' +
-      'Môn đạt: ' + passed.length + ' môn\n' +
-      'Môn rớt (F): ' + failed.length + ' môn\n' +
-      'DANH SÁCH MÔN HỌC (mã|tên|tín chỉ|điểm 10|điểm 4|điểm chữ|trạng thái):\n' + courseList;
-  })() : null;
+  const gpaSystemContext = academic ? JSON.stringify(academic) : null;
   return (
     <div className="page-container" style={{ maxWidth: '1400px', margin: '0 auto', width: '100%' }}>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: '24px', alignItems: 'start' }}>
+      <div className="responsive-grid-sidebar" style={{ gap: '24px', alignItems: 'start' }}>
         <div>
       {/* Top Banner & Search */}
       <div style={{
@@ -275,6 +264,7 @@ export default function GpaPage() {
             </div>
           </div>
 
+          <AcademicProgress progress={academic} />
           {/* Metric KPI Grid */}
           <div style={{
             display: 'grid',
@@ -285,7 +275,7 @@ export default function GpaPage() {
             <div className="vlu-card">
               <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '4px' }}>GPA Tích Lũy (Hệ 4)</div>
               <div style={{ fontSize: '28px', fontWeight: 800, color: 'var(--vlu-red)' }}>
-                {student.officialCumulativeGpa4?.toFixed(2) || '0.00'}
+                {formatAcademicNumber(academic?.calculatedGpa4)}
               </div>
               <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '4px' }}>
                 Thang điểm 4.0 Văn Lang
@@ -295,10 +285,10 @@ export default function GpaPage() {
             <div className="vlu-card">
               <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '4px' }}>Tổng Tín Chỉ Đạt</div>
               <div style={{ fontSize: '28px', fontWeight: 800, color: '#3b82f6' }}>
-                {student.officialCumulativeCredits} <span style={{ fontSize: '14px', color: 'var(--text-muted)' }}>/ 126 TC</span>
+                {academic?.earnedCredits ?? '—'} <span style={{ fontSize: '14px', color: 'var(--text-muted)' }}>/ {academic?.totalCredits ?? '—'} TC</span>
               </div>
               <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '4px' }}>
-                Tiến độ: {Math.round((student.officialCumulativeCredits / 126) * 100)}%
+                Tiến độ: {academic?.totalCredits > 0 ? Math.round(academic.earnedCredits / academic.totalCredits * 100) : '—'}%
               </div>
             </div>
 
@@ -381,8 +371,8 @@ export default function GpaPage() {
                         <td style={{ padding: '10px 12px', fontFamily: 'monospace', color: 'var(--text-muted)' }}>{c.code}</td>
                         <td style={{ padding: '10px 12px', fontWeight: 600, color: 'var(--text-main)' }}>{c.name}</td>
                         <td style={{ padding: '10px 12px', textAlign: 'center' }}>{c.credits}</td>
-                        <td style={{ padding: '10px 12px', textAlign: 'center', fontWeight: 600 }}>{c.score !== null ? c.score : '—'}</td>
-                        <td style={{ padding: '10px 12px', textAlign: 'center' }}>{c.point4 !== null ? c.point4 : '—'}</td>
+                        <td style={{ padding: '10px 12px', textAlign: 'center', fontWeight: 600 }}>{c.score != null ? c.score : '—'}</td>
+                        <td style={{ padding: '10px 12px', textAlign: 'center' }}>{c.point4 != null ? c.point4 : '—'}</td>
                         <td style={{ padding: '10px 12px', textAlign: 'center', fontWeight: 700, color: isFail ? '#ef4444' : isLow ? '#ea580c' : '#16a34a' }}>
                           {c.letter || '—'}
                         </td>
@@ -408,6 +398,7 @@ export default function GpaPage() {
                 Công Cụ Giả Lập Mục Tiêu GPA Kỳ Tới
               </h3>
             </div>
+            <p style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Ước tính cho các môn mới cùng phạm vi tính GPA, dùng tổng điểm có trọng số do máy chủ trả về. Học lại, miễn và thay đổi quy tắc GPA cần được xác minh riêng.</p>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '16px' }}>
               <div>

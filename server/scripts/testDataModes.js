@@ -1,10 +1,16 @@
 import 'dotenv/config';
-import { initDataProvider, userRepo, studentRepo, scheduleRepo, curriculumRepo, courseRepo, promptRepo, resetDemoStore } from '../src/repositories/index.js';
-import * as authService from '../src/services/authService.js';
-import * as studentService from '../src/services/studentService.js';
-import * as scheduleService from '../src/services/scheduleService.js';
-import * as curriculumService from '../src/services/curriculumService.js';
-import * as adminService from '../src/services/adminService.js';
+import { mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
+const testDirectory = mkdtempSync(path.join(tmpdir(), 'unimate-data-modes-'));
+process.env.DATA_MODE = 'demo';
+process.env.DEMO_DATA_PATH = path.join(testDirectory, 'store.json');
+const { initDataProvider, studentRepo, resetDemoStore } = await import('../src/repositories/index.js');
+const authService = await import('../src/services/authService.js');
+const studentService = await import('../src/services/studentService.js');
+const scheduleService = await import('../src/services/scheduleService.js');
+const curriculumService = await import('../src/services/curriculumService.js');
+const adminService = await import('../src/services/adminService.js');
 
 async function runTests() {
   console.log('\n======================================================');
@@ -15,6 +21,7 @@ async function runTests() {
   process.env.DATA_MODE = 'demo';
   const provider = await initDataProvider();
   resetDemoStore(); // Khôi phục kho demo sạch trước khi bắt đầu
+  const initialStudentCount = await studentRepo.count();
   console.log(`[TEST 1] Khởi tạo Data Provider: Mode = ${provider.mode}, isDemo = ${provider.isDemo}`);
   if (provider.mode !== 'demo' || !provider.isDemo) {
     throw new Error('TEST 1 FAILED: Expected demo mode');
@@ -73,14 +80,23 @@ async function runTests() {
 
   // 4. Test Student Updating Own Profile
   console.log('[TEST 4] Kiểm thử cập nhật thông tin cá nhân sinh viên...');
+  const firstEligibleCourse = foundStudent.academicProgress.courseStates.find(course => course.eligible && !course.specialization);
+  if (!firstEligibleCourse) throw new Error('TEST 4 FAILED: No eligible common course in seeded curriculum');
   const updatedStudent = await studentService.updateStudentProfile('2474999999999', {
     phone: '0988 777 666',
     address: 'Quận 1, TP.HCM',
-    completedCourses: ['71ITBS10103', '71ITBS10203']
+    plannedCourses: [firstEligibleCourse.code]
   }, false); // isUserAdmin = false
-  if (updatedStudent.phone !== '0988 777 666' || !updatedStudent.completedCourses.includes('71ITBS10103')) {
+  if (updatedStudent.phone !== '0988 777 666' || !updatedStudent.plannedCourses.includes(firstEligibleCourse.code) || updatedStudent.academicProgress.earnedCredits !== 0) {
     throw new Error('TEST 4 FAILED: Student update did not persist');
   }
+  let completionRejected = false;
+  try {
+    await studentService.updateStudentProfile('2474999999999', { completedCourses: [firstEligibleCourse.code] }, false);
+  } catch (error) {
+    completionRejected = error.statusCode === 403;
+  }
+  if (!completionRejected) throw new Error('TEST 4 FAILED: Student cannot invent transcript completion');
   console.log('✅ TEST 4 PASSED: Cập nhật thông tin sinh viên thành công.\n');
 
   // 5. Test Schedule Query & Creation
@@ -145,8 +161,8 @@ async function runTests() {
   resetDemoStore();
   const resetStudentCount = await studentRepo.count();
   console.log(`   - Số sinh viên sau khi reset: ${resetStudentCount}`);
-  if (resetStudentCount !== 7) {
-    throw new Error(`TEST 8 FAILED: Expected 7 students in demo seed, got ${resetStudentCount}`);
+  if (resetStudentCount !== initialStudentCount) {
+    throw new Error(`TEST 8 FAILED: Expected ${initialStudentCount} students in demo seed, got ${resetStudentCount}`);
   }
   console.log('✅ TEST 8 PASSED: Reset kho demo thành công.\n');
 
@@ -157,5 +173,5 @@ async function runTests() {
 
 runTests().catch(err => {
   console.error('\n❌ BÀI KIỂM THỬ THẤT BẠI:', err);
-  process.exit(1);
-});
+  process.exitCode = 1;
+}).finally(() => rmSync(testDirectory, { recursive: true, force: true }));

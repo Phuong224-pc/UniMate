@@ -31,6 +31,8 @@ import AdminImportModal from '../components/AdminImportModal';
 import AccountSecurity from './AccountSecurity';
 import { api } from '../services/api';
 import { useAuth } from '../hooks/useAuth';
+import { SPECIALIZATIONS, specializationName, formatAcademicNumber } from '../components/AcademicProgress';
+import { notifyAcademicUpdated } from '../hooks/useAcademicProgress';
 
 export default function AdminPage() {
   const { user: currentUser } = useAuth();
@@ -79,7 +81,7 @@ export default function AdminPage() {
     mssv: '',
     fullName: '',
     className: 'K30 CNTT',
-    major: 'Kỹ thuật Phần mềm'
+    major: 'Công nghệ thông tin'
   });
   const [addingUser, setAddingUser] = useState(false);
 
@@ -115,7 +117,7 @@ export default function AdminPage() {
       if (res.success) {
         setActionMsg({ text: `Tạo tài khoản ${newUser.email} thành công!`, type: 'success' });
         setShowAddUserModal(false);
-        setNewUser({ email: '', password: '', role: 'student', mssv: '', fullName: '', className: 'K30 CNTT', major: 'Kỹ thuật Phần mềm' });
+        setNewUser({ email: '', password: '', role: 'student', mssv: '', fullName: '', className: 'K30 CNTT', major: 'Công nghệ thông tin' });
         loadUsers();
         loadDashboard();
       }
@@ -144,13 +146,16 @@ export default function AdminPage() {
   const [totalStudents, setTotalStudents] = useState(0);
   const [searchStudent, setSearchStudent] = useState('');
   const [loadingStudents, setLoadingStudents] = useState(false);
+  const [specializationStudent, setSpecializationStudent] = useState(null);
+  const [specializationDraft, setSpecializationDraft] = useState('');
+  const [savingSpecialization, setSavingSpecialization] = useState(false);
   const [showAddStudentModal, setShowAddStudentModal] = useState(false);
   const [newStudent, setNewStudent] = useState({
     mssv: '',
     fullName: '',
     email: '',
     className: 'K30 CNTT',
-    major: 'Kỹ thuật Phần mềm',
+    major: 'Công nghệ thông tin',
     cohort: '2024 - 2028',
     officialCumulativeGpa4: 0,
     officialCumulativeCredits: 0
@@ -171,6 +176,20 @@ export default function AdminPage() {
     }
   };
 
+  const handleAdminSpecialization = async () => {
+    if (!specializationStudent || !specializationDraft) return;
+    if (!window.confirm(`Xác nhận đổi chuyên ngành của ${specializationStudent.fullName} sang ${specializationName(specializationDraft)}? Lịch sử điểm sẽ được giữ và tiến độ tính lại theo nhánh mới.`)) return;
+    setSavingSpecialization(true);
+    try {
+      await api.changeStudentSpecialization(specializationStudent.mssv, specializationDraft);
+      setSpecializationStudent(null);
+      setActionMsg({ text: 'Đã cập nhật chuyên ngành và giữ nguyên lịch sử điểm.', type: 'success' });
+      notifyAcademicUpdated();
+      loadStudents();
+    } catch (error) { setActionMsg({ text: error.message, type: 'error' }); }
+    finally { setSavingSpecialization(false); }
+  };
+
   const handleCreateStudent = async (e) => {
     e.preventDefault();
     if (!newStudent.mssv || !newStudent.fullName || !newStudent.email) {
@@ -182,7 +201,7 @@ export default function AdminPage() {
       if (res.success) {
         setActionMsg({ text: `Thêm sinh viên ${newStudent.fullName} (${newStudent.mssv}) thành công!`, type: 'success' });
         setShowAddStudentModal(false);
-        setNewStudent({ mssv: '', fullName: '', email: '', className: 'K30 CNTT', major: 'Kỹ thuật Phần mềm', cohort: '2024 - 2028', officialCumulativeGpa4: 0, officialCumulativeCredits: 0 });
+        setNewStudent({ mssv: '', fullName: '', email: '', className: 'K30 CNTT', major: 'Công nghệ thông tin', cohort: '2024 - 2028', officialCumulativeGpa4: 0, officialCumulativeCredits: 0 });
         loadStudents();
       }
     } catch (err) {
@@ -728,17 +747,18 @@ export default function AdminPage() {
                     <tr key={s._id} style={{ borderBottom: '1px solid var(--border-color)' }}>
                       <td style={{ padding: '12px 14px', fontWeight: 600, color: 'var(--vlu-red)', fontFamily: 'monospace' }}>{s.mssv}</td>
                       <td style={{ padding: '12px 14px', fontWeight: 600, color: 'var(--text-main)' }}>{s.fullName}</td>
-                      <td style={{ padding: '12px 14px', color: 'var(--text-secondary)' }}>{s.className} &bull; {s.major}</td>
-                      <td style={{ padding: '12px 14px', textAlign: 'center', fontWeight: 700, color: s.officialCumulativeGpa4 >= 3.0 ? '#10b981' : 'var(--text-main)' }}>
-                        {s.officialCumulativeGpa4?.toFixed(2) || '0.00'}
+                      <td style={{ padding: '12px 14px', color: 'var(--text-secondary)' }}>{s.className} &bull; {s.major}<div style={{ fontSize: '11px', marginTop: '4px' }}>{specializationName(s.specialization)}</div></td>
+                      <td style={{ padding: '12px 14px', textAlign: 'center', fontWeight: 700, color: s.academicProgress?.calculatedGpa4 >= 3.0 ? '#10b981' : 'var(--text-main)' }}>
+                        {formatAcademicNumber(s.academicProgress?.calculatedGpa4)}
                       </td>
                       <td style={{ padding: '12px 14px', textAlign: 'center', fontWeight: 600 }}>
-                        {s.officialCumulativeCredits || 0} / 126
+                        {s.academicProgress?.earnedCredits ?? '—'} / {s.academicProgress?.totalCredits ?? '—'}
                       </td>
                       <td style={{ padding: '12px 14px', textAlign: 'center' }}>
                         {(s.courses || []).length}
                       </td>
                       <td style={{ padding: '12px 14px', textAlign: 'center' }}>
+                        <button className="btn-secondary" style={{ fontSize: '11px', marginBottom: '5px' }} onClick={() => { setSpecializationStudent(s); setSpecializationDraft(s.specialization || ''); }}>Đổi chuyên ngành</button>
                         <button
                           onClick={() => handleDeleteStudent(s.mssv, s.fullName)}
                           style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '4px' }}
@@ -1112,6 +1132,15 @@ export default function AdminPage() {
       )}
 
       {/* Bulk Data Import Modal (PDF & Excel) */}
+      {specializationStudent && <div className="modal-overlay" onClick={() => !savingSpecialization && setSpecializationStudent(null)} style={{ zIndex: 1200 }}>
+        <div className="modal-box" onClick={event => event.stopPropagation()} style={{ maxWidth: '500px', padding: '24px', width: 'calc(100% - 32px)' }}>
+          <h3 style={{ marginTop: 0 }}>Đổi chuyên ngành theo quyền quản trị</h3>
+          <p>{specializationStudent.fullName} · {specializationStudent.mssv}</p>
+          <p style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Hiện tại: {specializationName(specializationStudent.specialization)}. Bảng điểm và lịch sử được giữ nguyên.</p>
+          <select aria-label="Chuyên ngành mới" value={specializationDraft} onChange={event => setSpecializationDraft(event.target.value)} style={{ width: '100%', padding: '10px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '8px', color: 'var(--text-main)' }}><option value="">Chọn chuyên ngành</option>{SPECIALIZATIONS.map(item => <option key={item.id} value={item.id}>{item.name}</option>)}</select>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '18px' }}><button className="btn-secondary" disabled={savingSpecialization} onClick={() => setSpecializationStudent(null)}>Hủy</button><button className="btn-vlu-primary" disabled={savingSpecialization || !specializationDraft || specializationDraft === specializationStudent.specialization} onClick={handleAdminSpecialization}>{savingSpecialization ? 'Đang lưu…' : 'Tiếp tục xác nhận'}</button></div>
+        </div>
+      </div>}
       <AdminImportModal
         isOpen={importModalOpen}
         onClose={() => setImportModalOpen(false)}

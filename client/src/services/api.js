@@ -82,6 +82,24 @@ export const api = {
     });
   },
 
+  async getAcademicProgress() {
+    return request('/profile/me/academic-progress');
+  },
+
+  async selectSpecialization(specialization, change = false) {
+    return request('/profile/me/specialization', {
+      method: 'PUT',
+      body: JSON.stringify({ specialization, confirm: true, change })
+    });
+  },
+
+  async changeStudentSpecialization(mssv, specialization) {
+    return request(`/students/${encodeURIComponent(mssv)}/specialization`, {
+      method: 'PUT',
+      body: JSON.stringify({ specialization, confirm: true, change: true })
+    });
+  },
+
   async extractProfileFromImage(imageData, mimeType = 'image/jpeg') {
     return request('/profile/extract-from-image', {
       method: 'POST',
@@ -157,10 +175,10 @@ export const api = {
     return this.extractProfileFromImage(data, mimeType);
   },
 
-  async confirmTranscript({ mssv, courses, source } = {}) {
+  async confirmTranscript({ mssv, courses, source, sourceTotals } = {}) {
     return request('/students/confirm-transcript', {
       method: 'POST',
-      body: JSON.stringify({ mssv, courses, source })
+      body: JSON.stringify({ mssv, courses, source, sourceTotals })
     });
   },
 
@@ -199,8 +217,8 @@ export const api = {
   },
 
   // ─── CHƯƠNG TRÌNH ĐÀO TẠO K30 ───
-  async getCurriculum(program = 'K30 CNTT') {
-    return request(`/curriculum?program=${encodeURIComponent(program)}`);
+  async getCurriculum(program = 'K30 CNTT', id = null) {
+    return request(`/curriculum?${id ? `id=${encodeURIComponent(id)}` : `program=${encodeURIComponent(program)}`}`);
   },
 
   async searchCourses(query) {
@@ -272,6 +290,10 @@ export const api = {
 
   async getAdminCurriculum(program = 'K30 CNTT') {
     return request(`/admin/curriculum?program=${encodeURIComponent(program)}`);
+  },
+
+  async getAdminCurricula() {
+    return request('/admin/curricula');
   },
 
   async updateAdminCurriculum(data) {
@@ -346,10 +368,10 @@ export const api = {
     });
   },
 
-  async confirmAdminImport({ dataType, rows, conflictMode, defaultProgram }) {
+  async confirmAdminImport(payload) {
     return request('/admin/import/confirm', {
       method: 'POST',
-      body: JSON.stringify({ dataType, rows, conflictMode, defaultProgram })
+      body: JSON.stringify(payload)
     });
   },
 

@@ -33,6 +33,7 @@ router.delete('/courses/:id', adminController.deleteCourse);
 
 // Quản lý Khung Chương trình đào tạo
 router.get('/curriculum', adminController.getCurriculum);
+router.get('/curricula', adminController.getCurricula);
 router.put('/curriculum', adminController.updateCurriculum);
 
 // Quản lý Thời khóa biểu

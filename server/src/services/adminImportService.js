@@ -11,11 +11,13 @@ import {
   courseRepo,
   studentRepo,
   scheduleRepo,
-  curriculumRepo,
   userRepo,
   getDataMode
 } from '../repositories/index.js';
 import { hashPassword } from '../utils/passwordUtils.js';
+import { confirmTranscriptCourses } from './studentService.js';
+import { numericGrade } from '../utils/gradeUtils.js';
+import { previewCurriculumImport, confirmCurriculumImport } from './curriculumImportService.js';
 
 export const adminImportService = {
   /**
@@ -33,12 +35,19 @@ export const adminImportService = {
   /**
    * 2. Preview & Validate Import File
    */
-  async previewImport({ buffer, filename, mimetype, dataType, sheetName = null, customMapping = null }) {
+  async previewImport({ buffer, filename, mimetype, dataType, sheetName = null, customMapping = null, defaultProgram = 'K30 CNTT', curriculumId = null, scope = null, targetMssv = null }) {
+    if (dataType === 'curriculum') {
+      if (String(filename || '').toLowerCase().endsWith('.pdf')) throw new Error('Cập nhật khung cần bảng Excel có mã nhóm và cột điều kiện riêng.');
+      return previewCurriculumImport({ buffer, filename, defaultProgram, curriculumId, scope, sheetName, customMapping });
+    }
     if (!FIELD_DEFINITIONS[dataType]) {
       throw new Error(`Loại dữ liệu không hỗ trợ: ${dataType}`);
     }
 
     const def = FIELD_DEFINITIONS[dataType];
+    if (dataType === 'grades' && targetMssv && !await studentRepo.findByMssv(String(targetMssv).trim())) {
+      throw Object.assign(new Error('Không tìm thấy hồ sơ MSSV đích để nhập bảng điểm.'), { statusCode: 404 });
+    }
     const isPdf = (mimetype && mimetype.includes('pdf')) || (filename && filename.toLowerCase().endsWith('.pdf'));
 
     let parsedResult;
@@ -119,6 +128,10 @@ export const adminImportService = {
           val = val.toUpperCase().replace(/\s+/g, '');
         } else if (f.key === 'mssv') {
           val = val.replace(/\s+/g, '');
+          if (dataType === 'grades' && targetMssv) {
+            if (val && val !== String(targetMssv).trim()) rowErrors.push('MSSV trong file khác MSSV đích đã chọn.');
+            if (!val) val = String(targetMssv).trim();
+          }
         } else if (f.key === 'credits') {
           const num = parseInt(val, 10);
           val = isNaN(num) ? '' : num;
@@ -179,7 +192,9 @@ export const adminImportService = {
         rowIndex: i + 1,
         selected: status !== 'invalid',
         status,
-        data: mappedData,
+        data: dataType === 'grades' ? { ...mappedData, _sourceTotals: parsedResult.sourceTotals,
+          _source: { filename, sheet: activeSheetName, row: raw.__sourceRow || i + 1,
+            fileHash: crypto.createHash('sha256').update(buffer).digest('hex') } } : mappedData,
         errors: rowErrors,
         warnings: rowWarnings,
         originalRaw: raw
@@ -193,6 +208,8 @@ export const adminImportService = {
       headers,
       detectedMapping,
       fields: def.fields,
+      sourceTotals: parsedResult.sourceTotals,
+      warnings: parsedResult.warnings || [],
       rows: validatedRows,
       summary: {
         total: validatedRows.length,
@@ -206,7 +223,8 @@ export const adminImportService = {
   /**
    * 3. Confirm & Save Validated Rows to Database / Demo Storage
    */
-  async confirmImport({ dataType, rows, conflictMode = 'skip', defaultProgram = 'K30 CNTT' }) {
+  async confirmImport({ dataType, rows, conflictMode = 'skip', defaultProgram = 'K30 CNTT', previewToken, selectedRowIndices, resolutions }) {
+    if (dataType === 'curriculum') return confirmCurriculumImport({ previewToken, rows, selectedRowIndices, resolutions });
     if (!Array.isArray(rows) || rows.length === 0) {
       throw new Error('Không có dòng dữ liệu nào được gửi để lưu');
     }
@@ -241,7 +259,7 @@ export const adminImportService = {
           const courseData = {
             code: data.code,
             name: data.name,
-            credits: Number(data.credits) || 3,
+            credits: numericGrade(data.credits),
             sectionName: data.sectionName || 'Đại cương',
             prerequisites: data.prerequisites
               ? (typeof data.prerequisites === 'string' ? data.prerequisites.split(/[,;\s]+/).filter(Boolean) : data.prerequisites)
@@ -251,6 +269,7 @@ export const adminImportService = {
             program: defaultProgram
           };
 
+          if (courseData.credits === null || courseData.credits < 0) throw new Error('Thiếu hoặc sai cột tín chỉ của học phần.');
           const existing = await courseRepo.findByCode(courseData.code);
           if (existing) {
             if (conflictMode === 'update') {
@@ -263,44 +282,6 @@ export const adminImportService = {
             await courseRepo.create(courseData);
             addedCount++;
           }
-
-        } else if (dataType === 'curriculum') {
-          const program = data.program || defaultProgram;
-          let curr = await curriculumRepo.findByProgram(program);
-          if (!curr || !curr.sections) {
-            curr = { program, major: 'Công nghệ thông tin', totalCredits: 126, sections: [] };
-          }
-
-          const secName = data.sectionName || 'Môn học chung';
-          let sec = curr.sections.find(s => s.name === secName);
-          if (!sec) {
-            sec = { name: secName, courses: [] };
-            curr.sections.push(sec);
-          }
-
-          const existingCourseIdx = sec.courses.findIndex(c => c.code === data.code);
-          const courseEntry = {
-            code: data.code,
-            name: data.name,
-            credits: Number(data.credits) || 3,
-            prerequisites: data.prerequisites
-              ? (typeof data.prerequisites === 'string' ? data.prerequisites.split(/[,;\s]+/).filter(Boolean) : data.prerequisites)
-              : []
-          };
-
-          if (existingCourseIdx !== -1) {
-            if (conflictMode === 'update') {
-              sec.courses[existingCourseIdx] = courseEntry;
-              updatedCount++;
-            } else {
-              skippedCount++;
-            }
-          } else {
-            sec.courses.push(courseEntry);
-            addedCount++;
-          }
-
-          await curriculumRepo.upsert(curr);
 
         } else if (dataType === 'schedules') {
           const scheduleData = {
@@ -350,7 +331,7 @@ export const adminImportService = {
             fullName: data.fullName,
             email: data.email,
             className: data.className || 'K30 CNTT',
-            major: data.major || 'Kỹ thuật Phần mềm',
+            major: data.major || 'Công nghệ thông tin',
             cohort: data.cohort || '2024 - 2028',
             phone: data.phone || '',
             dob: data.dob || '',
@@ -375,11 +356,10 @@ export const adminImportService = {
             if (!user) {
               user = await userRepo.create({
                 email: studentData.email,
-                password: hashedPassword,
+                passwordHash: hashedPassword,
                 role: 'student',
                 mssv,
                 status: 'active',
-                activationNote: `Mật khẩu khởi tạo: ${activationPassword}`
               });
             }
 
@@ -396,61 +376,32 @@ export const adminImportService = {
           }
 
           const existingCourses = student.courses || [];
-          const courseIdx = existingCourses.findIndex(c => c.code === data.courseCode);
+          const courseIdx = existingCourses.findIndex(c => c.code === data.courseCode && (c.semester || '').trim() === (data.semester || '').trim());
 
           const courseGrade = {
             code: data.courseCode,
             name: data.courseName,
-            credits: Number(data.credits) || 3,
-            score: data.score !== '' && data.score !== null ? Number(data.score) : null,
-            point4: data.point4 !== '' && data.point4 !== null ? Number(data.point4) : null,
+            credits: numericGrade(data.credits),
+            score: numericGrade(data.score),
+            point4: numericGrade(data.point4),
             letter: data.letter || '',
-            semester: data.semester || '2024-2025 HK01',
-            status: (data.score >= 5.0 || data.point4 >= 2.0) ? 'Dat' : 'Khong dat'
+            semester: data.semester || '',
+            status: ['MT', 'MIỄN'].includes(String(data.letter).toUpperCase()) ? 'Miễn/ bảo lưu' : numericGrade(data.score) === null && numericGrade(data.point4) === null ? 'Đang học' : String(data.letter).toUpperCase() === 'F' ? 'Không đạt' : /^[ABCD][+-]?$/i.test(data.letter || '') ? 'Đạt' : 'Chưa xác minh',
+            source: data._source
           };
 
           if (courseIdx !== -1) {
             if (conflictMode === 'update') {
-              existingCourses[courseIdx] = { ...existingCourses[courseIdx], ...courseGrade };
               updatedCount++;
             } else {
               skippedCount++;
               continue;
             }
           } else {
-            existingCourses.push(courseGrade);
             addedCount++;
           }
 
-          // Recalculate student GPA
-          let totalCredits = 0;
-          let earnedCredits = 0;
-          let totalPoints10 = 0;
-          let totalPoints4 = 0;
-
-          existingCourses.forEach(c => {
-            const cr = Number(c.credits) || 0;
-            if (c.score !== null && c.score !== undefined) {
-              totalCredits += cr;
-              totalPoints10 += c.score * cr;
-              if (c.point4 !== null && c.point4 !== undefined) {
-                totalPoints4 += c.point4 * cr;
-              }
-              if (c.score >= 5.0) {
-                earnedCredits += cr;
-              }
-            }
-          });
-
-          const gpa10 = totalCredits > 0 ? parseFloat((totalPoints10 / totalCredits).toFixed(2)) : 0;
-          const gpa4 = totalCredits > 0 ? parseFloat((totalPoints4 / totalCredits).toFixed(2)) : 0;
-
-          await studentRepo.updateByMssv(mssv, {
-            courses: existingCourses,
-            officialCumulativeGpa10: gpa10,
-            officialCumulativeGpa4: gpa4,
-            officialCumulativeCredits: earnedCredits
-          });
+          await confirmTranscriptCourses(mssv, [courseGrade], 'admin_excel_import', data._sourceTotals || null);
         }
       } catch (err) {
         errorCount++;

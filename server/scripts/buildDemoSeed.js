@@ -219,9 +219,10 @@ const rawK30 = JSON.parse(fs.readFileSync(path.join(__dirname, '../src/data/khun
 const curriculum = [
   {
     _id: 'cur_k30_cntt',
+    ...rawK30,
     program: rawK30.program || 'K30 CNTT',
     major: 'Công nghệ thông tin',
-    totalCredits: 126,
+    totalCredits: rawK30.totalCredits,
     sections: rawK30.sections || [],
     createdAt: now,
     updatedAt: now
@@ -235,6 +236,7 @@ for (const sec of rawK30.sections || []) {
     if (c.code) {
       courses.push({
         _id: `crs_${c.code}`,
+        ...c,
         code: c.code.toUpperCase(),
         name: c.name,
         credits: c.credits,
@@ -242,7 +244,7 @@ for (const sec of rawK30.sections || []) {
         sectionName: sec.name,
         program: rawK30.program || 'K30 CNTT',
         semesterRecommended: c.semesterRecommended || '',
-        required: true,
+        required: c.required,
         createdAt: now,
         updatedAt: now
       });

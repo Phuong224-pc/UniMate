@@ -44,7 +44,7 @@ export default function AiChatSidebar({
       const defaultGreetings = {
         graduation: 'Xin chào! Hãy nhập MSSV hoặc hỏi mình, mình sẽ kiểm tra các điều kiện tốt nghiệp (tín chỉ, GDQP, tiếng Anh, học phí) của bạn.',
         results: 'Xin chào! Mình có thể phân tích điểm GPA, gợi ý cải thiện điểm chữ và tính toán điểm mục tiêu cho bạn.',
-        roadmap: 'Xin chào! Mình là Trợ lý Lộ trình Học tập. Bạn có thể hỏi về các môn học tiếp theo, điều kiện tiên quyết và cách sắp xếp 126 tín chỉ K30.',
+        roadmap: 'Xin chào! Mình là Trợ lý Lộ trình Học tập. Bạn có thể hỏi về các môn học tiếp theo, điều kiện tiên quyết và yêu cầu của khung đang áp dụng.',
         advisor: 'Xin chào! Mình có thể tư vấn định hướng công nghệ, lộ trình 90 ngày và kỹ năng cần chuẩn bị cho công việc bạn quan tâm.'
       };
       greeting = defaultGreetings[mode] || defaultGreetings.results;

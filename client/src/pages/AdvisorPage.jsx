@@ -16,8 +16,11 @@ import {
 import { marked } from 'marked';
 import prism from 'prismjs';
 import { api } from '../services/api';
+import AcademicProgress from '../components/AcademicProgress';
+import { useAcademicProgress } from '../hooks/useAcademicProgress';
 
 export default function AdvisorPage() {
+  const { progress, error: progressError } = useAcademicProgress();
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
@@ -103,6 +106,7 @@ export default function AdvisorPage() {
 
   return (
     <div style={{ width: '100%', maxWidth: '100%', display: 'flex', flexDirection: 'column', minHeight: 'calc(100vh - 130px)', boxSizing: 'border-box' }}>
+      {progress && <AcademicProgress progress={progress} error={progressError} compact />}
       
       {/* ─── Top Banner ─── */}
       <div style={{
@@ -138,7 +142,7 @@ export default function AdvisorPage() {
               Cố vấn lộ trình học tập AI
             </h1>
             <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: 0 }}>
-              Đọc ảnh bảng điểm, đối chiếu Khung CTĐT K30 CNTT (126 tín chỉ) và kiểm tra điều kiện tiên quyết
+              Đọc ảnh bảng điểm, đối chiếu khung đào tạo đang áp dụng và kiểm tra điều kiện tiên quyết
             </p>
           </div>
         </div>
