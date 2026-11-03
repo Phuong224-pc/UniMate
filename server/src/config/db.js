@@ -10,7 +10,10 @@ export async function connectDB(options = {}) {
 
   if (!uri) {
     if (!silentError) {
-      console.warn('⚠️ [MongoDB] MONGODB_URI chưa được định nghĩa trong biến môi trường (.env).');
+      console.error('❌ [MongoDB] LỖI: Biến môi trường MONGODB_URI chưa được cấu hình trên Render / Production!');
+      console.error('👉 Vui lòng vào Render Dashboard -> Chọn Web Service -> Tab Environment -> Thêm biến:');
+      console.error('   Key: MONGODB_URI');
+      console.error('   Value: mongodb+srv://... (chuỗi kết nối MongoDB Atlas của bạn)\n');
     }
     return false;
   }
