@@ -3,10 +3,8 @@
   "version": "2.0.0",
   "description": "VLU Smart Assistant - Fullstack React + Node.js AI Platform",
   "scripts": {
-    "dev": "node run-dev.mjs auto",
-    "dev:demo": "node run-dev.mjs demo",
+    "dev": "node run-dev.mjs mongodb",
     "dev:mongo": "node run-dev.mjs mongodb",
-    "demo:reset": "npm run demo:reset --prefix server",
     "migrate": "npm run migrate --prefix server",
     "seed": "npm run seed --prefix server",
     "dev:server": "npm run dev --prefix server",

@@ -327,7 +327,7 @@ export default function AuthModal({ isOpen, onClose }) {
         {isLoginTab && (
           <div style={{ marginTop: '18px', paddingTop: '14px', borderTop: '1px solid var(--border-color)' }}>
             <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '8px', textAlign: 'center' }}>
-              Tài khoản mẫu có sẵn (Hoạt động cả Demo & MongoDB):
+              Tài khoản có sẵn trong cơ sở dữ liệu MongoDB:
             </div>
             <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', justifyContent: 'center' }}>
               <button

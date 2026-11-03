@@ -317,7 +317,7 @@ export default function AccountSecurity() {
           color: 'var(--text-secondary)',
           lineHeight: '1.6'
         }}>
-          💡 <strong>Chính sách bảo mật:</strong> Mật khẩu của bạn được mã hóa một chiều bằng chuẩn <strong>bcrypt</strong> trước khi lưu vào MongoDB hoặc kho Demo. Hệ thống tuyệt đối không lưu trữ hoặc trả về mật khẩu thô dưới bất kỳ hình thức nào.
+          💡 <strong>Chính sách bảo mật:</strong> Mật khẩu của bạn được mã hóa một chiều bằng chuẩn <strong>bcrypt</strong> trước khi lưu vào cơ sở dữ liệu MongoDB. Hệ thống tuyệt đối không lưu trữ hoặc trả về mật khẩu thô dưới bất kỳ hình thức nào.
         </div>
       </div>
     </div>

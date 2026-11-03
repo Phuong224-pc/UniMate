@@ -415,13 +415,13 @@ export const adminImportService = {
 
     return {
       success: true,
-      storageMode: mode,
+      storageMode: 'mongodb',
       addedCount,
       updatedCount,
       skippedCount,
       errorCount,
       errors,
-      message: `Đã nhập dữ liệu thành công vào ${mode === 'mongodb' ? 'MongoDB' : 'Demo Local'}: ${addedCount} thêm mới, ${updatedCount} cập nhật, ${skippedCount} bỏ qua, ${errorCount} lỗi.`
+      message: `Đã nhập dữ liệu thành công vào MongoDB: ${addedCount} thêm mới, ${updatedCount} cập nhật, ${skippedCount} bỏ qua, ${errorCount} lỗi.`
     };
   }
 };

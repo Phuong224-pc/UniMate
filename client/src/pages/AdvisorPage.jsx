@@ -24,7 +24,7 @@ export default function AdvisorPage() {
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
-      content: `👋 **Xin chào! Mình là UniMate – Cố vấn lộ trình học tập.** *(Dữ liệu demo: Ngành CNTT - VLU)*\n\nBạn có thể:\n- 📸 **Tải lên ảnh chụp bảng điểm** để mình đọc điểm, tính tín chỉ tích lũy và kiểm tra môn còn thiếu.\n- 🔍 **Hỏi điều kiện tiên quyết** của bất kỳ môn học nào (ví dụ: *"Tôi muốn học Lập trình Web thì cần pass môn gì trước?"*).\n- 🚀 **Gợi ý môn học kỳ tiếp theo** theo đúng chuyên ngành của bạn (Kỹ thuật phần mềm, Trí tuệ nhân tạo, Công nghệ dữ liệu).`,
+      content: `👋 **Xin chào! Mình là UniMate – Cố vấn lộ trình học tập của Khoa CNTT Trường Đại học Văn Lang.**\n\nBạn có thể:\n- 📸 **Tải lên ảnh chụp bảng điểm** để mình đọc điểm, tính tín chỉ tích lũy và kiểm tra môn còn thiếu.\n- 🔍 **Hỏi điều kiện tiên quyết** của bất kỳ môn học nào (ví dụ: *"Tôi muốn học Lập trình Web thì cần pass môn gì trước?"*).\n- 🚀 **Gợi ý môn học kỳ tiếp theo** theo đúng chuyên ngành của bạn (Kỹ thuật phần mềm, Trí tuệ nhân tạo, Công nghệ dữ liệu).`,
       timestamp: 'Hệ thống'
     }
   ]);

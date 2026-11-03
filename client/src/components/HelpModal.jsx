@@ -65,7 +65,7 @@ export default function HelpModal({ isOpen, onClose }) {
           </div>
           <div>
             <h2 style={{ fontSize: '17px', fontWeight: 800, color: 'var(--text-main)' }}>HƯỚNG DẪN SỬ DỤNG UNIMATE</h2>
-            <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Các mẹo để sử dụng trợ lý học tập UniMate hiệu quả nhất (Dữ liệu demo: VLU)</p>
+            <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Các mẹo để sử dụng trợ lý học tập UniMate hiệu quả nhất (Khoa CNTT - Đại học Văn Lang)</p>
           </div>
         </div>
 

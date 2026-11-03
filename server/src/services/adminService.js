@@ -38,13 +38,12 @@ export async function updatePrompts(promptsObj) {
   const mode = getDataMode();
   return { 
     success: true, 
-    message: `Đã cập nhật System Prompts thành công vào kho lưu trữ ${mode === 'mongodb' ? 'MongoDB' : 'Demo Local'}!` 
+    message: 'Đã cập nhật System Prompts thành công vào cơ sở dữ liệu MongoDB!' 
   };
 }
 
 export async function getSystemHealth() {
-  const isDemo = isDemoMode();
-  const dbConnected = isDemo ? true : isDbConnected();
+  const dbConnected = isDbConnected();
 
   let counts = { users: 0, students: 0, schedules: 0, courses: 0, curricula: 0 };
   try {
@@ -64,11 +63,11 @@ export async function getSystemHealth() {
     status: 'ok',
     app: 'VLU Smart Assistant Backend',
     timestamp: new Date().toISOString(),
-    dataMode: getDataMode(),
-    isDemo,
+    dataMode: 'mongodb',
+    isDemo: false,
     database: {
       connected: dbConnected,
-      engine: isDemo ? 'Demo Local (File JSON)' : 'MongoDB / Mongoose',
+      engine: 'MongoDB Atlas / Mongoose',
       stats: counts
     },
     geminiConfigured: Boolean(process.env.GEMINI_API_KEY) && process.env.GEMINI_API_KEY !== 'your_gemini_api_key_here'
@@ -116,8 +115,8 @@ export async function getDashboardStats() {
     roleBreakdown,
     statusBreakdown,
     recentUsers,
-    dataMode: getDataMode(),
-    isDemo: isDemoMode()
+    dataMode: 'mongodb',
+    isDemo: false
   };
 }
 

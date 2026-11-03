@@ -1,17 +1,8 @@
 import { spawn } from 'child_process';
 
-const modeArg = process.argv[2] || process.env.DATA_MODE || 'auto';
-const mode = modeArg.toLowerCase().trim();
-
 console.log("\n==========================================================");
 console.log("🚀 KHỞI ĐỘNG VLU SMART ASSISTANT FULLSTACK (REACT + NODE.JS)");
-if (mode === 'demo') {
-  console.log("📦 CHẾ ĐỘ: DEMO LOCAL (Chạy mượt mà không cần MongoDB)");
-} else if (mode === 'mongodb') {
-  console.log("🔌 CHẾ ĐỘ: MONGODB (Bắt buộc kết nối database MongoDB)");
-} else {
-  console.log("⚡ CHẾ ĐỘ: AUTO (Tự động nhận diện MongoDB / Demo Local)");
-}
+console.log("🔌 KẾT NỐI: MONGODB DATABASE CHÍNH THỨC (Dữ liệu thật)");
 console.log("==========================================================\n");
 
 const isWin = process.platform === 'win32';
@@ -24,7 +15,7 @@ const server = spawn(npmCmd, ['run', 'dev'], {
   shell: true,
   env: {
     ...process.env,
-    DATA_MODE: mode
+    DATA_MODE: 'mongodb'
   }
 });
 

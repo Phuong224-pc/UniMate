@@ -122,7 +122,7 @@ async function startServer() {
 
   app.listen(PORT, () => {
     console.log(`🚀 [VLU Assistant Backend] Server đang chạy tại http://localhost:${PORT}`);
-    console.log(`📊 Chế độ dữ liệu: ${provider.mode.toUpperCase()} ${provider.isDemo ? '(DEMO LOCAL - Không cần cài MongoDB)' : '(MONGODB PRODUCTION)'}`);
+    console.log(`📊 Cơ sở dữ liệu: MONGODB DATABASE (Dữ liệu thật)`);
     console.log(`🔑 Gemini AI: ${(config.geminiApiKey && config.geminiApiKey !== 'your_gemini_api_key_here') ? 'Đã cấu hình' : 'CHƯA CẤU HÌNH'}`);
   });
 }

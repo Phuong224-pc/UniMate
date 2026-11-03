@@ -925,7 +925,7 @@ export default function AdminImportModal({
             }}>
               <Database size={15} color="var(--vlu-red)" />
               <span>
-                Kho lưu trữ: <strong>{importResult.storageMode === 'mongodb' ? 'MongoDB (Dữ liệu thật)' : 'Demo Local Storage'}</strong> &bull; Dữ liệu được bảo toàn khi làm mới trang hoặc khởi động lại server.
+                Kho lưu trữ: <strong>MongoDB Atlas (Dữ liệu thật)</strong> &bull; Dữ liệu được bảo toàn trực tiếp trên cơ sở dữ liệu.
               </span>
             </div>
 

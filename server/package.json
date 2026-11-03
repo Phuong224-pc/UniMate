@@ -9,9 +9,7 @@
     "test:integration": "node scripts/testDataModes.js && node scripts/testNewFeatures.js",
     "start": "node src/index.js",
     "dev": "node --watch src/index.js",
-    "dev:demo": "node --watch -e \"process.env.DATA_MODE='demo'; import('./src/index.js');\"",
     "dev:mongo": "node --watch -e \"process.env.DATA_MODE='mongodb'; import('./src/index.js');\"",
-    "demo:reset": "node scripts/resetDemo.js",
     "migrate": "node scripts/migrate.js",
     "seed": "node scripts/migrate.js"
   },

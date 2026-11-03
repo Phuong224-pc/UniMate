@@ -303,46 +303,6 @@ export default function AdminLayout({ children, activeSection, onSelectSection }
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
-            {dataStatus.isDemo ? (
-              <div 
-                className="hide-on-mobile"
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '5px',
-                  padding: '4px 10px',
-                  background: '#fef3c7',
-                  border: '1px solid #f59e0b',
-                  color: '#b45309',
-                  borderRadius: '20px',
-                  fontSize: '11px',
-                  fontWeight: 600
-                }}
-              >
-                <Database size={12} />
-                <span>Chế độ demo — dữ liệu mẫu</span>
-              </div>
-            ) : (
-              <div 
-                className="hide-on-mobile"
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '5px',
-                  padding: '4px 9px',
-                  background: '#dcfce7',
-                  border: '1px solid #22c55e',
-                  color: '#15803d',
-                  borderRadius: '20px',
-                  fontSize: '11px',
-                  fontWeight: 600
-                }}
-              >
-                <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#22c55e' }} />
-                <span>MongoDB Active</span>
-              </div>
-            )}
-
             <button
               onClick={() => setDarkMode(!darkMode)}
               style={{

@@ -36,7 +36,7 @@ export default function GpaPage() {
   const [requiredScore, setRequiredScore] = useState(null);
   const academic = user?.role === 'student' ? ownProgress : student?.academicProgress;
 
-  const demoMssvs = [
+  const sampleMssvs = [
     { mssv: '2474802010458', name: 'Trương Trần Thanh Phương (K30)' },
     { mssv: '2474802010414', name: 'Võ Thành Trung (K30)' },
     { mssv: '2474802010071', name: 'Võ Ngọc Duy (K30)' },
@@ -157,7 +157,7 @@ export default function GpaPage() {
             ) : (
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                 <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Mẫu thử:</span>
-                {demoMssvs.slice(0, 3).map(d => (
+                {sampleMssvs.slice(0, 3).map(d => (
                   <button key={d.mssv} onClick={() => { setMssvInput(d.mssv); handleLookup(d.mssv); }} className="btn-secondary" style={{ fontSize: '12px', padding: '4px 10px' }}>
                     MSSV: {d.mssv.slice(-5)}
                   </button>
