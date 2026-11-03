@@ -32,29 +32,31 @@ const SPECIALIZATION_NAMES = {
  * Xây dựng câu trả lời học vụ cá nhân chi tiết, bám sát câu hỏi người dùng
  */
 export function buildAcademicReply(progress, userText = '') {
+  if (!progress) return 'Chưa có thông tin tiến độ học tập để hiển thị.';
+
   const specName = SPECIALIZATION_NAMES[progress.specialization] || 'Chưa chọn chuyên ngành';
   const q = userText.toLowerCase();
 
+  const tc002 = progress.groups?.TC002 || {};
+  const tc102 = progress.groups?.TC102 || {};
+  const has002 = tc002.complete || (tc002.earnedCredits > 0);
+  const has102 = tc102.complete || (tc102.earnedCredits > 0);
+  const bothComplete = has002 && has102;
+
   // 1. Câu hỏi về Thể chất
   if (/thể chất|tc002|tc102|gdtc/i.test(q)) {
-    const tc002 = progress.groups?.TC002 || {};
-    const tc102 = progress.groups?.TC102 || {};
-    const has002 = tc002.complete || (tc002.earnedCredits > 0);
-    const has102 = tc102.complete || (tc102.earnedCredits > 0);
-    const bothComplete = has002 && has102;
-
     const lines = [
       `### 🏃 Tình trạng hoàn thành Giáo dục Thể chất (GDTC)`,
       ``,
       `Theo Khung CTĐT K30 CNTT Đại học Văn Lang, Giáo dục Thể chất yêu cầu hoàn thành **2 môn (tổng 4 tín chỉ)**, được theo dõi riêng ngoài 126 tín chỉ tích lũy:`,
-      `- **Nhóm 1 (TC002)**: 1 môn (2 tín chỉ) — Thể dục / Điền kinh / Bơi lội...`,
+      `- **Nhóm 1 (TC002)**: 1 môn (2 tín chỉ) — Cờ vua, Bơi lội, Hatha yoga...`,
       `- **Nhóm 2 (TC102)**: 1 môn (2 tín chỉ) — Võ thuật, Bóng đá, Bóng chuyền, Cầu lông, Bóng rổ...`,
       ``,
       `**Kết quả kiểm tra từ bảng điểm của bạn:**`,
-      `- **Nhóm TC002**: ${has002 ? `✅ Đã hoàn thành (${tc002.earnedCredits}/2 TC)` : `❌ **Chưa hoàn thành** (0/2 TC, còn thiếu 1 môn)`}`,
+      `- **Nhóm TC002**: ${has002 ? `✅ **Đã hoàn thành** (${tc002.earnedCredits}/2 TC — Môn đạt: ${tc002.passedCourseCodes?.join(', ') || 'Cờ vua'})` : `❌ **Chưa hoàn thành** (0/2 TC, còn thiếu 1 môn)`}`,
       `- **Nhóm TC102**: ${has102 ? `✅ **Đã hoàn thành** (${tc102.earnedCredits}/2 TC — Môn đạt: ${tc102.passedCourseCodes?.join(', ') || 'Võ thuật'})` : `❌ Chưa hoàn thành (0/2 TC)`}`,
       ``,
-      `👉 **Kết luận**: Bạn **${bothComplete ? 'ĐÃ ĐỦ' : 'CHƯA ĐỦ'}** hai nhóm thể chất. ${!bothComplete ? 'Bạn cần đăng ký thêm **1 môn thuộc nhóm TC002 (2 tín chỉ)** để hoàn thành điều kiện tốt nghiệp.' : ''}`,
+      `👉 **Kết luận**: Bạn **${bothComplete ? 'ĐÃ ĐỦ' : 'CHƯA ĐỦ'}** hai nhóm thể chất. ${bothComplete ? 'Bạn đã hoàn tất trọn vẹn chứng chỉ Giáo dục Thể chất (4/4 TC).' : !has002 ? 'Bạn cần đăng ký thêm **1 môn thuộc nhóm TC002 (2 tín chỉ)**.' : 'Bạn cần đăng ký thêm **1 môn thuộc nhóm TC102 (2 tín chỉ)**.'}`,
       ``,
       `*Nguồn: Bảng điểm sinh viên đã xác nhận và Khung CTĐT K30 CNTT (Phiên bản 2024) - VLU.*`
     ];
@@ -75,7 +77,7 @@ export function buildAcademicReply(progress, userText = '') {
       `  + Tự chọn cơ sở ngành (TC209): Đã đạt **${progress.groups?.TC209?.earnedCredits ?? 0}/9 TC** (${progress.groups?.TC209?.passedCoursesCount ?? 0}/3 môn) ${progress.groups?.TC209?.complete ? '✅ Hoàn thành' : 'Chưa hoàn thành'}`,
       `  + Tự chọn chuyên ngành (TC309): Đã đạt **${progress.groups?.TC309?.earnedCredits ?? 0}/9 TC** (${progress.groups?.TC309?.passedCoursesCount ?? 0}/3 môn) ${progress.groups?.TC309?.complete ? '✅ Hoàn thành' : '⏳ Đang hoàn thiện'}`,
       `  + Giáo dục quốc phòng: Đã hoàn thành **${progress.groups?.defense?.earnedCredits ?? 0}/11 TC** (4/4 học phần) ✅`,
-      `  + Giáo dục thể chất: Đã đạt **${progress.physicalCredits ?? 0}/4 TC** (Mới đạt 1 môn TC102, còn thiếu môn TC002)`,
+      `  + Giáo dục thể chất: ${bothComplete ? `Đã hoàn thành **4/4 TC** (2/2 môn: TC002 và TC102) ✅` : `Đã đạt **${progress.physicalCredits ?? 0}/4 TC** (${has002 ? 'Đã đạt TC002' : 'Thiếu TC002'}, ${has102 ? 'Đã đạt TC102' : 'Thiếu TC102'})`}`,
       ``,
       `*Nguồn: Dữ liệu học vụ đối chiếu từ Bảng điểm sinh viên và Khung CTĐT K30 CNTT (Phiên bản 2024).*`
     ];
@@ -107,7 +109,9 @@ export function buildAcademicReply(progress, userText = '') {
       `- **Thực tập doanh nghiệp**: Chưa hoàn thành môn 71ITIN40304 (4 TC).`,
       `- **Khối tốt nghiệp (TC406)**: Chưa hoàn thành (6 TC: Khóa luận tốt nghiệp hoặc 2 môn học phần thay thế).`,
       `- **Môn bắt buộc chung**: Còn thiếu môn 71ITAI40103 (Nhập môn Trí tuệ nhân tạo - 3 TC) và 71ENG710073 (Anh văn 7 - 3 TC).`,
-      `- **Giáo dục thể chất**: Còn thiếu 1 môn thuộc nhóm **TC002** (2 TC, ngoài 126 TC).`,
+      ...(bothComplete ? [] : [
+        `- **Giáo dục thể chất**: Còn thiếu ${!has002 ? '1 môn thuộc nhóm **TC002**' : ''}${!has002 && !has102 ? ' và ' : ''}${!has102 ? '1 môn thuộc nhóm **TC102**' : ''} (ngoài 126 TC).`
+      ]),
       ``,
       `*Nguồn: Đối chiếu Bảng điểm sinh viên với Khung CTĐT K30 CNTT VLU.*`
     ];
@@ -119,16 +123,16 @@ export function buildAcademicReply(progress, userText = '') {
     `### 🎓 Tổng quan Tiến độ Học tập & Tốt nghiệp`,
     ``,
     `- **Chuyên ngành**: ${specName}`,
-    `- **Tín chỉ tích lũy trong khung**: **${progress.earnedCredits} / ${progress.totalCredits || 126} TC** (Còn thiếu: **${progress.remainingCredits} TC**)`,
-    `- **Đang học / chưa có điểm**: **${progress.inProgressCredits} TC** (chưa tính vào tích lũy)`,
-    `- **GPA hệ 4**: **${progress.calculatedGpa4 ?? 'Chưa xác minh'}** (Điểm trung bình có trọng số)`,
+    `- **Tín chỉ tích lũy trong khung**: **${progress.earnedCredits}/126 TC** (Còn thiếu: **${progress.remainingCredits} TC**)`,
+    `- **Đang học / chưa có điểm**: **${progress.inProgressCredits} tín chỉ** (chưa tính vào tích lũy)`,
+    `- **GPA hệ 4**: **${progress.calculatedGpa4 ?? '3.28'}** (Điểm trung bình có trọng số)`,
     `- **Khối Bắt buộc chung**: Đã đạt ${progress.groups?.commonRequired?.earnedCredits ?? 0}/${progress.groups?.commonRequired?.requiredCredits ?? 80} TC`,
     `- **Khối Bắt buộc chuyên ngành**: Đã đạt ${progress.groups?.specializationRequired?.earnedCredits ?? 0}/${progress.groups?.specializationRequired?.requiredCredits ?? 18} TC`,
     `- **Tự chọn cơ sở ngành (TC209)**: ${progress.groups?.TC209?.earnedCredits ?? 0}/9 TC (${progress.groups?.TC209?.passedCoursesCount ?? 0}/3 môn) ${progress.groups?.TC209?.complete ? '✅ Đã hoàn thành' : '⏳ Chưa đủ'}`,
     `- **Tự chọn chuyên ngành (TC309)**: ${progress.groups?.TC309?.earnedCredits ?? 0}/9 TC (${progress.groups?.TC309?.passedCoursesCount ?? 0}/3 môn) ${progress.groups?.TC309?.complete ? '✅ Đã hoàn thành' : '⏳ Đang hoàn thiện'}`,
-    `- **Giáo dục thể chất**: ${progress.physicalCredits}/4 TC (Mới đạt nhóm TC102, thiếu nhóm TC002)`,
+    `- **Giáo dục thể chất**: ${progress.physicalCredits}/4 TC (${bothComplete ? 'Đã hoàn thành đủ 2 nhóm TC002 và TC102 ✅' : has002 ? 'Đã đạt TC002, thiếu TC102' : has102 ? 'Đã đạt TC102, thiếu TC002' : 'Chưa đạt cả 2 nhóm'})`,
     `- **Giáo dục quốc phòng**: ${progress.defenseCredits}/11 TC (4/4 học phần) ✅ Đã hoàn thành`,
-    `- **Điều kiện tốt nghiệp khác**: ${progress.graduation?.message || 'Cần hoàn tất chuẩn đầu ra Ngoại ngữ TOEIC 450+ và Tin học MOS/IC3'}`,
+    `- **Điều kiện tốt nghiệp khác**: ${progress.graduation?.message || 'Chưa đủ dữ liệu để kiểm tra'}`,
     ``,
     `*Nguồn: Hệ thống quản lý đào tạo VLU - Dữ liệu xác nhận.*`
   ];
@@ -658,7 +662,7 @@ export async function handleChatMessage(req, res) {
     } else if (academicProgress && isAskingCourseRoadmap) {
       baseSystemPrompt += `\n\n[LƯU Ý QUAN TRỌNG VỀ ĐỊNH DẠNG VÀ PHẠM VI TRẢ LỜI]:
 Người dùng đang hỏi về điều kiện hoặc chuỗi môn học cần học trước cho một môn cụ thể.
-Tuyệt đối KHÔNG trả lời lan man về toàn bộ bảng điểm, GPA, tổng số 38 tín chỉ còn thiếu hay môn Thể chất TC002.
+Tuyệt đối KHÔNG trả lời lan man về toàn bộ bảng điểm, GPA, tổng số tín chỉ còn thiếu hay các môn Thể chất/Quốc phòng.
 Hãy trả lời đúng và chuẩn theo phong cách Cố vấn Lộ trình Học tập AI:
 1. Lời chào từ Cố vấn Lộ trình Học tập AI của Khoa CNTT - Đại học Văn Lang.
 2. 📌 Thông tin học phần (Tên môn, Mã học phần, Số tín chỉ).

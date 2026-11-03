@@ -20,8 +20,8 @@
         "semester": "2024-2025 HK01",
         "area": "Ngoại ngữ",
         "status": "Đạt",
-        "countCredit": false,
-        "countGpa": false
+        "countCredit": true,
+        "countGpa": true
       },
       {
         "code": "71ENG11013",
@@ -121,8 +121,8 @@
         "semester": "2024-2025 HK02",
         "area": "Giáo dục thể chất",
         "status": "Đạt",
-        "countCredit": false,
-        "countGpa": false
+        "countCredit": true,
+        "countGpa": true
       },
       {
         "code": "71POLP1013",
@@ -189,8 +189,8 @@
         "semester": "2024-2025 HK03",
         "area": "Giáo dục quốc phòng",
         "status": "Đạt",
-        "countCredit": false,
-        "countGpa": false
+        "countCredit": true,
+        "countGpa": true
       },
       {
         "code": "71NAD21022",
@@ -202,8 +202,8 @@
         "semester": "2024-2025 HK03",
         "area": "Giáo dục quốc phòng",
         "status": "Đạt",
-        "countCredit": false,
-        "countGpa": false
+        "countCredit": true,
+        "countGpa": true
       },
       {
         "code": "71NAD31032",
@@ -215,8 +215,8 @@
         "semester": "2024-2025 HK03",
         "area": "Giáo dục quốc phòng",
         "status": "Đạt",
-        "countCredit": false,
-        "countGpa": false
+        "countCredit": true,
+        "countGpa": true
       },
       {
         "code": "71NAD41044",
@@ -228,8 +228,8 @@
         "semester": "2024-2025 HK03",
         "area": "Giáo dục quốc phòng",
         "status": "Đạt",
-        "countCredit": false,
-        "countGpa": false
+        "countCredit": true,
+        "countGpa": true
       },
       {
         "code": "71POLE1022",
@@ -388,8 +388,8 @@
         "semester": "2024-2025 HK01",
         "area": "Ngoại ngữ",
         "status": "Đạt",
-        "countCredit": false,
-        "countGpa": false
+        "countCredit": true,
+        "countGpa": true
       },
       {
         "code": "71ENG11013",
@@ -489,8 +489,8 @@
         "semester": "2024-2025 HK02",
         "area": "Giáo dục thể chất",
         "status": "Đạt",
-        "countCredit": false,
-        "countGpa": false
+        "countCredit": true,
+        "countGpa": true
       },
       {
         "code": "71POLP1013",
@@ -557,8 +557,8 @@
         "semester": "2024-2025 HK03",
         "area": "Giáo dục quốc phòng",
         "status": "Đạt",
-        "countCredit": false,
-        "countGpa": false
+        "countCredit": true,
+        "countGpa": true
       },
       {
         "code": "71NAD21002",
@@ -570,8 +570,8 @@
         "semester": "2024-2025 HK03",
         "area": "Giáo dục quốc phòng",
         "status": "Đạt",
-        "countCredit": false,
-        "countGpa": false
+        "countCredit": true,
+        "countGpa": true
       },
       {
         "code": "71NAD31003",
@@ -583,8 +583,8 @@
         "semester": "2024-2025 HK03",
         "area": "Giáo dục quốc phòng",
         "status": "Đạt",
-        "countCredit": false,
-        "countGpa": false
+        "countCredit": true,
+        "countGpa": true
       },
       {
         "code": "71NAD41004",
@@ -596,8 +596,8 @@
         "semester": "2024-2025 HK03",
         "area": "Giáo dục quốc phòng",
         "status": "Đạt",
-        "countCredit": false,
-        "countGpa": false
+        "countCredit": true,
+        "countGpa": true
       },
       {
         "code": "71POLE1002",
@@ -778,8 +778,8 @@
         "semester": "2024-2025 HK01",
         "area": "Ngoại ngữ",
         "status": "Đạt",
-        "countCredit": false,
-        "countGpa": false
+        "countCredit": true,
+        "countGpa": true
       },
       {
         "code": "71ENG11013",
@@ -879,8 +879,8 @@
         "semester": "2024-2025 HK02",
         "area": "Giáo dục thể chất",
         "status": "Đạt",
-        "countCredit": false,
-        "countGpa": false
+        "countCredit": true,
+        "countGpa": true
       },
       {
         "code": "71POLP10013",
@@ -947,8 +947,8 @@
         "semester": "2024-2025 HK03",
         "area": "Giáo dục quốc phòng",
         "status": "Đạt",
-        "countCredit": false,
-        "countGpa": false
+        "countCredit": true,
+        "countGpa": true
       },
       {
         "code": "71NAD21002",
@@ -960,8 +960,8 @@
         "semester": "2024-2025 HK03",
         "area": "Giáo dục quốc phòng",
         "status": "Đạt",
-        "countCredit": false,
-        "countGpa": false
+        "countCredit": true,
+        "countGpa": true
       },
       {
         "code": "71NAD31003",
@@ -973,8 +973,8 @@
         "semester": "2024-2025 HK03",
         "area": "Giáo dục quốc phòng",
         "status": "Đạt",
-        "countCredit": false,
-        "countGpa": false
+        "countCredit": true,
+        "countGpa": true
       },
       {
         "code": "71NAD41004",
@@ -986,8 +986,8 @@
         "semester": "2024-2025 HK03",
         "area": "Giáo dục quốc phòng",
         "status": "Đạt",
-        "countCredit": false,
-        "countGpa": false
+        "countCredit": true,
+        "countGpa": true
       },
       {
         "code": "71POLE10022",
@@ -1087,8 +1087,8 @@
         "semester": "2025-2026 HK02",
         "area": "Giáo dục thể chất",
         "status": "Đạt",
-        "countCredit": false,
-        "countGpa": false
+        "countCredit": true,
+        "countGpa": true
       },
       {
         "code": "71POLS10032",
@@ -1137,8 +1137,8 @@
         "semester": "2024-2025 HK01",
         "area": "Ngoại ngữ",
         "status": "Đạt",
-        "countCredit": false,
-        "countGpa": false
+        "countCredit": true,
+        "countGpa": true
       },
       {
         "code": "71ENG01012",
@@ -1240,8 +1240,8 @@
         "semester": "2024-2025 HK02",
         "area": "Giáo dục thể chất",
         "status": "Đạt",
-        "countCredit": false,
-        "countGpa": false
+        "countCredit": true,
+        "countGpa": true
       },
       {
         "code": "71POLP10013",
@@ -1308,8 +1308,8 @@
         "semester": "2024-2025 HK03",
         "area": "Giáo dục quốc phòng",
         "status": "Đạt",
-        "countCredit": false,
-        "countGpa": false
+        "countCredit": true,
+        "countGpa": true
       },
       {
         "code": "71NAD21002",
@@ -1321,8 +1321,8 @@
         "semester": "2024-2025 HK03",
         "area": "Giáo dục quốc phòng",
         "status": "Đạt",
-        "countCredit": false,
-        "countGpa": false
+        "countCredit": true,
+        "countGpa": true
       },
       {
         "code": "71NAD31003",
@@ -1334,8 +1334,8 @@
         "semester": "2024-2025 HK03",
         "area": "Giáo dục quốc phòng",
         "status": "Đạt",
-        "countCredit": false,
-        "countGpa": false
+        "countCredit": true,
+        "countGpa": true
       },
       {
         "code": "71NAD41044",
@@ -1347,8 +1347,8 @@
         "semester": "2024-2025 HK03",
         "area": "Giáo dục quốc phòng",
         "status": "Đạt",
-        "countCredit": false,
-        "countGpa": false
+        "countCredit": true,
+        "countGpa": true
       },
       {
         "code": "71POLE10022",
@@ -1426,8 +1426,8 @@
         "semester": "2025-2026 HK01",
         "area": "Giáo dục thể chất",
         "status": "Đạt",
-        "countCredit": false,
-        "countGpa": false
+        "countCredit": true,
+        "countGpa": true
       },
       {
         "code": "71ENG41043",
@@ -1520,8 +1520,8 @@
         "semester": "2024-2025 HK01",
         "area": "Ngoại ngữ",
         "status": "Đạt",
-        "countCredit": false,
-        "countGpa": false
+        "countCredit": true,
+        "countGpa": true
       },
       {
         "code": "71ENG11013",
@@ -1621,8 +1621,8 @@
         "semester": "2024-2025 HK02",
         "area": "Giáo dục thể chất",
         "status": "Đạt",
-        "countCredit": false,
-        "countGpa": false
+        "countCredit": true,
+        "countGpa": true
       },
       {
         "code": "71POLP10013",
@@ -1689,8 +1689,8 @@
         "semester": "2024-2025 HK03",
         "area": "Giáo dục quốc phòng",
         "status": "Đạt",
-        "countCredit": false,
-        "countGpa": false
+        "countCredit": true,
+        "countGpa": true
       },
       {
         "code": "71NAD21002",
@@ -1702,8 +1702,8 @@
         "semester": "2024-2025 HK03",
         "area": "Giáo dục quốc phòng",
         "status": "Đạt",
-        "countCredit": false,
-        "countGpa": false
+        "countCredit": true,
+        "countGpa": true
       },
       {
         "code": "71NAD31003",
@@ -1715,8 +1715,8 @@
         "semester": "2024-2025 HK03",
         "area": "Giáo dục quốc phòng",
         "status": "Đạt",
-        "countCredit": false,
-        "countGpa": false
+        "countCredit": true,
+        "countGpa": true
       },
       {
         "code": "71NAD41044",
@@ -1728,8 +1728,8 @@
         "semester": "2024-2025 HK03",
         "area": "Giáo dục quốc phòng",
         "status": "Đạt",
-        "countCredit": false,
-        "countGpa": false
+        "countCredit": true,
+        "countGpa": true
       },
       {
         "code": "71POLE10022",

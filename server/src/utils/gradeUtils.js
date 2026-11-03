@@ -96,7 +96,8 @@ export function calculateAcademicStats(courses = [], { curriculum = null, specia
     if (latest.credits === null) { unverifiedCourses.push({ ...record, reason: 'Thiếu cột tín chỉ nguồn.' }); continue; }
     if (latest.credits !== Number(membership.credits)) warnings.push(`Tín chỉ ${code}: bảng điểm ${latest.credits}, khung ${membership.credits}; giữ nguyên nguồn, cần đối chiếu.`);
     if (!branchAllowed) warnings.push(`${code}: Không thuộc chuyên ngành bạn đã chọn; giữ lịch sử điểm, không tính vào yêu cầu nhánh.`);
-    if (passed && branchAllowed && passed.countCredit !== false) completed.push(record);
+    const isDegreeExemptGroup = ['TC002', 'TC102', 'defense'].includes(group) || membership.countsTowardDegree === false;
+    if (passed && branchAllowed && (passed.countCredit !== false || isDegreeExemptGroup)) completed.push(record);
     else if (active && branchAllowed) pending.push(record);
     else if (latest.outcome === 'failed') failed.push(record);
     else if (latest.outcome === 'unverified') unverifiedCourses.push(record);
