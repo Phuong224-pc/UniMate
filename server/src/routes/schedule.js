@@ -9,6 +9,12 @@ const router = express.Router();
 // Lấy danh sách học kỳ có trong hệ thống
 router.get('/semesters', scheduleController.getSemesters);
 
+// Các endpoint Lộ trình Thời khóa biểu thông minh cho sinh viên
+router.post('/roadmap/generate', authenticate, scheduleController.generateRoadmapPlan);
+router.get('/roadmap/plan', authenticate, scheduleController.getMyStudyPlan);
+router.post('/roadmap/plan', authenticate, scheduleController.saveMyStudyPlan);
+router.post('/roadmap/chat', authenticate, scheduleController.chatScheduleAdvisor);
+
 // Tra cứu thời khóa biểu (theo sinh viên đăng nhập hoặc theo lớp/học kỳ)
 router.get('/', optionalAuth, scheduleController.getSchedule);
 

@@ -216,6 +216,32 @@ export const api = {
     });
   },
 
+  // ─── LỘ TRÌNH THỜI KHÓA BIỂU CÁ NHÂN ───
+  async generateScheduleRoadmap(preferences = {}) {
+    return request('/schedule/roadmap/generate', {
+      method: 'POST',
+      body: JSON.stringify(preferences)
+    });
+  },
+
+  async getSavedStudyPlan() {
+    return request('/schedule/roadmap/plan');
+  },
+
+  async saveStudyPlan(planData) {
+    return request('/schedule/roadmap/plan', {
+      method: 'POST',
+      body: JSON.stringify(planData)
+    });
+  },
+
+  async chatScheduleAdvisor(data) {
+    return request('/schedule/roadmap/chat', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
+  },
+
   // ─── CHƯƠNG TRÌNH ĐÀO TẠO K30 ───
   async getCurriculum(program = 'K30 CNTT', id = null) {
     return request(`/curriculum?${id ? `id=${encodeURIComponent(id)}` : `program=${encodeURIComponent(program)}`}`);
