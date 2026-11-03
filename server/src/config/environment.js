@@ -19,7 +19,7 @@ export const config = {
   port: parseInt(process.env.PORT || '5001', 10),
   nodeEnv: process.env.NODE_ENV || 'development',
   dataMode: 'mongodb',
-  mongodbUri: process.env.MONGODB_URI || '',
+  mongodbUri: process.env.MONGODB_URI || 'mongodb+srv://phuongtruong:123@cluster0.fpboe9w.mongodb.net/chatbox',
   clientUrl: process.env.CLIENT_URL || 'http://localhost:5173',
   jwtSecret: process.env.JWT_SECRET || 'vlu_smart_assistant_super_secret_jwt_key_2025_cnh',
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || '7d',
