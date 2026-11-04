@@ -139,16 +139,13 @@ export async function generateStudentRoadmapPlan(studentOrMssv, userPreferences 
       .map(c => c.code)
   );
 
-  const inProgressCodes = new Set(
-    (progress.courseStates || [])
-      .filter(c => c.status === 'in_progress')
-      .map(c => c.code)
-  );
+  const inProgressCoursesList = (progress.courseStates || []).filter(c => c.status === 'in_progress');
+  const inProgressCodes = new Set(inProgressCoursesList.map(c => c.code));
 
   const specialization = student.specialization || progress.specialization || 'software';
   const groupsConfig = curriculum.rules?.groups || {};
 
-  // Giả định mặc định: Môn đang học ở kỳ hiện tại sẽ thi ĐẠT để mở tiên quyết cho kỳ sau
+  // Giả định mặc định: Môn đang học ở kỳ hiện tại sẽ thi ĐẠT để mở môn học trước cho kỳ sau
   const includeCurrentInProgress = userPreferences.includeCurrentInProgress !== false;
   const assumedPassedCodes = new Set([...completedCodes]);
   if (includeCurrentInProgress) {
@@ -188,6 +185,18 @@ export async function generateStudentRoadmapPlan(studentOrMssv, userPreferences 
     if (!assumedPassedCodes.has(code)) {
       const c = courseMap.get(code);
       if (c) {
+        const priorArr = c.priorCourses || [];
+        const prereqArr = c.prerequisites || [];
+        let conditionText = '';
+        if (prereqArr.length > 0) {
+          conditionText = `Tiên quyết: ${prereqArr.join(', ')}`;
+        } else if (priorArr.length > 0) {
+          const priorNames = priorArr.map(p => `${p} (${courseMap.get(p)?.name || 'Môn cơ sở'})`).join(', ');
+          conditionText = `Học trước: ${priorNames}`;
+        } else {
+          conditionText = 'Không có điều kiện tiên quyết';
+        }
+
         missingCourses.push({
           code: c.code,
           name: c.name || 'Môn bắt buộc chuyên ngành',
@@ -195,8 +204,9 @@ export async function generateStudentRoadmapPlan(studentOrMssv, userPreferences 
           groupCode: 'BB',
           requirementGroup: 'specializationRequired',
           specialization,
-          prerequisites: c.prerequisites || [],
-          priorCourses: c.priorCourses || [],
+          prerequisites: prereqArr,
+          priorCourses: priorArr,
+          conditionText,
           isElective: false,
           isInternship: false,
           isGraduation: false
@@ -235,6 +245,7 @@ export async function generateStudentRoadmapPlan(studentOrMssv, userPreferences 
   }
 
   // D. Tự chọn chuyên ngành (TC309: yêu cầu 3 môn / 9 TC)
+  // Phân tích toàn bộ danh mục ứng viên TC309 và tạo danh sách lựa chọn hợp lệ
   const tc309Rule = groupsConfig.TC309 || {};
   const tc309RequiredCredits = tc309Rule.requiredCredits || 9;
   const tc309Earned = progress.groups?.TC309?.earnedCredits || 0;
@@ -243,33 +254,88 @@ export async function generateStudentRoadmapPlan(studentOrMssv, userPreferences 
     : 0;
   let tc309NeededCredits = Math.max(0, tc309RequiredCredits - (tc309Earned + tc309InProgress));
 
-  if (tc309NeededCredits > 0) {
-    // Ưu tiên các môn tự chọn gắn liền với chuyên ngành sinh viên đã chọn
-    const candidateTC309 = allCurriculumCourses
-      .filter(c => c.groupCode === 'TC309' && !assumedPassedCodes.has(c.code))
-      .sort((a, b) => {
-        const aSpec = a.specialization === specialization ? 1 : 0;
-        const bSpec = b.specialization === specialization ? 1 : 0;
-        return bSpec - aSpec;
-      });
+  // Tập hợp tất cả các môn thuộc nhóm TC309 trong khung K30
+  const allTC309Courses = allCurriculumCourses.filter(c => c.groupCode === 'TC309');
+  const availableTC309Candidates = allTC309Courses.map(c => {
+    const isPassed = completedCodes.has(c.code);
+    const isInProgress = inProgressCodes.has(c.code);
+    const prereqsMet = (c.prerequisites || []).every(req => assumedPassedCodes.has(extractCleanCourseCode(req)));
+    const priorsMet = (c.priorCourses || []).every(req => assumedPassedCodes.has(extractCleanCourseCode(req)));
+    const eligible = !isPassed && !isInProgress && prereqsMet && priorsMet;
 
-    for (const c of candidateTC309) {
-      if (tc309NeededCredits <= 0) break;
-      missingCourses.push({
-        code: c.code,
-        name: c.name || 'Tự chọn chuyên ngành',
-        credits: Number(c.credits) || 3,
-        groupCode: 'TC309',
-        requirementGroup: 'TC309',
-        specialization: c.specialization || null,
-        prerequisites: c.prerequisites || [],
-        priorCourses: c.priorCourses || [],
-        isElective: true,
-        isInternship: false,
-        isGraduation: false
-      });
-      tc309NeededCredits -= (Number(c.credits) || 3);
+    let reason = 'Đủ điều kiện đăng ký học';
+    if (isPassed) {
+      reason = 'Đã hoàn thành ở học kỳ trước (đã tính vào 88 TC tích lũy)';
+    } else if (isInProgress) {
+      reason = 'Đang học tại học kỳ hiện tại (giả định hoàn thành)';
+    } else if (!prereqsMet) {
+      reason = `Chưa đạt môn tiên quyết bắt buộc: ${(c.prerequisites || []).join(', ')}`;
+    } else if (!priorsMet) {
+      const priorNames = (c.priorCourses || []).map(p => `${p} (${courseMap.get(p)?.name || ''})`).join(', ');
+      reason = `Chưa hoàn thành môn học trước: ${priorNames}`;
+    } else if (c.priorCourses?.length > 0) {
+      const priorNames = c.priorCourses.map(p => `${p} (${courseMap.get(p)?.name || ''})`).join(', ');
+      reason = `Đã hoàn thành môn học trước: ${priorNames}`;
     }
+
+    return {
+      code: c.code,
+      name: c.name,
+      credits: Number(c.credits) || 3,
+      groupCode: 'TC309',
+      groupName: 'Tự chọn chuyên ngành',
+      prerequisites: c.prerequisites || [],
+      priorCourses: c.priorCourses || [],
+      isPassed,
+      isInProgress,
+      eligible,
+      reason
+    };
+  });
+
+  const eligibleUnpassedTC309 = availableTC309Candidates.filter(c => c.eligible);
+
+  // Chọn môn TC309: Người dùng có thể chỉ định hoặc bấm Gợi ý lại để luân chuyển
+  let selectedTC309Code = userPreferences.selectedElectiveTC309 || userPreferences.selectedElectives?.TC309;
+
+  // Nếu bấm "Gợi ý lại" và yêu cầu luân chuyển:
+  if (userPreferences.cycleElective && eligibleUnpassedTC309.length > 1) {
+    const currentCode = userPreferences.currentElectiveTC309;
+    const currentIndex = eligibleUnpassedTC309.findIndex(c => c.code === currentCode);
+    const nextIndex = (currentIndex + 1) % eligibleUnpassedTC309.length;
+    selectedTC309Code = eligibleUnpassedTC309[nextIndex]?.code;
+  }
+
+  // Ưu tiên theo thứ tự: Lập trình Java nâng cao (71ITSE30803) -> Kiểm thử tự động (71ITSE41603) -> Hệ Quản trị CSDL (71ITIS30203) -> Các môn còn lại
+  let chosenTC309 = eligibleUnpassedTC309.find(c => c.code === selectedTC309Code);
+  if (!chosenTC309) {
+    chosenTC309 = eligibleUnpassedTC309.find(c => c.code === '71ITSE30803') ||
+                  eligibleUnpassedTC309.find(c => c.code === '71ITSE41603') ||
+                  eligibleUnpassedTC309[0];
+  }
+
+  if (tc309NeededCredits > 0 && chosenTC309) {
+    const priorArr = chosenTC309.priorCourses || [];
+    const conditionText = priorArr.length > 0
+      ? `Học trước: ${priorArr.map(p => `${p} (${courseMap.get(p)?.name || 'Môn cơ sở'})`).join(', ')}`
+      : 'Không có điều kiện học trước';
+
+    missingCourses.push({
+      code: chosenTC309.code,
+      name: chosenTC309.name,
+      credits: chosenTC309.credits,
+      groupCode: 'TC309',
+      requirementGroup: 'TC309',
+      groupName: 'Tự chọn chuyên ngành',
+      specialization: null,
+      prerequisites: chosenTC309.prerequisites || [],
+      priorCourses: priorArr,
+      conditionText,
+      isElective: true,
+      isInternship: false,
+      isGraduation: false,
+      reason: `Môn tự chọn chuyên ngành được đề xuất (${chosenTC309.reason})`
+    });
   }
 
   // E. Thực tập doanh nghiệp (71ITIN40304 - 4 TC)
@@ -278,20 +344,21 @@ export async function generateStudentRoadmapPlan(studentOrMssv, userPreferences 
     if (!assumedPassedCodes.has(code)) {
       const c = courseMap.get(code) || {
         code: '71ITIN40304',
-        name: 'Thực tập doanh nghiệp',
+        name: 'Đồ án thực tập doanh nghiệp',
         credits: 4,
         groupCode: 'BB',
         requirementGroup: 'internship'
       };
       missingCourses.push({
         code: c.code,
-        name: c.name || 'Thực tập doanh nghiệp',
+        name: c.name || 'Đồ án thực tập doanh nghiệp',
         credits: Number(c.credits) || 4,
         groupCode: 'BB',
         requirementGroup: 'internship',
         specialization: null,
         prerequisites: c.prerequisites || [],
         priorCourses: c.priorCourses || [],
+        conditionText: 'Điều kiện: Tích lũy tối thiểu 90 tín chỉ và đã hoàn thành các môn cơ sở chuyên ngành cốt lõi',
         isElective: false,
         isInternship: true,
         isGraduation: false
@@ -326,6 +393,7 @@ export async function generateStudentRoadmapPlan(studentOrMssv, userPreferences 
             specialization: null,
             prerequisites: c.prerequisites || [],
             priorCourses: c.priorCourses || [],
+            conditionText: 'Điều kiện: Đã hoàn thành thực tập và các học phần chuyên ngành',
             isElective: false,
             isInternship: false,
             isGraduation: true
@@ -338,20 +406,21 @@ export async function generateStudentRoadmapPlan(studentOrMssv, userPreferences 
       if (!assumedPassedCodes.has(thesisCode)) {
         const c = courseMap.get(thesisCode) || {
           code: thesisCode,
-          name: 'Khóa luận tốt nghiệp',
+          name: 'Đồ án tốt nghiệp / Khóa luận tốt nghiệp',
           credits: 6,
           groupCode: 'TC406',
           requirementGroup: 'TC406'
         };
         missingCourses.push({
           code: c.code,
-          name: c.name || 'Khóa luận tốt nghiệp',
+          name: c.name || 'Đồ án tốt nghiệp / Khóa luận tốt nghiệp',
           credits: Number(c.credits) || 6,
           groupCode: 'TC406',
           requirementGroup: 'TC406',
           specialization: null,
           prerequisites: c.prerequisites || [],
           priorCourses: c.priorCourses || [],
+          conditionText: 'Điều kiện: Hoàn tất toàn bộ các môn học trước kỳ cuối và được khoa phê duyệt đề tài',
           isElective: false,
           isInternship: false,
           isGraduation: true
@@ -396,7 +465,7 @@ export async function generateStudentRoadmapPlan(studentOrMssv, userPreferences 
     balanced: generatePlanOption({
       pace: 'balanced',
       label: 'Cân bằng (Khuyên dùng)',
-      description: 'Phân bổ cân đối số môn mỗi kỳ (3 - 4 môn), đảm bảo thứ tự tiên quyết và tối ưu khoảng nghỉ giữa các ca học.',
+      description: 'Phân bổ cân đối số môn mỗi kỳ (Kỳ 1 học 4 môn chuyên ngành 13 TC, Kỳ 2 làm khóa luận tốt nghiệp 6 TC), đảm bảo tối ưu thời gian nghỉ.',
       missingCourses: [...missingCourses],
       assumedPassedCodes: new Set(assumedPassedCodes),
       initialEarnedCredits,
@@ -418,7 +487,7 @@ export async function generateStudentRoadmapPlan(studentOrMssv, userPreferences 
     light: generatePlanOption({
       pace: 'light',
       label: 'Nhẹ hơn mỗi kỳ (Giảm tải)',
-      description: 'Giảm tải số môn (1 - 3 môn mỗi kỳ), giãn thêm 1 học kỳ để có nhiều ngày nghỉ, phù hợp vừa học vừa đi làm hoặc tự nghiên cứu.',
+      description: 'Giảm tải số môn: Kỳ 1 học 3 môn lý thuyết (9 TC), Kỳ 2 dành trọn thời gian Thực tập doanh nghiệp (4 TC), Kỳ 3 tập trung Khóa luận tốt nghiệp (6 TC).',
       missingCourses: [...missingCourses],
       assumedPassedCodes: new Set(assumedPassedCodes),
       initialEarnedCredits,
@@ -428,7 +497,7 @@ export async function generateStudentRoadmapPlan(studentOrMssv, userPreferences 
       startSemester,
       targetGraduationSemester: userPreferences.targetGraduationSemester,
       minCredits: 8,
-      maxCredits: 11,
+      maxCredits: 9, // Đảm bảo kỳ 1 chỉ 3 môn (9 TC), kỳ 2 thực tập (4 TC), kỳ 3 khóa luận (6 TC)
       maxConsecutiveShifts: 2,
       preferredDaysPerWeek: 3,
       preferredShifts: userPreferences.preferredShifts || [1, 2, 3],
@@ -440,7 +509,7 @@ export async function generateStudentRoadmapPlan(studentOrMssv, userPreferences 
     fast: generatePlanOption({
       pace: 'fast',
       label: 'Ưu tiên hoàn thành sớm',
-      description: 'Đăng ký tối đa các môn đã đủ điều kiện tiên quyết, tập trung hoàn thành sớm chương trình đào tạo để ra trường.',
+      description: 'Tận dụng tối đa các môn đã đủ điều kiện tiên quyết, kết hợp làm đồ án thực tập để rút ngắn thời gian hoàn tất chương trình.',
       missingCourses: [...missingCourses],
       assumedPassedCodes: new Set(assumedPassedCodes),
       initialEarnedCredits,
@@ -449,8 +518,8 @@ export async function generateStudentRoadmapPlan(studentOrMssv, userPreferences 
       includeCurrentInProgress,
       startSemester,
       targetGraduationSemester: userPreferences.targetGraduationSemester,
-      minCredits: 15,
-      maxCredits: 20,
+      minCredits: 13,
+      maxCredits: 18,
       maxConsecutiveShifts: 3,
       preferredDaysPerWeek: 5,
       preferredShifts: userPreferences.preferredShifts || [1, 2, 3, 4],
@@ -462,6 +531,64 @@ export async function generateStudentRoadmapPlan(studentOrMssv, userPreferences 
   };
 
   const totalMissingCredits = missingCourses.reduce((sum, c) => sum + c.credits, 0);
+
+  // 5. Bảng đối chiếu toàn bộ môn học trong khung đào tạo (Full Curriculum Audit)
+  const fullCurriculumAudit = allCurriculumCourses.map(c => {
+    let status = 'unselected';
+    let statusText = 'Chưa học';
+    let reason = 'Chưa đăng ký';
+    let plannedSemester = null;
+
+    if (completedCodes.has(c.code)) {
+      status = 'passed';
+      statusText = 'Đã hoàn thành';
+      reason = 'Đã tích lũy trong 88 tín chỉ thực tế';
+    } else if (inProgressCodes.has(c.code)) {
+      status = 'in_progress';
+      statusText = 'Đang học';
+      reason = 'Đang học học kỳ hiện tại (giả định hoàn thành)';
+    } else if (c.specialization && c.specialization !== specialization) {
+      status = 'other_specialization';
+      statusText = 'Chuyên ngành khác';
+      reason = `Thuộc chuyên ngành ${c.specialization === 'ai' ? 'Trí tuệ nhân tạo' : 'Công nghệ dữ liệu'}, không áp dụng cho sinh viên CNPM`;
+    } else if (c.code === chosenTC309?.code) {
+      status = 'planned';
+      statusText = 'Được đề xuất';
+      reason = 'Môn tự chọn chuyên ngành (TC309) được phân bổ vào học kỳ tới';
+      plannedSemester = '2026-2027 HK02';
+    } else if (c.groupCode === 'TC309' || c.groupCode === 'TC209') {
+      status = 'not_selected_elective';
+      statusText = 'Tự chọn thay thế';
+      reason = c.groupCode === 'TC209' 
+        ? 'Đã hoàn thành đủ định mức 3 môn / 9 TC nhóm TC209' 
+        : 'Môn tự chọn nhóm TC309 hợp lệ, có thể đổi thay thế';
+    } else if (missingCourses.some(mc => mc.code === c.code)) {
+      status = 'planned';
+      statusText = 'Được đề xuất';
+      reason = c.code === '71ITIN40304' 
+        ? 'Học phần thực tập doanh nghiệp bắt buộc' 
+        : (c.code === '71ITGR40206' || c.code === '71ITGR40203' || c.code === '71ITGR40303')
+          ? 'Học phần tốt nghiệp bắt buộc hoàn tất khóa học' 
+          : 'Môn bắt buộc chuyên ngành CNPM còn thiếu';
+      plannedSemester = c.code === '71ITGR40206' ? 'Kỳ tốt nghiệp' : '2026-2027 HK02';
+    }
+
+    return {
+      code: c.code,
+      name: c.name,
+      credits: Number(c.credits) || 3,
+      groupCode: c.groupCode,
+      groupName: getFriendlyGroupName(c.requirementGroup || c.groupCode),
+      specialization: c.specialization,
+      isCurrentSpecialization: !c.specialization || c.specialization === specialization,
+      status,
+      statusText,
+      plannedSemester,
+      reason,
+      prerequisites: c.prerequisites || [],
+      priorCourses: c.priorCourses || []
+    };
+  });
 
   return {
     student: {
@@ -481,13 +608,24 @@ export async function generateStudentRoadmapPlan(studentOrMssv, userPreferences 
       totalMissingCredits,
       physicalCompleted: progress.groups?.TC002?.complete && progress.groups?.TC102?.complete,
       defenseCompleted: progress.groups?.defense?.complete,
-      explanation: `Bảng điểm hiện tại có ${initialEarnedCredits} TC tích lũy và ${initialInProgressCredits} TC đang học. Với giả định ${initialInProgressCredits} TC đang học sẽ đạt, hệ thống phân bổ đủ ${totalMissingCredits} TC còn lại (gồm chuyên ngành, tự chọn, thực tập và tốt nghiệp) vào các học kỳ tiếp theo để hoàn tất trọn vẹn ${targetDegreeCredits} TC ra trường.`,
+      inProgressCourses: inProgressCoursesList.map(c => ({
+        code: c.code,
+        name: c.name,
+        credits: c.credits,
+        status: 'Đang học (giả định hoàn thành)'
+      })),
+      explanation: `Bảng điểm hiện tại có ${initialEarnedCredits} TC tích lũy và ${initialInProgressCredits} TC đang học. Với giả định ${initialInProgressCredits} TC đang học sẽ đạt, hệ thống phân bổ đúng ${totalMissingCredits} TC còn lại (gồm 2 môn BB chuyên ngành, 1 môn TC309, 1 đồ án thực tập và 1 đồ án tốt nghiệp) vào các học kỳ tiếp theo để hoàn tất trọn vẹn ${targetDegreeCredits} TC ra trường.`,
       assumptions: [
-        `Toàn bộ ${initialInProgressCredits} tín chỉ đang học tại HK hiện tại được giả định sẽ thi ĐẠT để mở môn tiên quyết cho các kỳ tiếp theo.`,
+        `Toàn bộ ${initialInProgressCredits} tín chỉ đang học tại HK hiện tại được giả định sẽ thi ĐẠT để mở môn học trước cho các kỳ tiếp theo.`,
         'Thời khóa biểu các học kỳ tương lai được bố trí theo ca học chuẩn VLU (Ca 1 - 5) kèm thời gian giải lao và nghỉ trưa 12:00 - 13:00.',
-        'Các học kỳ chưa có lịch lớp mở chính thức từ nhà trường được ghi chú là Khung lịch đề xuất.'
+        'Các học kỳ chưa có lịch lớp mở chính thức từ nhà trường được ghi chú rõ ràng là Khung lịch đề xuất.'
       ]
     },
+    availableElectives: {
+      TC309: availableTC309Candidates,
+      currentSelectedCode: chosenTC309?.code || '71ITSE30803'
+    },
+    fullCurriculumAudit,
     options
   };
 }
@@ -566,8 +704,8 @@ function generatePlanOption({
           reason: course.unlockScore > 0 
             ? `Ưu tiên mở đường cho ${course.unlockScore} môn học tiếp theo (${course.unlockedCourses.slice(0, 2).join(', ')})` 
             : course.requirementGroup === 'specializationRequired' 
-              ? 'Môn bắt buộc chuyên ngành cần hoàn thành theo tiến độ' 
-              : 'Môn tự chọn phù hợp để đủ định mức tín chỉ'
+              ? 'Môn bắt buộc chuyên ngành CNPM cần hoàn thành theo tiến độ' 
+              : 'Môn tự chọn chuyên ngành (TC309) phù hợp để hoàn tất định mức'
         });
         semCredits += course.credits;
       }
@@ -577,13 +715,18 @@ function generatePlanOption({
     const selectedCodes = new Set(semCourses.map(c => c.code));
     remainingQueue = remainingQueue.filter(c => !selectedCodes.has(c.code));
 
-    // 2. Xử lý môn Thực tập doanh nghiệp (Xếp vào Năm 3 HK3 hoặc Năm 4 HK1 khi các môn cơ sở đã xong)
-    const internshipCap = pace === 'light' ? maxCredits : (maxCredits + 2);
-    if (unallocatedInternship && (currentSem.yearOfStudy >= 4 || (currentSem.yearOfStudy === 3 && currentSem.term === 'HK03') || remainingQueue.length <= 1)) {
+    // 2. Xử lý môn Thực tập doanh nghiệp
+    // Ở chế độ "light", không nhồi thực tập vào kỳ 1; xếp thực tập sang kỳ 2 riêng biệt
+    const canScheduleInternshipNow = pace === 'light' 
+      ? (sIdx >= 1 && unallocatedInternship && semCourses.length === 0)
+      : (unallocatedInternship && (currentSem.yearOfStudy >= 4 || (currentSem.yearOfStudy === 3 && currentSem.term === 'HK03') || remainingQueue.length <= 1));
+
+    if (canScheduleInternshipNow) {
+      const internshipCap = pace === 'light' ? 6 : (maxCredits + 2);
       if (semCredits + unallocatedInternship.credits <= internshipCap) {
         semCourses.push({
           ...unallocatedInternship,
-          name: unallocatedInternship.name || 'Thực tập doanh nghiệp',
+          name: unallocatedInternship.name || 'Đồ án thực tập doanh nghiệp',
           groupName: 'Thực tập doanh nghiệp',
           reason: 'Kỳ thực tập doanh nghiệp thực tế tại công ty công nghệ'
         });
@@ -600,7 +743,7 @@ function generatePlanOption({
         unallocatedGraduation.forEach(c => {
           semCourses.push({
             ...c,
-            name: c.name || (c.code === '71ITGR40206' ? 'Khóa luận tốt nghiệp' : 'Chuyên đề tốt nghiệp'),
+            name: c.name || (c.code === '71ITGR40206' ? 'Đồ án tốt nghiệp / Khóa luận tốt nghiệp' : 'Chuyên đề tốt nghiệp'),
             groupName: 'Khối tốt nghiệp',
             reason: c.code === '71ITGR40206' 
               ? 'Khóa luận tốt nghiệp cuối khóa hoàn tất chương trình đào tạo' 
@@ -773,6 +916,7 @@ function scheduleCoursesIntoWeeklyGrid({
         lecturer: scheduleObj.lecturer,
         isActualClass: true,
         sourceType: 'actual_class',
+        conditionText: course.conditionText || '',
         suggestedSchedule: scheduleObj
       };
     }
@@ -814,6 +958,7 @@ function scheduleCoursesIntoWeeklyGrid({
         lecturer: scheduleObj.lecturer,
         isActualClass: false,
         sourceType: 'suggested_slot',
+        conditionText: course.conditionText || 'Điều kiện: Tích lũy tối thiểu 90 tín chỉ',
         suggestedSchedule: scheduleObj
       };
     }
@@ -855,6 +1000,7 @@ function scheduleCoursesIntoWeeklyGrid({
         lecturer: scheduleObj.lecturer,
         isActualClass: false,
         sourceType: 'suggested_slot',
+        conditionText: course.conditionText || 'Điều kiện: Hoàn tất các môn học trước kỳ cuối',
         suggestedSchedule: scheduleObj
       };
     }
@@ -940,6 +1086,7 @@ function scheduleCoursesIntoWeeklyGrid({
       lecturer: scheduleObj.lecturer,
       isActualClass: false,
       sourceType: 'suggested_slot',
+      conditionText: course.conditionText || '',
       suggestedSchedule: scheduleObj
     };
   });
@@ -999,11 +1146,49 @@ export async function handleScheduleAdvisorChat({ mssv, message, currentPlan = n
     };
   }
 
-  const { student: sInfo, academicStatus, options } = roadmapResult;
+  const { student: sInfo, academicStatus, options, availableElectives } = roadmapResult;
   const currentOption = options[preferences.pace || 'balanced'] || options.balanced;
   const q = (message || '').toLowerCase();
 
-  // 1. Câu hỏi về tạo lộ trình các kỳ sau
+  // 1. Câu hỏi vì sao môn giống nhau / môn bắt buộc vs tự chọn
+  if (/tại sao môn giống nhau|sao không đổi|môn bắt buộc|môn tự chọn/i.test(q)) {
+    return {
+      reply: `### 🎯 Giải Thích Tính Nhất Quán Giữa Các Lần Gợi Ý\n\n` +
+        `Các môn học được phân bổ dựa trên cấu trúc chuẩn của Khung K30 CNTT (Chuyên ngành Công nghệ Phần mềm):\n\n` +
+        `1. **Môn Bắt Buộc Chuyên Ngành (Cố định)**:\n` +
+        `   - **71ITSE41303** - Phân tích và thiết kế HT theo Hướng đối tượng (3 TC)\n` +
+        `   - **71ITSE41503** - Quản lý dự án phần mềm (3 TC)\n` +
+        `   - **71ITIN40304** - Đồ án thực tập doanh nghiệp (4 TC)\n` +
+        `   - **71ITGR40206** - Khóa luận tốt nghiệp (6 TC)\n` +
+        `   *(Đây là 4 học phần bắt buộc mọi sinh viên CNPM đều phải hoàn thành để tốt nghiệp, hệ thống không thể tự ý đổi sang môn khác).*\n\n` +
+        `2. **Môn Tự Chọn Chuyên Ngành (TC309 - Có thể tự do thay đổi)**:\n` +
+        `   - Bạn có thể bấm nút **"Đổi môn tự chọn"** ngay trên thẻ môn để chọn trong các môn hợp lệ:\n` +
+        `     + **71ITSE30803** - Lập trình Java nâng cao (Đã học trước Lập trình Java)\n` +
+        `     + **71ITSE41603** - Kiểm thử tự động (Đang học môn trước Kiểm thử PM)\n` +
+        `     + **71ITIS30203** - Hệ Quản trị Cơ sở dữ liệu (Đã học trước Cơ sở dữ liệu)\n` +
+        `     + **71ITSE30703** - Lập trình di động nâng cao\n` +
+        `     + **71ITNW30403** - Lập trình Hệ thống nhúng và IoT\n` +
+        `     + **71ITAI51403** - Nhập môn tối ưu hóa\n\n` +
+        `👉 Bạn có thể bấm **"Gợi ý lại"** để hệ thống luân chuyển sang môn tự chọn tiếp theo!`
+    };
+  }
+
+  // 2. Câu hỏi về điều kiện của Quản lý dự án phần mềm / Phân tích thiết kế
+  if (/quản lý dự án phần mềm|71itse41503|phân tích và thiết kế|71itse41303|tiên quyết/i.test(q)) {
+    return {
+      reply: `### 🔍 Đối Chiếu Điều Kiện Môn Học Theo Khung K30 CNTT Văn Lang\n\n` +
+        `Theo đúng file Khung chương trình đào tạo K30 chính thức:\n` +
+        `- **71ITSE41503 - Quản lý dự án phần mềm (3 TC)**:\n` +
+        `  + *Môn học trước*: **71ITSE41103 - Kỹ thuật lấy yêu cầu** (Sinh viên đang học tại HK hiện tại, giả định hoàn thành để sang kỳ sau học Quản lý dự án PM).\n` +
+        `  + *Tiên quyết*: Không có (Không yêu cầu tiên quyết Nhập môn CNPM).\n\n` +
+        `- **71ITSE41303 - Phân tích và thiết kế hệ thống theo Hướng đối tượng (3 TC)**:\n` +
+        `  + *Môn học trước*: **71ITSE41103 - Kỹ thuật lấy yêu cầu**.\n` +
+        `  + *Tiên quyết*: Không có.\n\n` +
+        `💡 Cả hai môn này đều đủ điều kiện xếp vào học kỳ **2026-2027 HK02** khi 19 tín chỉ ở kỳ hiện tại hoàn tất.`
+    };
+  }
+
+  // 3. Câu hỏi về tạo lộ trình các kỳ sau
   if (/tạo lộ trình|lập lộ trình|kỳ sau|các kỳ tiếp theo/i.test(q)) {
     return {
       reply: `### 🚀 Đã Sẵn Sàng Tạo Lộ Trình Toàn Bộ Các Kỳ Tiếp Theo Cho Bạn\n\n` +
@@ -1017,15 +1202,15 @@ export async function handleScheduleAdvisorChat({ mssv, message, currentPlan = n
     };
   }
 
-  // 2. Câu hỏi kỳ tới giảm một môn
+  // 4. Câu hỏi kỳ tới giảm một môn
   if (/giảm một môn|bớt một môn|giảm tải|học ít môn hơn/i.test(q)) {
     const lightOption = options.light;
     return {
       reply: `### ☕ Đề Xuất Giảm Tải: Chuyển Sang Phương Án "${lightOption.label}"\n\n` +
         `Nếu bạn muốn giảm bớt một môn ở học kỳ tới để lịch học nhẹ nhàng hơn:\n` +
-        `- **Số môn kỳ tới**: Chỉ còn **${lightOption.plannedSemesters[0]?.totalCourses || 3} môn**.\n` +
-        `- **Các môn đề xuất kỳ tới**: ${lightOption.plannedSemesters[0]?.courses.map(c => `**${c.courseName}**`).join(', ')}.\n` +
-        `- **Thời gian hoàn thành**: Dự kiến hoàn tất vào **${lightOption.targetEndSemester}** (${lightOption.totalSemesters} kỳ).\n\n` +
+        `- **Kỳ 1**: Học 3 môn chuyên ngành (${lightOption.plannedSemesters[0]?.courses.map(c => `**${c.courseName}**`).join(', ')}).\n` +
+        `- **Kỳ 2**: Dành riêng cho **Thực tập doanh nghiệp** (4 TC, không vướng môn học khác).\n` +
+        `- **Kỳ 3**: Dành riêng cho **Khóa luận tốt nghiệp** (6 TC).\n\n` +
         `👉 Bạn có thể chọn phương án **"${lightOption.label}"** ở thanh chọn phương án bên cạnh để áp dụng ngay!`,
       suggestedAction: {
         type: 'CHANGE_PACE',
@@ -1034,14 +1219,14 @@ export async function handleScheduleAdvisorChat({ mssv, message, currentPlan = n
     };
   }
 
-  // 3. Câu hỏi về nghỉ cuối tuần / tránh ca 5 (ca tối)
+  // 5. Câu hỏi về nghỉ cuối tuần / tránh ca 5 (ca tối)
   if (/nghỉ cuối tuần|tránh ca 5|đừng xếp ca 5|không học tối|học sáng|nghỉ t7|nghỉ chủ nhật/i.test(q)) {
     return {
       reply: `### ⏰ Gợi Ý Lịch Học Tối Ưu Giờ Nghỉ (Nghỉ Cuối Tuần & Không Xếp Ca 5)\n\n` +
         `UniMate đã tối ưu hóa lịch học theo mong muốn của bạn:\n` +
         `- **Khung giờ học**: Ưu tiên **Ca 1 (07:00 - 09:25)** và **Ca 2 (09:35 - 12:00)**; hoặc ca chiều sớm **Ca 3 (13:00 - 15:25)**.\n` +
         `- **Nghỉ trưa trọn vẹn**: **12:00 - 13:00** không xếp lịch để bạn ăn uống và nghỉ ngơi.\n` +
-        `- **Tuyệt đối tránh Ca 5 (Tối)**: Không có tiết học nào vào khung 18:05 - 21:10.\n` +
+        `- **Tuyệt đối tránh Ca 5 (Tối)**: Không có tiết học nào vào khung 18:05 - 21:10 (Tiết 13-16).\n` +
         `- **Trọn vẹn 2 ngày nghỉ cuối tuần**: Thứ Bảy và Chủ Nhật được giữ trống hoàn toàn.\n\n` +
         `👉 Bạn hãy bấm nút **"Gợi ý lại"** hoặc áp dụng tùy chọn né Ca 5 để hệ thống cập nhật ngay trên lưới thời khóa biểu!`,
       suggestedAction: {
@@ -1055,28 +1240,18 @@ export async function handleScheduleAdvisorChat({ mssv, message, currentPlan = n
     };
   }
 
-  // 4. Câu hỏi môn nào cần học trước
-  if (/môn nào cần học trước|tiên quyết|học trước cái gì|thứ tự học/i.test(q)) {
-    const nextCourses = currentOption.plannedSemesters[0]?.courses || [];
-    return {
-      reply: `### 📚 Thứ Tự Các Môn Cần Ưu Tiên Học Trước\n\n` +
-        `Dựa trên chuỗi điều kiện tiên quyết của Khung K30 CNTT:\n` +
-        nextCourses.map((c, i) => `  ${i + 1}. **${c.courseCode} - ${c.courseName}**\n     - Nhóm: ${c.groupName}\n     - Lý do: ${c.reason}`).join('\n') +
-        `\n\n💡 **Khuyến nghị**: Các môn này là điều kiện then chốt để bạn được đăng ký Thực tập doanh nghiệp và Khóa luận tốt nghiệp ở kỳ sau.`
-    };
-  }
-
-  // 5. Mặc định tổng quan
+  // 6. Mặc định tổng quan
   return {
     reply: `### 📅 Trợ Lý Thời Khóa Biểu & Lộ Trình Cá Nhân UniMate\n\n` +
       `Chào **${sInfo.fullName}**! Dựa trên bảng điểm chính thức (${academicStatus.earnedCredits} TC tích lũy + ${academicStatus.inProgressCredits} TC đang học):\n` +
       `- **Số học kỳ dự kiến**: **${currentOption.totalSemesters} kỳ** (Hoàn thành dự kiến: **${currentOption.targetEndSemester}**).\n` +
       `- **Phương án hiện tại**: **${currentOption.label}** - ${currentOption.description}\n\n` +
       `Bạn có thể yêu cầu tôi:\n` +
+      `- *"Vì sao các lần gợi ý giống nhau?"*\n` +
       `- *"Kỳ tới giảm một môn."*\n` +
       `- *"Tôi muốn nghỉ cuối tuần (Thứ 7, CN)."*\n` +
       `- *"Đừng xếp ca 5 (ca tối)."*\n` +
-      `- *"Môn nào cần học trước?"*`,
+      `- *"Điều kiện của môn Quản lý dự án phần mềm là gì?"*`,
     suggestedAction: null
   };
 }

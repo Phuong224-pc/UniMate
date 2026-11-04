@@ -21,10 +21,13 @@ import {
   CalendarCheck, 
   Coffee, 
   ArrowRight, 
-  HelpCircle,
-  ShieldAlert,
   ChevronDown,
-  Layers
+  ChevronUp,
+  Layers,
+  Check,
+  RotateCw,
+  Search,
+  Filter
 } from 'lucide-react';
 import { api } from '../services/api';
 import { useAuth } from '../hooks/useAuth';
@@ -79,18 +82,26 @@ export default function SchedulePage() {
     avoidNightMorning: true,
     maxConsecutiveShifts: 2,
     blockedDays: [7, 8], // Mặc định né T7, CN nếu có thể
-    includeCurrentInProgress: true
+    includeCurrentInProgress: true,
+    selectedElectiveTC309: null
   });
   const [showPrefPanel, setShowPrefPanel] = useState(false);
   const [savingPlan, setSavingPlan] = useState(false);
   const [saveSuccessMsg, setSaveSuccessMsg] = useState('');
+
+  // Modal đổi môn tự chọn (TC309)
+  const [electiveModalOpen, setElectiveModalOpen] = useState(false);
+
+  // Accordion đối chiếu toàn bộ môn học trong khung
+  const [showAuditTable, setShowAuditTable] = useState(false);
+  const [auditFilter, setAuditFilter] = useState('all'); // 'all' | 'in_progress' | 'planned' | 'passed' | 'not_selected_elective'
 
   // Trợ lý AI Thời khóa biểu tại chỗ
   const [advisorOpen, setAdvisorOpen] = useState(false);
   const [chatMessages, setChatMessages] = useState([
     {
       sender: 'bot',
-      text: 'Xin chào! Mình là Trợ lý AI Thời khóa biểu UniMate. Mình có thể giải thích lý do phân bổ môn học, các môn tiên quyết, hoặc cách xếp ca học tối ưu thời gian nghỉ cho bạn.'
+      text: 'Xin chào! Mình là Trợ lý AI Thời khóa biểu UniMate. Mình có thể giải thích lý do phân bổ môn học, các môn tiên quyết, hoặc hỗ trợ đổi môn tự chọn cho bạn.'
     }
   ]);
   const [chatInput, setChatInput] = useState('');
@@ -162,7 +173,7 @@ export default function SchedulePage() {
           setPreferences(prev => ({ ...prev, ...savedRes.data.preferences }));
         }
       }
-      // Tự động gọi backend để có phương án tính toán mới nhất
+      // Nạp phương án tính toán mới nhất từ backend
       await fetchRoadmap(preferences, false);
     } catch (err) {
       console.warn('Initial roadmap check:', err);
@@ -209,11 +220,23 @@ export default function SchedulePage() {
     setRoadmapLoading(true);
     setRoadmapError('');
     try {
-      const res = await api.generateScheduleRoadmap(prefPayload || preferences);
+      const payloadToSend = {
+        ...preferences,
+        ...(prefPayload || {})
+      };
+      const res = await api.generateScheduleRoadmap(payloadToSend);
       if (res.success && res.data) {
         setRoadmapData(res.data);
-        setSelectedPace(prefPayload?.pace || preferences.pace || 'balanced');
+        setSelectedPace(payloadToSend.pace || 'balanced');
         setSelectedSemesterIdx(0);
+
+        if (res.data.availableElectives?.currentSelectedCode) {
+          setPreferences(prev => ({
+            ...prev,
+            selectedElectiveTC309: res.data.availableElectives.currentSelectedCode
+          }));
+        }
+
         if (shouldScroll) {
           setTimeout(() => {
             resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -238,6 +261,32 @@ export default function SchedulePage() {
   const handleExecuteGenerate = (e) => {
     if (e) e.preventDefault();
     fetchRoadmap(preferences, true);
+  };
+
+  // Nút "Gợi ý lại" luân chuyển môn tự chọn hợp lệ
+  const handleRegenerateWithCycle = () => {
+    const currentCode = preferences.selectedElectiveTC309 || roadmapData?.availableElectives?.currentSelectedCode;
+    const cyclePayload = {
+      ...preferences,
+      cycleElective: true,
+      currentElectiveTC309: currentCode
+    };
+    fetchRoadmap(cyclePayload, true);
+    setSaveSuccessMsg('🔄 Đã tạo phương án mới với môn tự chọn luân chuyển hợp lệ!');
+    setTimeout(() => setSaveSuccessMsg(''), 4000);
+  };
+
+  // Chọn môn tự chọn cụ thể từ Modal
+  const handleSelectSpecificElective = (courseCode) => {
+    const updatedPref = {
+      ...preferences,
+      selectedElectiveTC309: courseCode
+    };
+    setPreferences(updatedPref);
+    setElectiveModalOpen(false);
+    fetchRoadmap(updatedPref, true);
+    setSaveSuccessMsg(`✓ Đã đổi sang môn tự chọn: ${courseCode}`);
+    setTimeout(() => setSaveSuccessMsg(''), 4000);
   };
 
   // Lưu kế hoạch vào MongoDB
@@ -369,6 +418,18 @@ export default function SchedulePage() {
       return !shift || shift === 0 || c.isInternship;
     });
   }, [currentPlannedSemester]);
+
+  // Danh sách các môn tự chọn TC309 từ backend
+  const availableTC309 = useMemo(() => {
+    return roadmapData?.availableElectives?.TC309 || [];
+  }, [roadmapData]);
+
+  // Lọc bảng đối chiếu toàn bộ môn học trong khung
+  const filteredAuditCourses = useMemo(() => {
+    const list = roadmapData?.fullCurriculumAudit || [];
+    if (auditFilter === 'all') return list;
+    return list.filter(c => c.status === auditFilter);
+  }, [roadmapData, auditFilter]);
 
   // Phân loại lịch hiện tại theo từng thứ trong tuần (Tab Hiện Tại)
   const groupedSchedules = useMemo(() => {
@@ -694,8 +755,8 @@ export default function SchedulePage() {
                   onChange={e => setPreferences({ ...preferences, pace: e.target.value })}
                   style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-main)', fontSize: '13px' }}
                 >
-                  <option value="balanced">Cân bằng (3 - 4 môn/kỳ)</option>
-                  <option value="light">Nhẹ hơn (1 - 3 môn/kỳ, nhiều ngày nghỉ)</option>
+                  <option value="balanced">Cân bằng (Kỳ 1: 4 môn, Kỳ 2: Khóa luận)</option>
+                  <option value="light">Nhẹ hơn (Kỳ 1: 3 môn, Kỳ 2: Thực tập, Kỳ 3: Khóa luận)</option>
                   <option value="fast">Ưu tiên hoàn thành sớm (Tối đa môn theo tiên quyết)</option>
                 </select>
               </div>
@@ -818,7 +879,7 @@ export default function SchedulePage() {
       {activeTab === 'roadmap' && (
         <div ref={resultsRef} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           
-          {/* Thông báo lưu thành công */}
+          {/* Thông báo lưu thành công hoặc luân chuyển thành công */}
           {saveSuccessMsg && (
             <div style={{
               background: 'rgba(22, 163, 74, 0.1)',
@@ -886,9 +947,9 @@ export default function SchedulePage() {
             {/* Các nút: Gợi ý lại, Điều chỉnh, Lưu, In */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
               <button
-                onClick={() => fetchRoadmap(preferences, true)}
+                onClick={handleRegenerateWithCycle}
                 disabled={roadmapLoading}
-                title="Tính toán lại phương án từ đầu"
+                title="Luân chuyển sang môn tự chọn hợp lệ tiếp theo"
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -903,7 +964,7 @@ export default function SchedulePage() {
                   cursor: 'pointer'
                 }}
               >
-                <RefreshCw size={13} className={roadmapLoading ? 'spin' : ''} /> Gợi ý lại
+                <RotateCw size={13} className={roadmapLoading ? 'spin' : ''} /> Gợi ý lại
               </button>
 
               <button
@@ -1019,7 +1080,7 @@ export default function SchedulePage() {
                 </div>
               </div>
 
-              {/* Dải các nút chọn học kỳ tiếp theo (Timeline Semesters) */}
+              {/* Dải các nút chọn học kỳ tiếp theo (Timeline Semesters) - Kèm tóm tắt tên môn */}
               <div style={{
                 display: 'grid',
                 gridTemplateColumns: `repeat(${Math.max(currentPlanOption.plannedSemesters.length, 1)}, 1fr)`,
@@ -1063,8 +1124,19 @@ export default function SchedulePage() {
                         {sem.semester}
                       </div>
 
-                      <div style={{ fontSize: '12.5px', color: 'var(--text-secondary)', fontWeight: 600 }}>
+                      <div style={{ fontSize: '12px', color: 'var(--text-secondary)', fontWeight: 600, marginBottom: '6px' }}>
                         {sem.totalCourses} môn học
+                      </div>
+
+                      {/* Tóm tắt tên các môn học của kỳ */}
+                      <div style={{
+                        fontSize: '11px',
+                        color: 'var(--text-muted)',
+                        lineHeight: 1.35,
+                        borderTop: '1px dashed var(--border-color)',
+                        paddingTop: '6px'
+                      }}>
+                        {sem.courses.map(c => c.courseName).join(', ')}
                       </div>
                     </div>
                   );
@@ -1083,10 +1155,17 @@ export default function SchedulePage() {
                     padding: '20px'
                   }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '10px' }}>
-                      <h3 style={{ fontSize: '16px', fontWeight: 800, color: 'var(--text-main)', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <BookOpen size={18} color="var(--vlu-red)" />
-                        Danh Sách Môn Đề Xuất Cho Học Kỳ {currentPlannedSemester.semester} ({currentPlannedSemester.totalCourses} Môn Học)
-                      </h3>
+                      <div>
+                        {/* Chỉ báo "Đang xem Kỳ X trong Y kỳ" */}
+                        <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--vlu-red)', marginBottom: '4px' }}>
+                          📍 Đang xem Kỳ {selectedSemesterIdx + 1} / {currentPlanOption.plannedSemesters.length} kỳ ({currentPlannedSemester.semester})
+                        </div>
+                        <h3 style={{ fontSize: '16px', fontWeight: 800, color: 'var(--text-main)', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <BookOpen size={18} color="var(--vlu-red)" />
+                          Danh Sách Môn Đề Xuất Cho Học Kỳ {currentPlannedSemester.semester} ({currentPlannedSemester.totalCourses} Môn Học)
+                        </h3>
+                      </div>
+
                       <button
                         onClick={() => {
                           setAdvisorOpen(true);
@@ -1094,7 +1173,7 @@ export default function SchedulePage() {
                         }}
                         style={{
                           fontSize: '12px',
-                          padding: '5px 12px',
+                          padding: '6px 14px',
                           borderRadius: '6px',
                           border: '1px solid rgba(196, 18, 48, 0.3)',
                           background: 'rgba(196, 18, 48, 0.08)',
@@ -1138,16 +1217,42 @@ export default function SchedulePage() {
                               }}>
                                 {course.courseCode || course.code}
                               </span>
-                              <span style={{
-                                fontSize: '11px',
-                                fontWeight: 700,
-                                padding: '2px 8px',
-                                borderRadius: '12px',
-                                background: course.isGraduation ? 'rgba(168, 85, 247, 0.1)' : course.isInternship ? 'rgba(59, 130, 246, 0.1)' : 'rgba(22, 163, 74, 0.1)',
-                                color: course.isGraduation ? '#9333ea' : course.isInternship ? '#2563eb' : '#16a34a'
-                              }}>
-                                {course.groupName || 'Môn học'}
-                              </span>
+
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <span style={{
+                                  fontSize: '11px',
+                                  fontWeight: 700,
+                                  padding: '2px 8px',
+                                  borderRadius: '12px',
+                                  background: course.isGraduation ? 'rgba(168, 85, 247, 0.1)' : course.isInternship ? 'rgba(59, 130, 246, 0.1)' : 'rgba(22, 163, 74, 0.1)',
+                                  color: course.isGraduation ? '#9333ea' : course.isInternship ? '#2563eb' : '#16a34a'
+                                }}>
+                                  {course.groupName || 'Môn học'}
+                                </span>
+
+                                {/* Nút đổi môn tự chọn nếu là nhóm TC309 */}
+                                {course.groupCode === 'TC309' && (
+                                  <button
+                                    onClick={() => setElectiveModalOpen(true)}
+                                    title="Đổi sang môn tự chọn chuyên ngành khác"
+                                    style={{
+                                      fontSize: '10.5px',
+                                      padding: '2px 6px',
+                                      borderRadius: '4px',
+                                      border: '1px solid rgba(196, 18, 48, 0.3)',
+                                      background: 'var(--bg-secondary)',
+                                      color: 'var(--vlu-red)',
+                                      cursor: 'pointer',
+                                      fontWeight: 600,
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      gap: '3px'
+                                    }}
+                                  >
+                                    <RotateCw size={10} /> Đổi môn
+                                  </button>
+                                )}
+                              </div>
                             </div>
 
                             {/* Tên môn học đầy đủ */}
@@ -1167,11 +1272,15 @@ export default function SchedulePage() {
                             color: 'var(--text-muted)'
                           }}>
                             <div>💡 {course.reason || 'Môn bắt buộc theo chuyên ngành đã chọn'}</div>
-                            {course.prerequisites?.length > 0 && (
-                              <div style={{ color: '#d97706', marginTop: '3px' }}>
-                                ⚠️ Điều kiện tiên quyết: {course.prerequisites.join(', ')}
+                            {course.conditionText ? (
+                              <div style={{ color: '#d97706', marginTop: '3px', fontWeight: 500 }}>
+                                📌 {course.conditionText}
                               </div>
-                            )}
+                            ) : course.priorCourses?.length > 0 ? (
+                              <div style={{ color: '#d97706', marginTop: '3px' }}>
+                                🟡 Môn học trước: {course.priorCourses.join(', ')}
+                              </div>
+                            ) : null}
                           </div>
                         </div>
                       ))}
@@ -1192,7 +1301,7 @@ export default function SchedulePage() {
                           Gợi Ý Lịch Học Tuần Có Khoảng Nghỉ (Khung Chuẩn Văn Lang)
                         </h3>
                         <p style={{ fontSize: '12px', color: 'var(--text-secondary)', margin: '4px 0 0 0' }}>
-                          Nghỉ trưa 12:00 - 13:00, giải lao giữa các ca, tối đa 2 ca liên tiếp, không xếp Ca 5 (tối) sát Ca 1 (sáng sớm).
+                          Nghỉ trưa 12:00 - 13:00, giải lao giữa các ca, tối đa 2 ca liên tiếp, không xếp Ca 5 (tối: Tiết 13-16) sát Ca 1 (sáng sớm).
                         </p>
                       </div>
 
@@ -1369,6 +1478,131 @@ export default function SchedulePage() {
                               • <strong>{c.courseCode || c.code} - {c.courseName || c.name}</strong> ({c.groupName}): {c.reason || 'Thực hiện tại doanh nghiệp liên kết, thời gian linh hoạt.'}
                             </div>
                           ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* ─────────────────────────────────────────────────────────────
+                      ACCORDION: ĐỐI CHIẾU TOÀN BỘ MÔN HỌC & VÌ SAO MÔN KHÁC KHÔNG XẾP
+                  ───────────────────────────────────────────────────────────── */}
+                  <div style={{
+                    background: 'var(--bg-secondary)',
+                    border: '1px solid var(--border-color)',
+                    borderRadius: 'var(--radius-lg)',
+                    overflow: 'hidden'
+                  }}>
+                    <button
+                      onClick={() => setShowAuditTable(!showAuditTable)}
+                      style={{
+                        width: '100%',
+                        padding: '16px 20px',
+                        background: 'none',
+                        border: 'none',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        textAlign: 'left'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <Layers size={18} color="var(--vlu-red)" />
+                        <strong style={{ fontSize: '14px', color: 'var(--text-main)' }}>
+                          Bảng Đối Chiếu Toàn Bộ Môn Học Khung K30 & Vì Sao Các Môn Khác Không Được Đề Xuất?
+                        </strong>
+                      </div>
+                      {showAuditTable ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                    </button>
+
+                    {showAuditTable && (
+                      <div style={{ padding: '0 20px 20px 20px', borderTop: '1px solid var(--border-color)' }}>
+                        
+                        {/* Lời giải thích tổng quan */}
+                        <div style={{
+                          padding: '12px 16px',
+                          background: 'rgba(59, 130, 246, 0.08)',
+                          borderRadius: '8px',
+                          border: '1px solid rgba(59, 130, 246, 0.2)',
+                          fontSize: '12.5px',
+                          color: 'var(--text-main)',
+                          margin: '16px 0',
+                          lineHeight: 1.45
+                        }}>
+                          <strong>💡 Căn cứ phân bổ học phần:</strong>
+                          <div style={{ marginTop: '4px' }}>
+                            • <strong>88 tín chỉ đã đạt</strong>: Đã tích lũy hợp lệ trong lịch sử học tập, không đề xuất học lại.<br/>
+                            • <strong>19 tín chỉ đang học</strong>: Đang theo học tại HK hiện tại, được <em>giả định thi ĐẠT</em> để mở môn học trước cho các kỳ tiếp theo.<br/>
+                            • <strong>19 tín chỉ còn lại được phân bổ</strong>: Gồm 2 môn BB chuyên ngành CNPM (Phân tích thiết kế HT HĐT, Quản lý dự án phần mềm), 1 môn TC309 còn thiếu, Đồ án thực tập và Khóa luận tốt nghiệp.<br/>
+                            • <strong>Các môn không xuất hiện</strong>: Là môn tự chọn tương đương chưa được chọn hoặc thuộc chuyên ngành khác (Trí tuệ Nhân tạo, Công nghệ Dữ liệu).
+                          </div>
+                        </div>
+
+                        {/* Bộ lọc bảng đối chiếu */}
+                        <div style={{ display: 'flex', gap: '8px', marginBottom: '14px', flexWrap: 'wrap' }}>
+                          {[
+                            { key: 'all', label: 'Tất cả học phần' },
+                            { key: 'planned', label: 'Được xếp vào kế hoạch' },
+                            { key: 'in_progress', label: 'Đang học (Giả định đạt)' },
+                            { key: 'not_selected_elective', label: 'Tự chọn chưa chọn' },
+                            { key: 'passed', label: 'Đã hoàn thành' }
+                          ].map(f => (
+                            <button
+                              key={f.key}
+                              onClick={() => setAuditFilter(f.key)}
+                              style={{
+                                padding: '5px 12px',
+                                borderRadius: '6px',
+                                fontSize: '11.5px',
+                                fontWeight: 600,
+                                border: auditFilter === f.key ? '1px solid var(--vlu-red)' : '1px solid var(--border-color)',
+                                background: auditFilter === f.key ? 'var(--vlu-red)' : 'var(--bg-primary)',
+                                color: auditFilter === f.key ? 'white' : 'var(--text-secondary)',
+                                cursor: 'pointer'
+                              }}
+                            >
+                              {f.label}
+                            </button>
+                          ))}
+                        </div>
+
+                        {/* Bảng danh sách chi tiết */}
+                        <div style={{ overflowX: 'auto', maxHeight: '420px', overflowY: 'auto' }}>
+                          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
+                            <thead>
+                              <tr style={{ background: 'var(--bg-tertiary)', borderBottom: '1px solid var(--border-color)', position: 'sticky', top: 0 }}>
+                                <th style={{ padding: '8px 10px', textAlign: 'left' }}>Mã môn</th>
+                                <th style={{ padding: '8px 10px', textAlign: 'left' }}>Tên môn học</th>
+                                <th style={{ padding: '8px 10px', textAlign: 'left' }}>Nhóm yêu cầu</th>
+                                <th style={{ padding: '8px 10px', textAlign: 'left' }}>Trạng thái</th>
+                                <th style={{ padding: '8px 10px', textAlign: 'left' }}>Kỳ xếp</th>
+                                <th style={{ padding: '8px 10px', textAlign: 'left' }}>Lý do / Giải thích</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {filteredAuditCourses.map((c, i) => (
+                                <tr key={c.code + i} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                                  <td style={{ padding: '8px 10px', fontWeight: 700, color: 'var(--vlu-red)' }}>{c.code}</td>
+                                  <td style={{ padding: '8px 10px', fontWeight: 600, color: 'var(--text-main)' }}>{c.name}</td>
+                                  <td style={{ padding: '8px 10px', color: 'var(--text-secondary)' }}>{c.groupName}</td>
+                                  <td style={{ padding: '8px 10px' }}>
+                                    <span style={{
+                                      fontSize: '10.5px',
+                                      padding: '2px 6px',
+                                      borderRadius: '4px',
+                                      fontWeight: 700,
+                                      background: c.status === 'passed' ? 'rgba(22, 163, 74, 0.1)' : c.status === 'in_progress' ? 'rgba(59, 130, 246, 0.1)' : c.status === 'planned' ? 'rgba(196, 18, 48, 0.1)' : 'var(--bg-tertiary)',
+                                      color: c.status === 'passed' ? '#16a34a' : c.status === 'in_progress' ? '#2563eb' : c.status === 'planned' ? 'var(--vlu-red)' : 'var(--text-muted)'
+                                    }}>
+                                      {c.statusText}
+                                    </span>
+                                  </td>
+                                  <td style={{ padding: '8px 10px', color: 'var(--text-main)' }}>{c.plannedSemester || '—'}</td>
+                                  <td style={{ padding: '8px 10px', color: 'var(--text-muted)' }}>{c.reason}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
                         </div>
                       </div>
                     )}
@@ -1648,7 +1882,91 @@ export default function SchedulePage() {
       )}
 
       {/* ─────────────────────────────────────────────────────────────
-          5. TRỢ LÝ AI CỐ VẤN THỜI KHÓA BIỂU TẠI CHỖ (SLIDE-OVER)
+          5. MODAL ĐỔI MÔN TỰ CHỌN CHUYÊN NGÀNH (TC309)
+      ───────────────────────────────────────────────────────────── */}
+      {electiveModalOpen && (
+        <div className="modal-overlay" onClick={() => setElectiveModalOpen(false)}>
+          <div className="modal-box chatgpt-scroll" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '560px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <div>
+                <h3 style={{ fontSize: '17px', fontWeight: 800, color: 'var(--text-main)', margin: 0 }}>
+                  Đổi Môn Tự Chọn Chuyên Ngành (TC309)
+                </h3>
+                <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
+                  Định mức: 3 môn (9 TC). Bạn đã có 2 môn (1 môn đã đạt, 1 môn đang học). Hãy chọn môn thứ 3:
+                </span>
+              </div>
+              <button
+                onClick={() => setElectiveModalOpen(false)}
+                style={{ background: 'none', border: 'none', fontSize: '18px', cursor: 'pointer', color: 'var(--text-muted)' }}
+              >
+                ✕
+              </button>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {availableTC309.map(c => {
+                const isCurrent = c.code === (preferences.selectedElectiveTC309 || roadmapData?.availableElectives?.currentSelectedCode);
+                const disabled = !c.eligible;
+
+                return (
+                  <div
+                    key={c.code}
+                    style={{
+                      padding: '12px 14px',
+                      borderRadius: '8px',
+                      border: isCurrent ? '2px solid var(--vlu-red)' : '1px solid var(--border-color)',
+                      background: isCurrent ? 'rgba(196, 18, 48, 0.04)' : disabled ? 'var(--bg-tertiary)' : 'var(--bg-primary)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      opacity: disabled ? 0.6 : 1,
+                      gap: '12px'
+                    }}
+                  >
+                    <div style={{ flex: 1 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '3px' }}>
+                        <span style={{ fontSize: '11px', fontWeight: 800, color: 'var(--vlu-red)' }}>
+                          {c.code}
+                        </span>
+                        <strong style={{ fontSize: '13.5px', color: 'var(--text-main)' }}>
+                          {c.name}
+                        </strong>
+                      </div>
+                      <div style={{ fontSize: '11.5px', color: 'var(--text-muted)' }}>
+                        {c.reason}
+                      </div>
+                    </div>
+
+                    <div>
+                      {isCurrent ? (
+                        <span style={{ fontSize: '11.5px', fontWeight: 700, color: 'var(--vlu-red)', padding: '4px 10px', background: 'rgba(196, 18, 48, 0.1)', borderRadius: '6px' }}>
+                          ✓ Đang chọn
+                        </span>
+                      ) : disabled ? (
+                        <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontStyle: 'italic' }}>
+                          {c.isPassed ? 'Đã học' : c.isInProgress ? 'Đang học' : 'Chưa đủ ĐK'}
+                        </span>
+                      ) : (
+                        <button
+                          onClick={() => handleSelectSpecificElective(c.code)}
+                          className="btn-vlu-primary"
+                          style={{ fontSize: '12px', padding: '6px 12px' }}
+                        >
+                          Chọn môn này
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─────────────────────────────────────────────────────────────
+          6. TRỢ LÝ AI CỐ VẤN THỜI KHÓA BIỂU TẠI CHỖ (SLIDE-OVER)
       ───────────────────────────────────────────────────────────── */}
       {advisorOpen && (
         <div style={{
@@ -1756,11 +2074,11 @@ export default function SchedulePage() {
             scrollbarWidth: 'none'
           }}>
             {[
-              'Tạo lộ trình các kỳ sau cho tôi.',
+              'Vì sao môn giống nhau?',
+              'Đổi môn tự chọn.',
               'Kỳ tới giảm một môn.',
               'Tôi muốn nghỉ cuối tuần.',
-              'Đừng xếp ca 5.',
-              'Môn nào cần học trước?'
+              'Đừng xếp ca 5.'
             ].map((q, idx) => (
               <button
                 key={idx}
@@ -1832,7 +2150,7 @@ export default function SchedulePage() {
       )}
 
       {/* ─────────────────────────────────────────────────────────────
-          6. MODAL THÊM / SỬA TIẾT HỌC ADMIN (CHO TAB HIỆN TẠI)
+          7. MODAL THÊM / SỬA TIẾT HỌC ADMIN (CHO TAB HIỆN TẠI)
       ───────────────────────────────────────────────────────────── */}
       {modalOpen && (
         <div className="modal-overlay" onClick={() => setModalOpen(false)}>
