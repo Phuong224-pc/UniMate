@@ -18,7 +18,7 @@ export async function getPrompts() {
 export async function updatePrompts(promptsObj) {
   const entries = Object.entries(promptsObj);
   const titles = {
-    default: '1. AI Trợ Lý Sinh Viên (Trang Chủ)',
+    default: '1. UniMate Toàn Diện (Trang Chủ - Demo VLU)',
     advisor: '2. Cố Vấn Lộ Trình Học Tập (Advisor)',
     roadmap: '3. Lộ Trình Cá Nhân Hóa (Roadmap)',
     results: '4. Phân Tích Kết QuẢ Học Tập (GPA)',

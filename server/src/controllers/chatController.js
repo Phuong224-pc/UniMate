@@ -264,7 +264,7 @@ export function buildCourseRoadmapReply(course, allCourses = [], studentProgress
   // Trường hợp đặc biệt chuẩn xác cho môn Lập trình Java nâng cao (Image 3)
   if (courseCode === '71ITSE30803' || /java nâng cao/i.test(courseName)) {
     return [
-      `Chào bạn! Mình là Cố vấn Lộ trình Học tập AI của Khoa CNTT – Đại học Văn Lang. Rất vui được hỗ trợ bạn!`,
+      `Chào bạn! Mình là UniMate — trợ lý học tập thông minh (tham khảo dữ liệu Khung CTĐT K30 CNTT Đại học Văn Lang). Rất vui được hỗ trợ bạn!`,
       ``,
       `Để đăng ký môn **Lập trình Java nâng cao**, bạn cần nắm rõ thông tin môn học và **điều kiện tiên quyết** theo đúng Khung chương trình đào tạo K30 CNTT như sau:`,
       ``,
@@ -322,7 +322,7 @@ export function buildCourseRoadmapReply(course, allCourses = [], studentProgress
   const firstPrereqName = firstPrereqObj ? firstPrereqObj.name : (directPrereqs[0] || 'môn học trước');
 
   return [
-    `Chào bạn! Mình là Cố vấn Lộ trình Học tập AI của Khoa CNTT – Đại học Văn Lang. Rất vui được hỗ trợ bạn!`,
+    `Chào bạn! Mình là UniMate — trợ lý học tập thông minh (tham khảo dữ liệu Khung CTĐT K30 CNTT Đại học Văn Lang). Rất vui được hỗ trợ bạn!`,
     ``,
     `Để đăng ký môn **${courseName}**, bạn cần nắm rõ thông tin môn học và **điều kiện tiên quyết** theo đúng Khung chương trình đào tạo K30 CNTT như sau:`,
     ``,
@@ -462,6 +462,51 @@ export function handleDirectAcademicQuery(userText, curriculum, studentProgress,
   return null;
 }
 
+/**
+ * Xử lý truy vấn thông tin lịch đóng học phí và kế hoạch thu học phí
+ * Đảm bảo 100% nhất quán, không tự tạo mốc thời gian, không bịa đặt portal / URL
+ */
+export function handleTuitionScheduleQuery(userText) {
+  if (!userText || typeof userText !== 'string') return null;
+  const q = userText.trim().toLowerCase();
+
+  const isTuitionQuery = /(?:học phí|tiền học)/i.test(q);
+  if (!isTuitionQuery) return null;
+
+  const isScheduleOrDeadline = /(?:lịch|thời gian|thời hạn|hạn chót|hạn nộp|khi nào|bao giờ|ngày nào|đợt)\s*(?:đóng|nộp|thu|thanh toán)?/i.test(q)
+    || /(?:đóng|nộp|thu|thanh toán)\s*(?:học phí|tiền học)/i.test(q);
+
+  if (!isScheduleOrDeadline) return null;
+
+  const is2025_2026 = /(?:2025\s*[-–/]\s*2026|2025\s*2026|năm\s*học\s*2025)/i.test(q);
+
+  if (is2025_2026) {
+    return [
+      `### 💳 Lịch Đóng Học Phí (Dữ liệu tham khảo: VLU)`,
+      ``,
+      `Hiện dữ liệu UniMate đang có chưa chứa lịch đóng học phí năm học 2025–2026 của VLU.`,
+      ``,
+      `📌 **Hướng dẫn kiểm tra thông tin được xác minh:**`,
+      `- Để có thông tin chính xác và cập nhật nhất, bạn vui lòng theo dõi thông báo trực tiếp từ **Phòng Kế toán - Tài chính** hoặc kiểm tra tại **Cổng thông tin đào tạo / Cổng thông tin sinh viên** của Trường Đại học Văn Lang.`,
+      `- Khi nhà trường ban hành văn bản hoặc kế hoạch thu học phí chính thức cho năm học 2025–2026, văn bản sẽ được bổ sung vào hệ thống dữ liệu của UniMate để hỗ trợ sinh viên tra cứu.`,
+      ``,
+      `*Lưu ý: UniMate không sử dụng thông lệ của các năm học trước để tự suy đoán thời hạn đóng học phí.*`
+    ].join('\n');
+  }
+
+  // Trường hợp hỏi lịch đóng học phí nói chung mà không nêu rõ năm học
+  return [
+    `### 💳 Thông Tin Lịch & Quy Định Đóng Học Phí (Dữ liệu tham khảo: VLU)`,
+    ``,
+    `Tại Trường Đại học Văn Lang (VLU):`,
+    `- **Quy định thu học phí**: Học phí được tính theo số tín chỉ thực tế mà sinh viên đăng ký trong từng học kỳ.`,
+    `- **Thời hạn nộp**: Mỗi học kỳ (Học kỳ chính 1, Học kỳ chính 2 và Học kỳ phụ), nhà trường sẽ ban hành thông báo kế hoạch đóng học phí riêng kèm thời hạn chi tiết trên Cổng thông tin sinh viên.`,
+    `- **Đối với năm học 2025–2026**: Hiện dữ liệu UniMate đang có chưa chứa lịch đóng học phí năm học 2025–2026 của VLU.`,
+    ``,
+    `👉 Bạn vui lòng kiểm tra thông báo mới nhất từ **Phòng Kế toán - Tài chính** của trường để nắm được mốc thời gian chính thức.`
+  ].join('\n');
+}
+
 function getGeminiClient() {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey || apiKey === 'your_gemini_api_key_here') {
@@ -583,7 +628,18 @@ export async function handleChatMessage(req, res) {
       console.warn('Không thể tải courses từ MongoDB:', err.message);
     }
 
-    // 2. Kiểm tra câu hỏi học vụ định chuẩn (toàn bộ khung, TC209/TC309, Java nâng cao, lộ trình môn học, CNPM, 126 TC tốt nghiệp...)
+    // 2. Kiểm tra câu hỏi về lịch đóng học phí (đảm bảo 100% nhất quán, không tự tạo mốc thời gian)
+    const tuitionReply = handleTuitionScheduleQuery(userText);
+    if (tuitionReply) {
+      return res.json({
+        success: true,
+        reply: tuitionReply,
+        model: 'unimate-verified-announcement',
+        source: 'Dữ liệu tham khảo VLU (Trạng thái văn bản)'
+      });
+    }
+
+    // 3. Kiểm tra câu hỏi học vụ định chuẩn (toàn bộ khung, TC209/TC309, Java nâng cao, lộ trình môn học, CNPM, 126 TC tốt nghiệp...)
     const directReply = handleDirectAcademicQuery(userText, activeCurriculum, null, allCoursesList);
     if (directReply) {
       return res.json({
@@ -594,7 +650,7 @@ export async function handleChatMessage(req, res) {
       });
     }
 
-    // 3. Kiểm tra câu hỏi cá nhân liên quan đến điểm, tín chỉ, tiến độ
+    // 4. Kiểm tra câu hỏi cá nhân liên quan đến điểm, tín chỉ, tiến độ
     const requestedMssv = userText.match(/\b(\d{10,15})\b/)?.[1];
     const ownStudent = req.user ? await resolveChatStudent(req.user, null) : null;
     if (requestedMssv && (!req.user || (req.user.role !== 'admin' && requestedMssv !== ownStudent?.mssv))) {
@@ -638,10 +694,17 @@ export async function handleChatMessage(req, res) {
     } catch {}
 
     if (!promptContent) {
-      promptContent = 'Bạn là UniMate, trợ lý học tập AI thông minh và thân thiện của Trường Đại học Văn Lang (VLU). Bạn sử dụng nguồn dữ liệu tham khảo chính thức từ VLU và không tự nhận là đại diện phát ngôn chính thức của trường.';
+      promptContent = 'Bạn là UniMate — trợ lý học tập thông minh. Hiện tại hệ thống đang sử dụng dữ liệu tham khảo từ Trường Đại học Văn Lang (VLU) để hỗ trợ sinh viên giải đáp quy chế, chương trình đào tạo, học phí, học bổng và thủ tục học vụ. Bạn không phải là đại diện phát ngôn chính thức của trường mà là trợ lý học tập thông minh dựa trên nguồn dữ liệu tham khảo này.';
     }
 
     let baseSystemPrompt = composeAssistantPrompt(promptContent, systemPromptOverride);
+
+    // Luôn bổ sung quy tắc chống bịa đặt lịch học phí, link URL và không xem câu trả lời cũ là sự thật
+    baseSystemPrompt += `\n\n[QUY TẮC BẮT BUỘC VỀ THƯƠNG HIỆU & HỌC VỤ]:
+1. THƯƠNG HIỆU: Tự giới thiệu là "UniMate — trợ lý học tập thông minh". VLU là dữ liệu tham khảo phục vụ thử nghiệm/demo.
+2. TUYỆT ĐỐI KHÔNG TỰ TẠO LỊCH HỌC PHÍ / THỜI GIAN: Không dùng thông lệ năm trước để tự tạo lịch năm 2025-2026. Không tự tạo các tháng 08-09, 01-02 hoặc 05-06. Gắn chữ "dự kiến" không làm một mốc tự suy đoán trở thành có căn cứ. Không tự tạo địa chỉ portal, URL hay email.
+3. Nếu người dùng hỏi về lịch đóng học phí năm học 2025-2026 của VLU, BẮT BUỘC trả lời: "Hiện dữ liệu UniMate đang có chưa chứa lịch đóng học phí năm học 2025–2026 của VLU." và hướng dẫn kiểm tra thông báo từ Phòng Kế toán - Tài chính của nhà trường.
+4. LỊCH SỬ CHAT CŨ KHÔNG PHẢI NGUỒN SỰ THẬT: Câu trả lời trước của AI không phải tài liệu xác minh. Luôn trả lời căn cứ vào dữ liệu hệ thống cung cấp cho lượt hỏi hiện tại.`;
 
     // Bổ sung dữ liệu học vụ vào prompt để AI diễn giải chuẩn mực
     const isAskingCourseRoadmap = /(?:muốn học|đăng ký học|lộ trình học|tiên quyết|chuỗi môn|học trước)/i.test(userText);
@@ -663,7 +726,7 @@ export async function handleChatMessage(req, res) {
 Người dùng đang hỏi về điều kiện hoặc chuỗi môn học cần học trước cho một môn cụ thể.
 Tuyệt đối KHÔNG trả lời lan man về toàn bộ bảng điểm, GPA, tổng số tín chỉ còn thiếu hay các môn Thể chất/Quốc phòng.
 Hãy trả lời đúng và chuẩn theo phong cách Cố vấn Lộ trình Học tập AI:
-1. Lời chào từ Cố vấn Lộ trình Học tập AI của Khoa CNTT - Đại học Văn Lang.
+1. Lời chào từ UniMate — trợ lý học tập thông minh (tham khảo dữ liệu Khung CTĐT K30 CNTT Đại học Văn Lang).
 2. 📌 Thông tin học phần (Tên môn, Mã học phần, Số tín chỉ).
 3. ⚠️ Điều kiện tiên quyết (Môn tiên quyết trực tiếp bắt buộc thi đạt).
 4. 🔗 Chuỗi lộ trình học tập dẫn đến môn này (Liệt kê từ Cơ sở lập trình đến môn mục tiêu).
@@ -692,8 +755,8 @@ Hãy trả lời đúng và chuẩn theo phong cách Cố vấn Lộ trình Họ
 
     const genai = getGeminiClient();
 
-    // Chuẩn bị lịch sử hội thoại
-    const rawHistory = validMessages.slice(0, validMessages.length - 1);
+    // Chuẩn bị lịch sử hội thoại (giới hạn 8 lượt tin nhắn gần nhất để giữ trọng tâm và không bị câu trả lời cũ làm sai lệch)
+    const rawHistory = validMessages.slice(0, validMessages.length - 1).slice(-8);
     while (rawHistory.length > 0 && rawHistory[0].role !== 'user') {
       rawHistory.shift();
     }

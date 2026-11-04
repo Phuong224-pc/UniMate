@@ -37,14 +37,15 @@ const BOTS = [
     name: 'UniMate Toàn Diện',
     icon: Bot,
     badge: 'Đa năng',
-    desc: 'Tư vấn thông tin học tập, quy chế, học phí & chương trình đào tạo VLU',
+    desc: 'Trợ lý học tập thông minh hỗ trợ giải đáp quy chế, học vụ và định hướng lộ trình học tập',
+    demoBadge: 'Dữ liệu demo: VLU',
     color: 'var(--vlu-red)',
     placeholder: 'Hỏi UniMate bất cứ điều gì về học tập, quy chế...',
     suggestions: [
-      { title: 'Các cơ sở đào tạo', desc: 'CS3 Đặng Thùy Trâm, CS1 Q.1, CS2 Q.6', query: 'Trường Đại học Văn Lang có những cơ sở nào tại TP.HCM?' },
-      { title: 'Học phí & Học bổng', desc: 'Chính sách miễn giảm và thời hạn', query: 'Lịch đóng học phí trường Văn Lang năm học 2025-2026' },
-      { title: 'Khung đào tạo K30', desc: 'Chương trình 126 tín chỉ', query: 'Khung chương trình đào tạo Khoa CNTT K30 Văn Lang' },
-      { title: 'Cẩm nang sinh viên', desc: 'Quy định thi và điểm rèn luyện', query: 'Cẩm nang sinh viên Đại học Văn Lang mới nhất' }
+      { title: 'Các cơ sở đào tạo', desc: 'Dữ liệu demo VLU (CS3, CS1, CS2)', query: 'Trường Đại học Văn Lang có những cơ sở nào tại TP.HCM?' },
+      { title: 'Học phí & Quy chế', desc: 'Quy định tài chính & học vụ (Demo VLU)', query: 'Lịch đóng học phí trường Văn Lang năm học 2025-2026' },
+      { title: 'Khung đào tạo K30', desc: 'Chương trình 126 tín chỉ CNTT (Demo VLU)', query: 'Khung chương trình đào tạo Khoa CNTT K30 Văn Lang' },
+      { title: 'Cẩm nang sinh viên', desc: 'Quy định thi & điểm rèn luyện (Demo VLU)', query: 'Cẩm nang sinh viên Đại học Văn Lang mới nhất' }
     ]
   },
   {
@@ -312,6 +313,23 @@ export default function ChatPage({ activeChat, onUpdateChat }) {
                 <h1 style={{ fontSize: '28px', fontWeight: 800, marginBottom: '6px' }}>
                   <span className="gradient-text">{currentBot.name}</span>
                 </h1>
+
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+                  <span style={{ 
+                    fontSize: '11px', 
+                    padding: '3px 10px', 
+                    borderRadius: '12px', 
+                    background: 'rgba(196, 18, 48, 0.08)', 
+                    color: 'var(--vlu-red)', 
+                    border: '1px solid rgba(196, 18, 48, 0.2)', 
+                    fontWeight: 600,
+                    letterSpacing: '0.2px'
+                  }}>
+                    {currentBot.demoBadge || 'Dữ liệu demo: VLU'}
+                  </span>
+                </div>
+
+
                 
                 <p style={{ color: 'var(--text-secondary)', fontSize: '14px', maxWidth: '640px', margin: '0 auto 28px', lineHeight: 1.6 }}>
                   {currentBot.desc}. Hãy đặt câu hỏi hoặc bấm vào gợi ý bên dưới để bắt đầu ngay!
@@ -469,7 +487,7 @@ export default function ChatPage({ activeChat, onUpdateChat }) {
                     color: 'var(--text-muted)'
                   }}>
                     <span style={{ display: 'inline-block', width: '6px', height: '6px', borderRadius: '50%', background: 'var(--vlu-red)', animation: 'pulseGlow 1.2s infinite' }}></span>
-                    <span>VLU AI đang soạn thảo câu trả lời...</span>
+                    <span>UniMate đang soạn câu trả lời...</span>
                   </div>
                 </div>
               )}
@@ -746,7 +764,7 @@ export default function ChatPage({ activeChat, onUpdateChat }) {
           </div>
 
           <div className="chat-disclaimer-text" style={{ textAlign: 'center', fontSize: '11px', color: 'var(--text-muted)', marginTop: '4px', lineHeight: 1.3 }}>
-            UniMate có thể đưa ra thông tin chưa cập nhật. Hãy đối chiếu với thông tin chính thức của Trường Đại học Văn Lang.
+            UniMate là trợ lý học tập thông minh. Trong phiên bản thử nghiệm, dữ liệu đang được tham chiếu theo Trường Đại học Văn Lang (VLU). Hãy đối chiếu với thông báo chính thức của nhà trường khi cần xác thực pháp lý.
           </div>
         </div>
       </div>

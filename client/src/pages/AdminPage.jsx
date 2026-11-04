@@ -1090,7 +1090,7 @@ export default function AdminPage() {
           ) : (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px' }}>
               {[
-                { key: 'default', title: '1. AI Trợ Lý VLU Toàn Diện (Trang Chủ)' },
+                { key: 'default', title: '1. UniMate Toàn Diện (Trang Chủ - Demo VLU)' },
                 { key: 'roadmap', title: '2. Cố Vấn Lộ Trình & Khung Đào Tạo K30' },
                 { key: 'results', title: '3. Phân Tích Kết Quả & Điểm GPA' },
                 { key: 'graduation', title: '4. Cố Vấn Điều Kiện Tốt Nghiệp' },
