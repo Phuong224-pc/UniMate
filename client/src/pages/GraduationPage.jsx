@@ -4,7 +4,6 @@ import AiChatSidebar from '../components/AiChatSidebar';
 import MobileChatDrawer from '../components/MobileChatDrawer';
 import { api } from '../services/api';
 import { useAuth } from '../hooks/useAuth';
-import AcademicProgress from '../components/AcademicProgress';
 import { useAcademicProgress } from '../hooks/useAcademicProgress';
 
 export default function GraduationPage() {
@@ -118,7 +117,6 @@ export default function GraduationPage() {
 
           {student && (
             <>
-              <AcademicProgress progress={academic} error={progressError} />
               <div className="vlu-card" style={{ background: 'linear-gradient(135deg, rgba(196,18,48,0.06) 0%, rgba(30,41,59,0.04) 100%)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-lg)', padding: '24px', marginBottom: '24px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px' }}>
                   <div>

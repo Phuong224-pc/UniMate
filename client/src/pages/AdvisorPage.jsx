@@ -16,11 +16,8 @@ import {
 import { marked } from 'marked';
 import prism from 'prismjs';
 import { api } from '../services/api';
-import AcademicProgress from '../components/AcademicProgress';
-import { useAcademicProgress } from '../hooks/useAcademicProgress';
 
 export default function AdvisorPage() {
-  const { progress, error: progressError } = useAcademicProgress();
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
@@ -106,8 +103,6 @@ export default function AdvisorPage() {
 
   return (
     <div style={{ width: '100%', maxWidth: '100%', display: 'flex', flexDirection: 'column', minHeight: 'calc(100vh - 130px)', boxSizing: 'border-box' }}>
-      {progress && <AcademicProgress progress={progress} error={progressError} compact />}
-      
       {/* ─── Top Banner ─── */}
       <div style={{
         background: 'linear-gradient(135deg, rgba(196, 18, 48, 0.08) 0%, rgba(30, 41, 59, 0.04) 100%)',

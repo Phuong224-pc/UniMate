@@ -5,31 +5,26 @@ import {
   MapPin, 
   User, 
   BookOpen, 
-  Filter, 
   Plus, 
   Trash2, 
   Edit3, 
   CheckCircle2, 
   AlertCircle, 
   Loader2, 
-  ChevronLeft, 
-  ChevronRight,
-  Layers,
-  Sparkles,
-  Save,
-  Printer,
-  RefreshCw,
-  Send,
-  Bot,
-  Sliders,
-  GraduationCap,
-  Info,
-  CalendarCheck,
-  Coffee,
-  ArrowRight,
-  Check,
-  Zap,
-  BookmarkCheck
+  Sparkles, 
+  Save, 
+  Printer, 
+  RefreshCw, 
+  Send, 
+  Bot, 
+  Sliders, 
+  CalendarCheck, 
+  Coffee, 
+  ArrowRight, 
+  HelpCircle,
+  ShieldAlert,
+  ChevronDown,
+  Layers
 } from 'lucide-react';
 import { api } from '../services/api';
 import { useAuth } from '../hooks/useAuth';
@@ -47,10 +42,10 @@ const DAYS_OF_WEEK = [
 const VLU_SHIFTS = [
   { shift: 1, name: 'Ca 1', periods: 'Tiết 1 - 3', time: '07:00 - 09:25', session: 'morning' },
   { shift: 2, name: 'Ca 2', periods: 'Tiết 4 - 6', time: '09:35 - 12:00', session: 'morning' },
-  { shift: 'lunch', name: 'Nghỉ trưa', periods: 'Khoảng nghỉ', time: '12:00 - 13:00', session: 'break', isBreak: true },
+  { shift: 'lunch', name: 'Nghỉ trưa', periods: 'Nghỉ ngơi', time: '12:00 - 13:00', session: 'break', isBreak: true },
   { shift: 3, name: 'Ca 3', periods: 'Tiết 7 - 9', time: '13:00 - 15:25', session: 'afternoon' },
   { shift: 4, name: 'Ca 4', periods: 'Tiết 10 - 12', time: '15:35 - 18:00', session: 'afternoon' },
-  { shift: 5, name: 'Ca 5', periods: 'Tiết 13 - 15', time: '18:05 - 21:10', session: 'evening' }
+  { shift: 5, name: 'Ca 5', periods: 'Tiết 13 - 16', time: '18:05 - 21:10', session: 'evening' }
 ];
 
 export default function SchedulePage() {
@@ -58,6 +53,10 @@ export default function SchedulePage() {
   
   // Tab chính: 'roadmap' (Lộ trình & TKB cá nhân) hoặc 'current' (TKB tuần hiện tại từ MongoDB)
   const [activeTab, setActiveTab] = useState('roadmap');
+
+  // Ref cuộn mượt đến vùng kết quả sau khi tạo lộ trình
+  const resultsRef = useRef(null);
+  const chatScrollRef = useRef(null);
 
   // ─────────────────────────────────────────────────────────────
   // 1. STATE CHO LỘ TRÌNH VÀ THỜI KHÓA BIỂU CÁ NHÂN (ROADMAP)
@@ -96,7 +95,6 @@ export default function SchedulePage() {
   ]);
   const [chatInput, setChatInput] = useState('');
   const [chatLoading, setChatLoading] = useState(false);
-  const chatScrollRef = useRef(null);
 
   // ─────────────────────────────────────────────────────────────
   // 2. STATE CHO THỜI KHÓA BIỂU TUẦN HIỆN TẠI (TRUYỀN THỐNG / ADMIN)
@@ -149,16 +147,13 @@ export default function SchedulePage() {
         setSemesters(['2024-2025 HK01', '2024-2025 HK02', '2025-2026 HK01', '2026-2027 HK01', '2026-2027 HK02']);
       });
 
-    // 2. Kiểm tra xem sinh viên đã có Lộ trình học tập lưu trong MongoDB chưa
+    // 2. Tự động kiểm tra kế hoạch đã lưu hoặc nạp phương án ban đầu
     if (user?.role === 'student' || profile?.mssv) {
-      loadSavedOrGenerateRoadmap();
+      loadInitialPlan();
     }
   }, [profile?.mssv]);
 
-  // Nạp kế hoạch đã lưu hoặc tự động phát sinh
-  const loadSavedOrGenerateRoadmap = async () => {
-    setRoadmapLoading(true);
-    setRoadmapError('');
+  const loadInitialPlan = async () => {
     try {
       const savedRes = await api.getSavedStudyPlan();
       if (savedRes.success && savedRes.data) {
@@ -167,21 +162,10 @@ export default function SchedulePage() {
           setPreferences(prev => ({ ...prev, ...savedRes.data.preferences }));
         }
       }
-
-      // Tự động generate lộ trình theo dữ liệu thật mới nhất của sinh viên
-      const genRes = await api.generateScheduleRoadmap(preferences);
-      if (genRes.success && genRes.data) {
-        setRoadmapData(genRes.data);
-        setSelectedPace(preferences.pace || 'balanced');
-        setSelectedSemesterIdx(0);
-      } else {
-        setRoadmapError(genRes.message || 'Không thể tạo lộ trình cá nhân.');
-      }
+      // Tự động gọi backend để có phương án tính toán mới nhất
+      await fetchRoadmap(preferences, false);
     } catch (err) {
-      console.error('Error loading schedule roadmap:', err);
-      setRoadmapError(err.message || 'Lỗi kết nối khi nạp dữ liệu lộ trình học tập.');
-    } finally {
-      setRoadmapLoading(false);
+      console.warn('Initial roadmap check:', err);
     }
   };
 
@@ -190,15 +174,9 @@ export default function SchedulePage() {
     setLoading(true);
     setError('');
     try {
-      const params = {
-        semester: selectedSemester
-      };
-      if (selectedDay !== 'all') {
-        params.dayOfWeek = selectedDay;
-      }
-      if (user?.role === 'student') {
-        params.mssv = profile?.mssv || user.mssv;
-      }
+      const params = { semester: selectedSemester };
+      if (selectedDay !== 'all') params.dayOfWeek = selectedDay;
+      if (user?.role === 'student') params.mssv = profile?.mssv || user.mssv;
 
       const res = await api.getSchedule(params);
       if (res.success) {
@@ -212,8 +190,10 @@ export default function SchedulePage() {
   };
 
   useEffect(() => {
-    fetchSchedules();
-  }, [selectedSemester, selectedDay, profile?.mssv]);
+    if (activeTab === 'current') {
+      fetchSchedules();
+    }
+  }, [activeTab, selectedSemester, selectedDay, profile?.mssv]);
 
   // Cuộn chat tự động
   useEffect(() => {
@@ -223,29 +203,44 @@ export default function SchedulePage() {
   }, [chatMessages, advisorOpen]);
 
   // ─────────────────────────────────────────────────────────────
-  // HÀNH ĐỘNG TẠO & LƯU LỘ TRÌNH
+  // HÀNH ĐỘNG GỌI BACKEND TẠO LỘ TRÌNH THỰC TẾ
   // ─────────────────────────────────────────────────────────────
-  const handleGenerateRoadmap = async (e) => {
-    if (e) e.preventDefault();
+  const fetchRoadmap = async (prefPayload, shouldScroll = true) => {
     setRoadmapLoading(true);
     setRoadmapError('');
     try {
-      const res = await api.generateScheduleRoadmap(preferences);
+      const res = await api.generateScheduleRoadmap(prefPayload || preferences);
       if (res.success && res.data) {
         setRoadmapData(res.data);
-        setSelectedPace(preferences.pace || 'balanced');
+        setSelectedPace(prefPayload?.pace || preferences.pace || 'balanced');
         setSelectedSemesterIdx(0);
-        setShowPrefPanel(false);
+        if (shouldScroll) {
+          setTimeout(() => {
+            resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }, 150);
+        }
       } else {
         setRoadmapError(res.message || 'Không thể tính toán phân bổ lộ trình.');
       }
     } catch (err) {
-      setRoadmapError(err.message || 'Lỗi máy chủ khi tạo lộ trình học tập.');
+      setRoadmapError(err.message || 'Lỗi kết nối khi gửi yêu cầu tạo lộ trình học tập.');
     } finally {
       setRoadmapLoading(false);
     }
   };
 
+  // Nút chính "Gợi ý lộ trình & thời khóa biểu"
+  const handlePrimaryGenerateClick = () => {
+    setShowPrefPanel(true);
+  };
+
+  // Nút "Tạo phương án" trong form tùy chọn
+  const handleExecuteGenerate = (e) => {
+    if (e) e.preventDefault();
+    fetchRoadmap(preferences, true);
+  };
+
+  // Lưu kế hoạch vào MongoDB
   const handleSavePlan = async () => {
     if (!currentPlanOption) return;
     setSavingPlan(true);
@@ -263,7 +258,7 @@ export default function SchedulePage() {
       const res = await api.saveStudyPlan(payload);
       if (res.success) {
         setSavedPlanMeta(res.data);
-        setSaveSuccessMsg('Đã lưu thành công lộ trình và thời khóa biểu vào tài khoản của bạn!');
+        setSaveSuccessMsg('Đã lưu thành công lộ trình và thời khóa biểu vào hệ thống!');
         setTimeout(() => setSaveSuccessMsg(''), 4000);
       }
     } catch (err) {
@@ -280,24 +275,35 @@ export default function SchedulePage() {
   // ─────────────────────────────────────────────────────────────
   // HỘI THOẠI TRỢ LÝ AI TẠI CHỖ
   // ─────────────────────────────────────────────────────────────
-  const handleSendChat = async (e) => {
-    e.preventDefault();
-    if (!chatInput.trim() || chatLoading) return;
+  const sendChatMessage = async (userText) => {
+    if (!userText || !userText.trim() || chatLoading) return;
 
-    const userText = chatInput.trim();
-    setChatInput('');
-    setChatMessages(prev => [...prev, { sender: 'user', text: userText }]);
+    const trimmed = userText.trim();
+    setChatMessages(prev => [...prev, { sender: 'user', text: trimmed }]);
     setChatLoading(true);
 
     try {
       const res = await api.chatScheduleAdvisor({
-        message: userText,
+        message: trimmed,
         currentPlan: currentPlanOption,
         preferences
       });
 
       if (res.success && res.data?.reply) {
         setChatMessages(prev => [...prev, { sender: 'bot', text: res.data.reply }]);
+
+        // Xử lý gợi ý hành động tự động từ AI (nếu có)
+        if (res.data?.suggestedAction) {
+          const action = res.data.suggestedAction;
+          if (action.type === 'CHANGE_PACE' && action.pace) {
+            setSelectedPace(action.pace);
+            setPreferences(prev => ({ ...prev, pace: action.pace }));
+          } else if (action.type === 'APPLY_PREFERENCES' && action.preferences) {
+            const updatedPref = { ...preferences, ...action.preferences };
+            setPreferences(updatedPref);
+            fetchRoadmap(updatedPref, true);
+          }
+        }
       } else {
         setChatMessages(prev => [...prev, { 
           sender: 'bot', 
@@ -312,6 +318,14 @@ export default function SchedulePage() {
     } finally {
       setChatLoading(false);
     }
+  };
+
+  const handleSendChat = (e) => {
+    e.preventDefault();
+    if (!chatInput.trim()) return;
+    const txt = chatInput;
+    setChatInput('');
+    sendChatMessage(txt);
   };
 
   // ─────────────────────────────────────────────────────────────
@@ -337,12 +351,23 @@ export default function SchedulePage() {
 
     if (currentPlannedSemester?.courses) {
       currentPlannedSemester.courses.forEach(c => {
-        if (c.dayOfWeek && c.shift && matrix[c.dayOfWeek]) {
-          matrix[c.dayOfWeek][c.shift] = c;
+        const day = c.dayOfWeek || c.suggestedSchedule?.dayOfWeek;
+        const shift = c.shift || c.suggestedSchedule?.shift;
+        if (day && shift && matrix[day]) {
+          matrix[day][shift] = c;
         }
       });
     }
     return matrix;
+  }, [currentPlannedSemester]);
+
+  // Lọc các môn không xếp được vào ca học chuẩn (ví dụ: Thực tập doanh nghiệp cả tuần)
+  const nonGridCourses = useMemo(() => {
+    if (!currentPlannedSemester?.courses) return [];
+    return currentPlannedSemester.courses.filter(c => {
+      const shift = c.shift || c.suggestedSchedule?.shift;
+      return !shift || shift === 0 || c.isInternship;
+    });
   }, [currentPlannedSemester]);
 
   // Phân loại lịch hiện tại theo từng thứ trong tuần (Tab Hiện Tại)
@@ -441,18 +466,21 @@ export default function SchedulePage() {
 
   return (
     <div style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box', position: 'relative' }}>
+      
       {/* ─────────────────────────────────────────────────────────────
-          HEADER BANNER & TAB NAVIGATION
+          1. HEADER BANNER CHÍNH & NÚT GỢI Ý LỘ TRÌNH & THỜI KHÓA BIỂU
       ───────────────────────────────────────────────────────────── */}
       <div style={{
         background: 'var(--bg-secondary)',
         border: '1px solid var(--border-color)',
         borderRadius: 'var(--radius-lg)',
-        padding: '24px',
+        padding: '22px 24px',
         marginBottom: '20px',
         boxShadow: 'var(--shadow-sm)'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
+          
+          {/* Tiêu đề & Logo */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
             <div style={{
               width: '48px',
@@ -471,7 +499,7 @@ export default function SchedulePage() {
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                 <h1 style={{ fontSize: '22px', fontWeight: 800, color: 'var(--text-main)', margin: 0 }}>
-                  Thời Khóa Biểu & Lộ Trình Học Tập Cá Nhân
+                  Thời Khóa Biểu Học Tập
                 </h1>
                 <span style={{
                   fontSize: '11px',
@@ -491,14 +519,36 @@ export default function SchedulePage() {
             </div>
           </div>
 
+          {/* Cụm Nút Hành Động Ở Đầu Trang */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+            {/* NÚT CHÍNH YÊU CẦU: GỢI Ý LỘ TRÌNH & THỜI KHÓA BIỂU */}
+            <button
+              onClick={handlePrimaryGenerateClick}
+              disabled={roadmapLoading}
+              className="btn-vlu-primary"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '10px 20px',
+                fontSize: '13.5px',
+                fontWeight: 700,
+                borderRadius: '8px',
+                boxShadow: '0 4px 14px rgba(196, 18, 48, 0.3)',
+                cursor: 'pointer'
+              }}
+            >
+              {roadmapLoading ? <Loader2 size={16} className="spin" /> : <Sparkles size={16} />}
+              Gợi ý lộ trình & thời khóa biểu
+            </button>
+
             <button
               onClick={() => setAdvisorOpen(!advisorOpen)}
               style={{
                 display: 'flex',
                 alignItems: 'center',
                 gap: '6px',
-                padding: '8px 14px',
+                padding: '9px 14px',
                 borderRadius: '8px',
                 fontSize: '13px',
                 fontWeight: 600,
@@ -509,34 +559,22 @@ export default function SchedulePage() {
                 transition: 'all 0.2s'
               }}
             >
-              <Bot size={16} /> Trợ lý AI Cố Vấn
+              <Bot size={16} /> Cố Vấn AI
             </button>
 
             {activeTab === 'current' && isAdmin && (
               <button
                 onClick={openAddModal}
                 className="btn-vlu-primary"
-                style={{ fontSize: '13px', padding: '8px 16px', display: 'flex', alignItems: 'center', gap: '6px' }}
+                style={{ fontSize: '13px', padding: '9px 16px', display: 'flex', alignItems: 'center', gap: '6px' }}
               >
                 <Plus size={16} /> Thêm Tiết Học
               </button>
             )}
-
-            <div style={{
-              background: 'var(--bg-primary)',
-              padding: '6px 14px',
-              borderRadius: '20px',
-              fontSize: '12px',
-              fontWeight: 600,
-              border: '1px solid var(--border-color)',
-              color: 'var(--text-main)'
-            }}>
-              Lớp: <strong>{roadmapData?.student?.className || profile?.className || 'K30 CNTT'}</strong>
-            </div>
           </div>
         </div>
 
-        {/* Chuyển đổi giữa Chế độ Lộ trình tự động & Thời khóa biểu tuần */}
+        {/* Tab chuyển đổi: Lộ trình cá nhân hóa vs Thời khóa biểu tuần hiện tại */}
         <div style={{
           display: 'flex',
           alignItems: 'center',
@@ -551,9 +589,9 @@ export default function SchedulePage() {
               display: 'flex',
               alignItems: 'center',
               gap: '8px',
-              padding: '10px 18px',
+              padding: '9px 16px',
               borderRadius: '8px',
-              fontSize: '13.5px',
+              fontSize: '13px',
               fontWeight: 700,
               border: 'none',
               cursor: 'pointer',
@@ -562,7 +600,7 @@ export default function SchedulePage() {
               boxShadow: activeTab === 'roadmap' ? '0 2px 8px rgba(196, 18, 48, 0.25)' : 'none'
             }}
           >
-            <Sparkles size={16} /> Tự Động Lập Lộ Trình Cá Nhân Hóa
+            <Sparkles size={15} /> Lộ Trình & Lịch Học Các Kỳ Tiếp Theo
           </button>
 
           <button
@@ -571,9 +609,9 @@ export default function SchedulePage() {
               display: 'flex',
               alignItems: 'center',
               gap: '8px',
-              padding: '10px 18px',
+              padding: '9px 16px',
               borderRadius: '8px',
-              fontSize: '13.5px',
+              fontSize: '13px',
               fontWeight: 700,
               border: 'none',
               cursor: 'pointer',
@@ -582,210 +620,205 @@ export default function SchedulePage() {
               boxShadow: activeTab === 'current' ? '0 2px 8px rgba(196, 18, 48, 0.25)' : 'none'
             }}
           >
-            <CalendarCheck size={16} /> Thời Khóa Biểu Tuần Hiện Tại (MongoDB)
+            <CalendarCheck size={15} /> Thời Khóa Biểu Tuần Hiện Tại (MongoDB)
           </button>
         </div>
       </div>
 
       {/* ─────────────────────────────────────────────────────────────
-          NỘI DUNG CHÍNH TAB 1: LỘ TRÌNH & TKB TỰ ĐỘNG CÁ NHÂN HÓA
+          2. PANEL TÙY CHỈNH MONG MUỐN HỌC TẬP (MỞ KHI BẤM NÚT CHÍNH)
       ───────────────────────────────────────────────────────────── */}
-      {activeTab === 'roadmap' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          
-          {/* 1. THẺ THÔNG TIN TIẾN ĐỘ HỌC VỤ & BẢNG ĐIỂM THẬT */}
-          {roadmapData && (
-            <div style={{
-              background: 'var(--bg-secondary)',
-              border: '1px solid var(--border-color)',
-              borderRadius: 'var(--radius-lg)',
-              padding: '18px 22px',
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-              gap: '16px',
-              alignItems: 'center'
-            }}>
-              <div>
-                <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase' }}>
-                  Sinh viên & Chuyên ngành
-                </span>
-                <div style={{ fontSize: '15px', fontWeight: 800, color: 'var(--text-main)', marginTop: '2px' }}>
-                  {roadmapData.student.fullName} ({roadmapData.student.mssv})
-                </div>
-                <div style={{ fontSize: '12.5px', color: 'var(--vlu-red)', fontWeight: 600 }}>
-                  CN: {roadmapData.student.specializationName}
-                </div>
-              </div>
-
-              <div>
-                <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase' }}>
-                  Tín chỉ tích lũy chính thức
-                </span>
-                <div style={{ fontSize: '18px', fontWeight: 900, color: '#16a34a', marginTop: '2px' }}>
-                  {roadmapData.academicStatus.earnedCredits} / {roadmapData.academicStatus.totalCredits} TC
-                </div>
-                <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
-                  Đang học HK hiện tại: <strong>{roadmapData.academicStatus.inProgressCredits} TC</strong>
-                </div>
-              </div>
-
-              <div>
-                <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase' }}>
-                  Môn & Tín chỉ cần hoàn thành
-                </span>
-                <div style={{ fontSize: '18px', fontWeight: 900, color: 'var(--vlu-red)', marginTop: '2px' }}>
-                  {roadmapData.academicStatus.remainingCredits} TC ({roadmapData.academicStatus.missingCoursesCount} môn/khối)
-                </div>
-                <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
-                  Đến khi dự kiến đạt 126 TC tốt nghiệp
-                </div>
-              </div>
-
-              <div>
-                <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase' }}>
-                  Điều kiện bắt buộc khác
-                </span>
-                <div style={{ display: 'flex', gap: '8px', marginTop: '4px', flexWrap: 'wrap' }}>
-                  <span style={{
-                    fontSize: '11px',
-                    padding: '2px 8px',
-                    borderRadius: '12px',
-                    background: roadmapData.academicStatus.physicalCompleted ? 'rgba(22, 163, 74, 0.1)' : 'rgba(239, 68, 68, 0.1)',
-                    color: roadmapData.academicStatus.physicalCompleted ? '#16a34a' : '#ef4444',
-                    fontWeight: 700
-                  }}>
-                    Thể chất: {roadmapData.academicStatus.physicalCompleted ? '✓ Đạt 4/4 TC' : 'Chưa đạt'}
-                  </span>
-                  <span style={{
-                    fontSize: '11px',
-                    padding: '2px 8px',
-                    borderRadius: '12px',
-                    background: roadmapData.academicStatus.defenseCompleted ? 'rgba(22, 163, 74, 0.1)' : 'rgba(239, 68, 68, 0.1)',
-                    color: roadmapData.academicStatus.defenseCompleted ? '#16a34a' : '#ef4444',
-                    fontWeight: 700
-                  }}>
-                    Quốc phòng: {roadmapData.academicStatus.defenseCompleted ? '✓ Đạt 4 HP' : 'Chưa đạt'}
-                  </span>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* 2. THANH ĐIỀU HƯỚNG TÙY CHỌN LỘ TRÌNH VÀ CÁC THAO TÁC */}
-          <div style={{
-            background: 'var(--bg-secondary)',
-            border: '1px solid var(--border-color)',
-            borderRadius: 'var(--radius-lg)',
-            padding: '16px 20px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            flexWrap: 'wrap',
-            gap: '14px'
-          }}>
-            {/* Lựa chọn 3 phương án tốc độ */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-              <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-main)' }}>Phương án:</span>
-              {[
-                { key: 'balanced', label: 'Cân bằng (Khuyên dùng)', icon: Zap },
-                { key: 'light', label: 'Giảm tải (Nhẹ)', icon: Coffee },
-                { key: 'fast', label: 'Tăng tốc (Sớm)', icon: Sparkles }
-              ].map(opt => {
-                const IconComponent = opt.icon;
-                const active = selectedPace === opt.key;
-                return (
-                  <button
-                    key={opt.key}
-                    onClick={() => {
-                      setSelectedPace(opt.key);
-                      setSelectedSemesterIdx(0);
-                    }}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                      padding: '7px 14px',
-                      borderRadius: '8px',
-                      fontSize: '12.5px',
-                      fontWeight: 600,
-                      border: active ? '1px solid var(--vlu-red)' : '1px solid var(--border-color)',
-                      background: active ? 'var(--vlu-red)' : 'var(--bg-primary)',
-                      color: active ? 'white' : 'var(--text-main)',
-                      cursor: 'pointer',
-                      transition: 'all 0.15s'
-                    }}
-                  >
-                    <IconComponent size={14} /> {opt.label}
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Các nút hành động: Tùy chỉnh, Lưu, In */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-              <button
-                onClick={() => setShowPrefPanel(!showPrefPanel)}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  padding: '7px 12px',
-                  borderRadius: '6px',
-                  fontSize: '12.5px',
-                  fontWeight: 600,
-                  border: '1px solid var(--border-color)',
-                  background: showPrefPanel ? 'var(--bg-tertiary)' : 'var(--bg-primary)',
-                  color: 'var(--text-main)',
-                  cursor: 'pointer'
-                }}
-              >
-                <Sliders size={14} /> Tùy chỉnh mục tiêu & ca học
-              </button>
-
-              <button
-                onClick={handleSavePlan}
-                disabled={savingPlan || !currentPlanOption}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  padding: '7px 14px',
-                  borderRadius: '6px',
-                  fontSize: '12.5px',
-                  fontWeight: 600,
-                  border: 'none',
-                  background: '#16a34a',
-                  color: 'white',
-                  cursor: 'pointer',
-                  opacity: savingPlan ? 0.7 : 1
-                }}
-              >
-                {savingPlan ? <Loader2 size={14} className="spin" /> : <Save size={14} />}
-                {savedPlanMeta ? 'Cập nhật lộ trình đã lưu' : 'Lưu vào hệ thống'}
-              </button>
-
-              <button
-                onClick={handlePrint}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  padding: '7px 12px',
-                  borderRadius: '6px',
-                  fontSize: '12.5px',
-                  fontWeight: 600,
-                  border: '1px solid var(--border-color)',
-                  background: 'var(--bg-primary)',
-                  color: 'var(--text-main)',
-                  cursor: 'pointer'
-                }}
-              >
-                <Printer size={14} /> In / Xuất PDF
-              </button>
-            </div>
+      {showPrefPanel && (
+        <div style={{
+          background: 'var(--bg-primary)',
+          border: '1px solid var(--border-color)',
+          borderRadius: 'var(--radius-lg)',
+          padding: '20px 24px',
+          marginBottom: '20px',
+          boxShadow: 'var(--shadow-md)'
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+            <h3 style={{ fontSize: '16px', fontWeight: 800, color: 'var(--text-main)', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Sliders size={18} color="var(--vlu-red)" /> Thiết Lập Tiêu Chí Lập Kế Hoạch & Thời Khóa Biểu
+            </h3>
+            <button
+              onClick={() => setShowPrefPanel(false)}
+              style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: '13px', cursor: 'pointer', fontWeight: 600 }}
+            >
+              Thu gọn ✕
+            </button>
           </div>
 
-          {/* Flash thông báo lưu thành công */}
+          <form onSubmit={handleExecuteGenerate}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px' }}>
+              
+              {/* 1. Kỳ bắt đầu */}
+              <div>
+                <label style={{ fontSize: '12px', fontWeight: 600, display: 'block', marginBottom: '6px', color: 'var(--text-secondary)' }}>
+                  Học kỳ bắt đầu:
+                </label>
+                <select
+                  value={preferences.startSemester}
+                  onChange={e => setPreferences({ ...preferences, startSemester: e.target.value })}
+                  style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-main)', fontSize: '13px' }}
+                >
+                  <option value="2026-2027 HK02">2026-2027 HK02 (Học kỳ tiếp theo)</option>
+                  <option value="2026-2027 HK03">2026-2027 HK03 (Học kỳ hè)</option>
+                  <option value="2027-2028 HK01">2027-2028 HK01</option>
+                </select>
+              </div>
+
+              {/* 2. Mục tiêu hoàn thành */}
+              <div>
+                <label style={{ fontSize: '12px', fontWeight: 600, display: 'block', marginBottom: '6px', color: 'var(--text-secondary)' }}>
+                  Mục tiêu hoàn thành:
+                </label>
+                <select
+                  value={preferences.targetGraduationSemester}
+                  onChange={e => setPreferences({ ...preferences, targetGraduationSemester: e.target.value })}
+                  style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-main)', fontSize: '13px' }}
+                >
+                  <option value="2027-2028 HK01">Ưu tiên hoàn thành sớm (2027-2028 HK01)</option>
+                  <option value="2027-2028 HK02">Hoàn thành đúng hạn chuẩn (2027-2028 HK02)</option>
+                  <option value="2027-2028 HK03">Giãn tiến độ học tập (2027-2028 HK03)</option>
+                </select>
+              </div>
+
+              {/* 3. Mức học */}
+              <div>
+                <label style={{ fontSize: '12px', fontWeight: 600, display: 'block', marginBottom: '6px', color: 'var(--text-secondary)' }}>
+                  Mức học mong muốn:
+                </label>
+                <select
+                  value={preferences.pace}
+                  onChange={e => setPreferences({ ...preferences, pace: e.target.value })}
+                  style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-main)', fontSize: '13px' }}
+                >
+                  <option value="balanced">Cân bằng (3 - 4 môn/kỳ)</option>
+                  <option value="light">Nhẹ hơn (1 - 3 môn/kỳ, nhiều ngày nghỉ)</option>
+                  <option value="fast">Ưu tiên hoàn thành sớm (Tối đa môn theo tiên quyết)</option>
+                </select>
+              </div>
+
+              {/* 4. Hình thức tốt nghiệp */}
+              <div>
+                <label style={{ fontSize: '12px', fontWeight: 600, display: 'block', marginBottom: '6px', color: 'var(--text-secondary)' }}>
+                  Hình thức khối tốt nghiệp:
+                </label>
+                <select
+                  value={preferences.graduationType}
+                  onChange={e => setPreferences({ ...preferences, graduationType: e.target.value })}
+                  style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-main)', fontSize: '13px' }}
+                >
+                  <option value="thesis">Khóa luận tốt nghiệp</option>
+                  <option value="topics">2 Chuyên đề tốt nghiệp thay thế</option>
+                </select>
+              </div>
+
+              {/* 5. Ca ưu tiên */}
+              <div>
+                <label style={{ fontSize: '12px', fontWeight: 600, display: 'block', marginBottom: '6px', color: 'var(--text-secondary)' }}>
+                  Ca học ưu tiên:
+                </label>
+                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                  {[
+                    { shift: 1, label: 'Ca 1 (Sáng)' },
+                    { shift: 2, label: 'Ca 2 (Trưa)' },
+                    { shift: 3, label: 'Ca 3 (Chiều)' },
+                    { shift: 4, label: 'Ca 4 (Chiều muộn)' },
+                    { shift: 5, label: 'Ca 5 (Tối)' }
+                  ].map(s => {
+                    const active = preferences.preferredShifts.includes(s.shift);
+                    return (
+                      <button
+                        key={s.shift}
+                        type="button"
+                        onClick={() => {
+                          const next = active 
+                            ? preferences.preferredShifts.filter(x => x !== s.shift)
+                            : [...preferences.preferredShifts, s.shift];
+                          setPreferences({ ...preferences, preferredShifts: next });
+                        }}
+                        style={{
+                          padding: '5px 9px',
+                          borderRadius: '4px',
+                          fontSize: '11.5px',
+                          fontWeight: 600,
+                          border: active ? '1px solid var(--vlu-red)' : '1px solid var(--border-color)',
+                          background: active ? 'rgba(196, 18, 48, 0.1)' : 'var(--bg-secondary)',
+                          color: active ? 'var(--vlu-red)' : 'var(--text-muted)',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        {active ? '✓ ' : ''}{s.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* 6. Khoảng nghỉ & Tránh ca tối */}
+              <div>
+                <label style={{ fontSize: '12px', fontWeight: 600, display: 'block', marginBottom: '6px', color: 'var(--text-secondary)' }}>
+                  Khoảng nghỉ & Sức khỏe:
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: 'var(--text-main)', cursor: 'pointer', marginBottom: '6px' }}>
+                  <input
+                    type="checkbox"
+                    checked={preferences.avoidNightMorning}
+                    onChange={e => setPreferences({ ...preferences, avoidNightMorning: e.target.checked })}
+                  />
+                  <span>Tránh học Ca 5 (tối) rồi Ca 1 (sáng hôm sau)</span>
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: 'var(--text-main)', cursor: 'pointer' }}>
+                  <input
+                    type="checkbox"
+                    checked={preferences.includeCurrentInProgress}
+                    onChange={e => setPreferences({ ...preferences, includeCurrentInProgress: e.target.checked })}
+                  />
+                  <span>Giả định các môn đang học kỳ này sẽ thi ĐẠT</span>
+                </label>
+              </div>
+            </div>
+
+            {/* Nút Thực hiện tạo phương án */}
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '18px', paddingTop: '14px', borderTop: '1px solid var(--border-color)' }}>
+              <button
+                type="button"
+                onClick={() => setShowPrefPanel(false)}
+                className="btn-secondary"
+                style={{ fontSize: '13px', padding: '8px 16px' }}
+              >
+                Đóng
+              </button>
+              <button
+                type="submit"
+                disabled={roadmapLoading}
+                className="btn-vlu-primary"
+                style={{
+                  fontSize: '13px',
+                  padding: '8px 20px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  opacity: roadmapLoading ? 0.7 : 1
+                }}
+              >
+                {roadmapLoading ? <Loader2 size={15} className="spin" /> : <RefreshCw size={15} />}
+                Tạo phương án
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* ─────────────────────────────────────────────────────────────
+          3. NỘI DUNG CHÍNH: LỘ TRÌNH & THỜI KHÓA BIỂU CÁ NHÂN
+      ───────────────────────────────────────────────────────────── */}
+      {activeTab === 'roadmap' && (
+        <div ref={resultsRef} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          
+          {/* Thông báo lưu thành công */}
           {saveSuccessMsg && (
             <div style={{
               background: 'rgba(22, 163, 74, 0.1)',
@@ -802,148 +835,169 @@ export default function SchedulePage() {
             </div>
           )}
 
-          {/* 3. PANEL TÙY CHỈNH NÂNG CAO (KHI BẤM "TÙY CHỈNH MỤC TIÊU") */}
-          {showPrefPanel && (
-            <div style={{
-              background: 'var(--bg-primary)',
-              border: '1px solid var(--border-color)',
-              borderRadius: 'var(--radius-lg)',
-              padding: '20px',
-              boxShadow: 'var(--shadow-md)'
-            }}>
-              <h3 style={{ fontSize: '15px', fontWeight: 800, color: 'var(--text-main)', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Sliders size={18} color="var(--vlu-red)" /> Thiết Lập Tiêu Chí Lập Kế Hoạch & Thời Khóa Biểu
-              </h3>
-
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px' }}>
-                <div>
-                  <label style={{ fontSize: '12px', fontWeight: 600, display: 'block', marginBottom: '6px', color: 'var(--text-secondary)' }}>
-                    Học kỳ bắt đầu xếp lịch:
-                  </label>
-                  <select
-                    value={preferences.startSemester}
-                    onChange={e => setPreferences({ ...preferences, startSemester: e.target.value })}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-main)', fontSize: '13px' }}
+          {/* Thanh lựa chọn 3 Phương án học tập (Không hiển thị tín chỉ / GPA) */}
+          <div style={{
+            background: 'var(--bg-secondary)',
+            border: '1px solid var(--border-color)',
+            borderRadius: 'var(--radius-lg)',
+            padding: '16px 20px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '12px'
+          }}>
+            {/* 3 Mức học */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-main)', marginRight: '4px' }}>
+                Phương án:
+              </span>
+              {[
+                { key: 'balanced', label: 'Cân bằng (Khuyên dùng)' },
+                { key: 'light', label: 'Nhẹ hơn mỗi kỳ' },
+                { key: 'fast', label: 'Ưu tiên hoàn thành sớm' }
+              ].map(opt => {
+                const active = selectedPace === opt.key;
+                return (
+                  <button
+                    key={opt.key}
+                    onClick={() => {
+                      setSelectedPace(opt.key);
+                      setSelectedSemesterIdx(0);
+                    }}
+                    style={{
+                      padding: '8px 14px',
+                      borderRadius: '8px',
+                      fontSize: '12.5px',
+                      fontWeight: 600,
+                      border: active ? '1px solid var(--vlu-red)' : '1px solid var(--border-color)',
+                      background: active ? 'var(--vlu-red)' : 'var(--bg-primary)',
+                      color: active ? 'white' : 'var(--text-main)',
+                      cursor: 'pointer',
+                      transition: 'all 0.15s'
+                    }}
                   >
-                    <option value="2026-2027 HK02">2026-2027 HK02 (Kỳ tiếp theo)</option>
-                    <option value="2026-2027 HK03">2026-2027 HK03 (Kỳ hè / phụ)</option>
-                    <option value="2027-2028 HK01">2027-2028 HK01</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label style={{ fontSize: '12px', fontWeight: 600, display: 'block', marginBottom: '6px', color: 'var(--text-secondary)' }}>
-                    Mục tiêu tốt nghiệp:
-                  </label>
-                  <select
-                    value={preferences.targetGraduationSemester}
-                    onChange={e => setPreferences({ ...preferences, targetGraduationSemester: e.target.value })}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-main)', fontSize: '13px' }}
-                  >
-                    <option value="2027-2028 HK01">Tốt nghiệp sớm (2027-2028 HK01)</option>
-                    <option value="2027-2028 HK02">Đúng tiến độ chuẩn (2027-2028 HK02)</option>
-                    <option value="2027-2028 HK03">Giãn tiến độ (2027-2028 HK03)</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label style={{ fontSize: '12px', fontWeight: 600, display: 'block', marginBottom: '6px', color: 'var(--text-secondary)' }}>
-                    Phương án khối tốt nghiệp (6 TC):
-                  </label>
-                  <select
-                    value={preferences.graduationType}
-                    onChange={e => setPreferences({ ...preferences, graduationType: e.target.value })}
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-main)', fontSize: '13px' }}
-                  >
-                    <option value="thesis">Khóa luận tốt nghiệp (71ITGR40206 - 6 TC)</option>
-                    <option value="topics">2 Chuyên đề tốt nghiệp (2 x 3 TC)</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label style={{ fontSize: '12px', fontWeight: 600, display: 'block', marginBottom: '6px', color: 'var(--text-secondary)' }}>
-                    Khoảng thời gian học ưu tiên:
-                  </label>
-                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                    {[
-                      { shift: 1, label: 'Ca 1 (Sáng sớm)' },
-                      { shift: 2, label: 'Ca 2 (Sáng)' },
-                      { shift: 3, label: 'Ca 3 (Chiều)' },
-                      { shift: 4, label: 'Ca 4 (Chiều muộn)' },
-                      { shift: 5, label: 'Ca 5 (Tối)' }
-                    ].map(s => {
-                      const selected = preferences.preferredShifts.includes(s.shift);
-                      return (
-                        <button
-                          key={s.shift}
-                          type="button"
-                          onClick={() => {
-                            const next = selected 
-                              ? preferences.preferredShifts.filter(x => x !== s.shift)
-                              : [...preferences.preferredShifts, s.shift];
-                            setPreferences({ ...preferences, preferredShifts: next });
-                          }}
-                          style={{
-                            padding: '4px 10px',
-                            borderRadius: '4px',
-                            fontSize: '11.5px',
-                            fontWeight: 600,
-                            border: selected ? '1px solid var(--vlu-red)' : '1px solid var(--border-color)',
-                            background: selected ? 'rgba(196, 18, 48, 0.1)' : 'var(--bg-secondary)',
-                            color: selected ? 'var(--vlu-red)' : 'var(--text-muted)',
-                            cursor: 'pointer'
-                          }}
-                        >
-                          {selected ? '✓ ' : ''}{s.label}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '16px' }}>
-                <button
-                  onClick={() => setShowPrefPanel(false)}
-                  className="btn-secondary"
-                  style={{ fontSize: '12.5px', padding: '6px 14px' }}
-                >
-                  Đóng
-                </button>
-                <button
-                  onClick={handleGenerateRoadmap}
-                  disabled={roadmapLoading}
-                  className="btn-vlu-primary"
-                  style={{ fontSize: '12.5px', padding: '6px 16px', display: 'flex', alignItems: 'center', gap: '6px' }}
-                >
-                  {roadmapLoading ? <Loader2 size={14} className="spin" /> : <RefreshCw size={14} />}
-                  Tính Toán Lại Lộ Trình
-                </button>
-              </div>
+                    {opt.label}
+                  </button>
+                );
+              })}
             </div>
-          )}
 
-          {/* 4. HIỂN THỊ CÁC HỌC KỲ TRONG LỘ TRÌNH (TIẾN TRÌNH TIMELINE) */}
+            {/* Các nút: Gợi ý lại, Điều chỉnh, Lưu, In */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              <button
+                onClick={() => fetchRoadmap(preferences, true)}
+                disabled={roadmapLoading}
+                title="Tính toán lại phương án từ đầu"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '7px 12px',
+                  borderRadius: '6px',
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  border: '1px solid var(--border-color)',
+                  background: 'var(--bg-primary)',
+                  color: 'var(--text-main)',
+                  cursor: 'pointer'
+                }}
+              >
+                <RefreshCw size={13} className={roadmapLoading ? 'spin' : ''} /> Gợi ý lại
+              </button>
+
+              <button
+                onClick={() => setShowPrefPanel(true)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '7px 12px',
+                  borderRadius: '6px',
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  border: '1px solid var(--border-color)',
+                  background: 'var(--bg-primary)',
+                  color: 'var(--text-main)',
+                  cursor: 'pointer'
+                }}
+              >
+                <Sliders size={13} /> Điều chỉnh mong muốn
+              </button>
+
+              <button
+                onClick={handleSavePlan}
+                disabled={savingPlan || !currentPlanOption}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '7px 14px',
+                  borderRadius: '6px',
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  border: 'none',
+                  background: '#16a34a',
+                  color: 'white',
+                  cursor: 'pointer',
+                  opacity: savingPlan ? 0.7 : 1
+                }}
+              >
+                {savingPlan ? <Loader2 size={13} className="spin" /> : <Save size={13} />}
+                Lưu vào hệ thống
+              </button>
+
+              <button
+                onClick={handlePrint}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '7px 12px',
+                  borderRadius: '6px',
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  border: '1px solid var(--border-color)',
+                  background: 'var(--bg-primary)',
+                  color: 'var(--text-main)',
+                  cursor: 'pointer'
+                }}
+              >
+                <Printer size={13} /> In / Xuất PDF
+              </button>
+            </div>
+          </div>
+
+          {/* Loading hoặc Lỗi */}
           {roadmapLoading ? (
             <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text-muted)' }}>
               <Loader2 size={36} className="spin" style={{ margin: '0 auto 12px', color: 'var(--vlu-red)' }} />
-              <p style={{ fontWeight: 600 }}>UniMate đang phân tích điều kiện tiên quyết và tính toán lộ trình tối ưu...</p>
+              <p style={{ fontWeight: 600, fontSize: '14px' }}>
+                UniMate đang đọc dữ liệu thật từ MongoDB, phân tích điều kiện tiên quyết và lập lịch tối ưu...
+              </p>
             </div>
           ) : roadmapError ? (
             <div style={{
               background: 'rgba(239, 68, 68, 0.1)',
               border: '1px solid rgba(239, 68, 68, 0.3)',
               borderRadius: '12px',
-              padding: '20px',
+              padding: '24px',
               color: '#ef4444',
               textAlign: 'center'
             }}>
-              <AlertCircle size={28} style={{ margin: '0 auto 8px' }} />
-              <p style={{ fontWeight: 600 }}>{roadmapError}</p>
+              <AlertCircle size={30} style={{ margin: '0 auto 10px' }} />
+              <p style={{ fontWeight: 700, fontSize: '14px', marginBottom: '10px' }}>{roadmapError}</p>
+              <button
+                onClick={() => fetchRoadmap(preferences, true)}
+                className="btn-vlu-primary"
+                style={{ fontSize: '12.5px', padding: '6px 16px', margin: '0 auto' }}
+              >
+                Thử lại
+              </button>
             </div>
           ) : currentPlanOption && (
             <div>
-              {/* Mô tả phương án đang chọn */}
+              {/* Mô tả chi tiết phương án (Không hiển thị tín chỉ / GPA) */}
               <div style={{
                 background: 'var(--bg-secondary)',
                 border: '1px solid var(--border-color)',
@@ -954,18 +1008,18 @@ export default function SchedulePage() {
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 flexWrap: 'wrap',
-                gap: '10px'
+                gap: '8px'
               }}>
                 <div>
-                  <strong style={{ fontSize: '14px', color: 'var(--text-main)' }}>{currentPlanOption.label}: </strong>
+                  <strong style={{ fontSize: '13.5px', color: 'var(--text-main)' }}>{currentPlanOption.label}: </strong>
                   <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>{currentPlanOption.description}</span>
                 </div>
-                <div style={{ fontSize: '12.5px', fontWeight: 700, color: 'var(--vlu-red)' }}>
-                  Tổng cộng: {currentPlanOption.totalSemesters} kỳ ({currentPlanOption.totalPlannedCredits} TC) • Dự kiến kết thúc: {currentPlanOption.targetEndSemester}
+                <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--vlu-red)' }}>
+                  Dự kiến hoàn thành trong {currentPlanOption.totalSemesters} học kỳ • Kỳ tốt nghiệp: {currentPlanOption.targetEndSemester}
                 </div>
               </div>
 
-              {/* Dải các nút chọn học kỳ (Timeline Semesters) */}
+              {/* Dải các nút chọn học kỳ tiếp theo (Timeline Semesters) */}
               <div style={{
                 display: 'grid',
                 gridTemplateColumns: `repeat(${Math.max(currentPlanOption.plannedSemesters.length, 1)}, 1fr)`,
@@ -1000,7 +1054,7 @@ export default function SchedulePage() {
                         }}>
                           Kỳ {idx + 1}
                         </span>
-                        <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-muted)' }}>
+                        <span style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-muted)' }}>
                           {sem.yearLabel}
                         </span>
                       </div>
@@ -1009,20 +1063,15 @@ export default function SchedulePage() {
                         {sem.semester}
                       </div>
 
-                      <div style={{ fontSize: '12.5px', color: 'var(--text-secondary)', display: 'flex', justifyContent: 'space-between' }}>
-                        <span>{sem.totalCourses} môn học</span>
-                        <strong style={{ color: 'var(--text-main)' }}>{sem.totalCredits} TC</strong>
-                      </div>
-
-                      <div style={{ fontSize: '11px', color: '#16a34a', fontWeight: 600, marginTop: '6px' }}>
-                        Lũy kế: ~{sem.projectedCumulativeCredits}/126 TC
+                      <div style={{ fontSize: '12.5px', color: 'var(--text-secondary)', fontWeight: 600 }}>
+                        {sem.totalCourses} môn học
                       </div>
                     </div>
                   );
                 })}
               </div>
 
-              {/* 5. CHI TIẾT HỌC KỲ ĐƯỢC CHỌN: DANH SÁCH MÔN & THỜI KHÓA BIỂU */}
+              {/* Chi tiết học kỳ đang chọn: Danh sách môn & Lưới thời khóa biểu */}
               {currentPlannedSemester && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                   
@@ -1036,17 +1085,36 @@ export default function SchedulePage() {
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '10px' }}>
                       <h3 style={{ fontSize: '16px', fontWeight: 800, color: 'var(--text-main)', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <BookOpen size={18} color="var(--vlu-red)" />
-                        Danh Sách Môn Đề Xuất Cho Học Kỳ {currentPlannedSemester.semester} ({currentPlannedSemester.totalCredits} Tín Chỉ)
+                        Danh Sách Môn Đề Xuất Cho Học Kỳ {currentPlannedSemester.semester} ({currentPlannedSemester.totalCourses} Môn Học)
                       </h3>
-                      <span style={{ fontSize: '12px', color: 'var(--text-secondary)', fontStyle: 'italic' }}>
-                        {currentPlannedSemester.notes}
-                      </span>
+                      <button
+                        onClick={() => {
+                          setAdvisorOpen(true);
+                          sendChatMessage(`Tư vấn lịch học và điều kiện tiên quyết cho học kỳ ${currentPlannedSemester.semester}`);
+                        }}
+                        style={{
+                          fontSize: '12px',
+                          padding: '5px 12px',
+                          borderRadius: '6px',
+                          border: '1px solid rgba(196, 18, 48, 0.3)',
+                          background: 'rgba(196, 18, 48, 0.08)',
+                          color: 'var(--vlu-red)',
+                          cursor: 'pointer',
+                          fontWeight: 600
+                        }}
+                      >
+                        💬 Tư vấn lịch học kỳ này
+                      </button>
                     </div>
+
+                    <p style={{ fontSize: '12.5px', color: 'var(--text-secondary)', margin: '0 0 16px 0', fontStyle: 'italic' }}>
+                      {currentPlannedSemester.notes}
+                    </p>
 
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '12px' }}>
                       {currentPlannedSemester.courses.map((course, cIdx) => (
                         <div
-                          key={course.code + cIdx}
+                          key={(course.courseCode || course.code) + cIdx}
                           style={{
                             background: 'var(--bg-primary)',
                             border: '1px solid var(--border-color)',
@@ -1059,7 +1127,7 @@ export default function SchedulePage() {
                           }}
                         >
                           <div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '4px' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '6px' }}>
                               <span style={{
                                 fontSize: '11px',
                                 fontWeight: 800,
@@ -1068,7 +1136,7 @@ export default function SchedulePage() {
                                 padding: '2px 6px',
                                 borderRadius: '4px'
                               }}>
-                                {course.code}
+                                {course.courseCode || course.code}
                               </span>
                               <span style={{
                                 fontSize: '11px',
@@ -1078,29 +1146,30 @@ export default function SchedulePage() {
                                 background: course.isGraduation ? 'rgba(168, 85, 247, 0.1)' : course.isInternship ? 'rgba(59, 130, 246, 0.1)' : 'rgba(22, 163, 74, 0.1)',
                                 color: course.isGraduation ? '#9333ea' : course.isInternship ? '#2563eb' : '#16a34a'
                               }}>
-                                {course.credits} Tín chỉ
+                                {course.groupName || 'Môn học'}
                               </span>
                             </div>
 
-                            <h4 style={{ fontSize: '13.5px', fontWeight: 700, color: 'var(--text-main)', margin: '4px 0 6px 0', lineHeight: 1.3 }}>
-                              {course.name}
+                            {/* Tên môn học đầy đủ */}
+                            <h4 style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-main)', margin: '4px 0 6px 0', lineHeight: 1.35 }}>
+                              {course.courseName || course.name}
                             </h4>
 
                             <div style={{ fontSize: '11.5px', color: 'var(--text-secondary)' }}>
-                              Nhóm: <strong>{course.groupName || course.requirementGroup}</strong>
+                              Thứ tự: <strong>Môn thứ {cIdx + 1} trong kỳ</strong>
                             </div>
                           </div>
 
                           <div style={{
                             borderTop: '1px dashed var(--border-color)',
                             paddingTop: '6px',
-                            fontSize: '11px',
+                            fontSize: '11.5px',
                             color: 'var(--text-muted)'
                           }}>
-                            <div>💡 Lý do: {course.reason || 'Môn bắt buộc / Tự chọn tích lũy'}</div>
+                            <div>💡 {course.reason || 'Môn bắt buộc theo chuyên ngành đã chọn'}</div>
                             {course.prerequisites?.length > 0 && (
-                              <div style={{ color: '#d97706', marginTop: '2px' }}>
-                                ⚠️ Tiên quyết: {course.prerequisites.join(', ')}
+                              <div style={{ color: '#d97706', marginTop: '3px' }}>
+                                ⚠️ Điều kiện tiên quyết: {course.prerequisites.join(', ')}
                               </div>
                             )}
                           </div>
@@ -1120,10 +1189,10 @@ export default function SchedulePage() {
                       <div>
                         <h3 style={{ fontSize: '16px', fontWeight: 800, color: 'var(--text-main)', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
                           <Clock size={18} color="var(--vlu-red)" />
-                          Gợi Ý Lịch Học Tuần Có Khoảng Nghỉ Tối Ưu (Khung Chuẩn Văn Lang)
+                          Gợi Ý Lịch Học Tuần Có Khoảng Nghỉ (Khung Chuẩn Văn Lang)
                         </h3>
                         <p style={{ fontSize: '12px', color: 'var(--text-secondary)', margin: '4px 0 0 0' }}>
-                          Xếp tối đa 2 ca liên tiếp, có nghỉ trưa 12:00 - 13:00, không xếp ca tối (Ca 5) sát ca sáng sớm (Ca 1).
+                          Nghỉ trưa 12:00 - 13:00, giải lao giữa các ca, tối đa 2 ca liên tiếp, không xếp Ca 5 (tối) sát Ca 1 (sáng sớm).
                         </p>
                       </div>
 
@@ -1134,7 +1203,7 @@ export default function SchedulePage() {
                         </span>
                         <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                           <span style={{ width: '10px', height: '10px', borderRadius: '2px', background: '#3b82f6' }}></span>
-                          Khung gợi ý tối ưu
+                          Lịch đề xuất tối ưu
                         </span>
                       </div>
                     </div>
@@ -1145,11 +1214,11 @@ export default function SchedulePage() {
                         width: '100%',
                         borderCollapse: 'collapse',
                         fontSize: '12px',
-                        minWidth: '720px'
+                        minWidth: '740px'
                       }}>
                         <thead>
                           <tr style={{ background: 'var(--bg-tertiary)', borderBottom: '2px solid var(--border-color)' }}>
-                            <th style={{ padding: '12px 10px', textAlign: 'center', width: '130px', color: 'var(--text-main)', fontWeight: 700 }}>
+                            <th style={{ padding: '12px 10px', textAlign: 'center', width: '135px', color: 'var(--text-main)', fontWeight: 700 }}>
                               Ca học / Tiết
                             </th>
                             {DAYS_OF_WEEK.map(d => (
@@ -1161,7 +1230,7 @@ export default function SchedulePage() {
                         </thead>
                         <tbody>
                           {VLU_SHIFTS.map((shiftRow) => {
-                            // Dòng đặc biệt: Nghỉ trưa
+                            // Dòng đặc biệt: Nghỉ trưa 12:00 - 13:00
                             if (shiftRow.isBreak) {
                               return (
                                 <tr key="lunch-break" style={{ background: 'rgba(234, 179, 8, 0.06)', borderBottom: '1px solid var(--border-color)' }}>
@@ -1172,7 +1241,7 @@ export default function SchedulePage() {
                                     <div style={{ fontSize: '10.5px', fontWeight: 500 }}>{shiftRow.time}</div>
                                   </td>
                                   <td colSpan={7} style={{ padding: '8px 16px', textAlign: 'center', color: '#a16207', fontStyle: 'italic', fontSize: '11.5px' }}>
-                                    ☕ Thời gian nghỉ ngơi, ăn trưa và nạp năng lượng (12:00 - 13:00)
+                                    ☕ Khoảng nghỉ trưa, ăn uống và nạp năng lượng (12:00 - 13:00)
                                   </td>
                                 </tr>
                               );
@@ -1201,7 +1270,7 @@ export default function SchedulePage() {
                                 {/* Các ô theo từng thứ trong tuần */}
                                 {DAYS_OF_WEEK.map(day => {
                                   const cellCourse = scheduleMatrix[day.value]?.[shiftRow.shift];
-                                  const isActual = cellCourse?.sourceType === 'actual_class';
+                                  const isActual = cellCourse?.sourceType === 'actual_class' || cellCourse?.isActualClass;
 
                                   if (cellCourse) {
                                     return (
@@ -1226,23 +1295,21 @@ export default function SchedulePage() {
                                         }}>
                                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                             <span style={{
-                                              fontSize: '10px',
+                                              fontSize: '10.5px',
                                               fontWeight: 800,
                                               color: isActual ? 'var(--vlu-red)' : '#2563eb'
                                             }}>
-                                              {cellCourse.code}
-                                            </span>
-                                            <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>
-                                              {cellCourse.credits} TC
+                                              {cellCourse.courseCode || cellCourse.code}
                                             </span>
                                           </div>
 
-                                          <div style={{ fontSize: '11.5px', fontWeight: 700, color: 'var(--text-main)', lineHeight: 1.25 }}>
-                                            {cellCourse.name}
+                                          {/* Tên môn học đầy đủ trên ô lịch */}
+                                          <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-main)', lineHeight: 1.3 }}>
+                                            {cellCourse.courseName || cellCourse.name}
                                           </div>
 
                                           <div style={{ fontSize: '10px', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '3px' }}>
-                                            <MapPin size={10} /> {cellCourse.room || 'CS3 Đặng Thùy Trâm'}
+                                            <MapPin size={10} /> {cellCourse.room || (isActual ? 'Phòng học chính thức' : 'Phòng học CS3 (Gợi ý)')}
                                           </div>
 
                                           {cellCourse.lecturer && (
@@ -1253,14 +1320,14 @@ export default function SchedulePage() {
 
                                           <div style={{
                                             fontSize: '9.5px',
-                                            padding: '1px 4px',
+                                            padding: '1px 5px',
                                             borderRadius: '3px',
                                             alignSelf: 'flex-start',
                                             background: isActual ? 'rgba(196, 18, 48, 0.1)' : 'rgba(59, 130, 246, 0.1)',
                                             color: isActual ? 'var(--vlu-red)' : '#2563eb',
                                             fontWeight: 600
                                           }}>
-                                            {isActual ? 'Lớp thực tế' : 'Đề xuất tối ưu'}
+                                            {isActual ? 'Lớp thực tế (MongoDB)' : 'Lịch đề xuất — chưa mở lớp chính thức'}
                                           </div>
                                         </div>
                                       </td>
@@ -1279,7 +1346,7 @@ export default function SchedulePage() {
                                         background: 'var(--bg-primary)'
                                       }}
                                     >
-                                      <span style={{ opacity: 0.3, fontSize: '11px' }}>-</span>
+                                      <span style={{ opacity: 0.25, fontSize: '11px' }}>-</span>
                                     </td>
                                   );
                                 })}
@@ -1289,6 +1356,22 @@ export default function SchedulePage() {
                         </tbody>
                       </table>
                     </div>
+
+                    {/* Môn thực tập hoặc môn đặc thù không chiếm ca cố định */}
+                    {nonGridCourses.length > 0 && (
+                      <div style={{ marginTop: '16px', padding: '12px 16px', background: 'var(--bg-tertiary)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                        <strong style={{ fontSize: '12.5px', color: 'var(--text-main)', display: 'block', marginBottom: '6px' }}>
+                          🏢 Học phần thực tập / đặc thù:
+                        </strong>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                          {nonGridCourses.map((c, i) => (
+                            <div key={i} style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
+                              • <strong>{c.courseCode || c.code} - {c.courseName || c.name}</strong> ({c.groupName}): {c.reason || 'Thực hiện tại doanh nghiệp liên kết, thời gian linh hoạt.'}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
@@ -1298,7 +1381,7 @@ export default function SchedulePage() {
       )}
 
       {/* ─────────────────────────────────────────────────────────────
-          NỘI DUNG CHÍNH TAB 2: THỜI KHÓA BIỂU TUẦN HIỆN TẠI (MONGODB)
+          4. NỘI DUNG CHÍNH TAB 2: THỜI KHÓA BIỂU TUẦN HIỆN TẠI (MONGODB)
       ───────────────────────────────────────────────────────────── */}
       {activeTab === 'current' && (
         <div>
@@ -1565,20 +1648,20 @@ export default function SchedulePage() {
       )}
 
       {/* ─────────────────────────────────────────────────────────────
-          TRỢ LÝ AI CỐ VẤN THỜI KHÓA BIỂU TẠI CHỖ (SLIDE-OVER / POPUP)
+          5. TRỢ LÝ AI CỐ VẤN THỜI KHÓA BIỂU TẠI CHỖ (SLIDE-OVER)
       ───────────────────────────────────────────────────────────── */}
       {advisorOpen && (
         <div style={{
           position: 'fixed',
           bottom: '24px',
           right: '24px',
-          width: '380px',
+          width: '390px',
           maxWidth: 'calc(100vw - 32px)',
-          height: '520px',
+          height: '540px',
           background: 'var(--bg-primary)',
           border: '1px solid var(--border-color)',
           borderRadius: '16px',
-          boxShadow: '0 12px 36px rgba(0,0,0,0.2)',
+          boxShadow: '0 12px 36px rgba(0,0,0,0.25)',
           zIndex: 1000,
           display: 'flex',
           flexDirection: 'column',
@@ -1661,6 +1744,43 @@ export default function SchedulePage() {
             )}
           </div>
 
+          {/* Gợi ý câu hỏi nhanh */}
+          <div style={{
+            padding: '8px 12px',
+            background: 'var(--bg-tertiary)',
+            borderTop: '1px solid var(--border-color)',
+            display: 'flex',
+            gap: '6px',
+            overflowX: 'auto',
+            whiteSpace: 'nowrap',
+            scrollbarWidth: 'none'
+          }}>
+            {[
+              'Tạo lộ trình các kỳ sau cho tôi.',
+              'Kỳ tới giảm một môn.',
+              'Tôi muốn nghỉ cuối tuần.',
+              'Đừng xếp ca 5.',
+              'Môn nào cần học trước?'
+            ].map((q, idx) => (
+              <button
+                key={idx}
+                type="button"
+                onClick={() => sendChatMessage(q)}
+                style={{
+                  fontSize: '11px',
+                  padding: '4px 8px',
+                  borderRadius: '12px',
+                  border: '1px solid var(--border-color)',
+                  background: 'var(--bg-primary)',
+                  color: 'var(--text-main)',
+                  cursor: 'pointer'
+                }}
+              >
+                {q}
+              </button>
+            ))}
+          </div>
+
           {/* Form nhập chat */}
           <form
             onSubmit={handleSendChat}
@@ -1712,7 +1832,7 @@ export default function SchedulePage() {
       )}
 
       {/* ─────────────────────────────────────────────────────────────
-          MODAL THÊM / SỬA TIẾT HỌC ADMIN (CHO TAB HIỆN TẠI)
+          6. MODAL THÊM / SỬA TIẾT HỌC ADMIN (CHO TAB HIỆN TẠI)
       ───────────────────────────────────────────────────────────── */}
       {modalOpen && (
         <div className="modal-overlay" onClick={() => setModalOpen(false)}>
@@ -1791,7 +1911,7 @@ export default function SchedulePage() {
                     type="number"
                     value={formData.startPeriod}
                     onChange={e => setFormData({ ...formData, startPeriod: Number(e.target.value) })}
-                    min="1" max="15"
+                    min="1" max="16"
                     style={{ width: '100%', padding: '8px 10px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--bg-primary)', color: 'var(--text-main)', fontSize: '13px' }}
                   />
                 </div>
@@ -1801,7 +1921,7 @@ export default function SchedulePage() {
                     type="number"
                     value={formData.endPeriod}
                     onChange={e => setFormData({ ...formData, endPeriod: Number(e.target.value) })}
-                    min="1" max="15"
+                    min="1" max="16"
                     style={{ width: '100%', padding: '8px 10px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--bg-primary)', color: 'var(--text-main)', fontSize: '13px' }}
                   />
                 </div>
